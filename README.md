@@ -48,7 +48,7 @@ Toolchain: Emscripten 4.0.18 em imagem fixada por digest; Chocolate Doom vendori
 
 ```sh
 npm ci
-docker run --rm -v "$PWD:/src" -w /src emscripten/emsdk@sha256:bbe90e2b00acbd1a9596087d88305029f383de1eb71c0cdb20f4e19647265450 bash scripts/build-engine.sh
+docker run --rm --user "$(id -u):$(id -g)" -e EM_CACHE=/src/build/emscripten-cache -v "$PWD:/src" -w /src emscripten/emsdk@sha256:bbe90e2b00acbd1a9596087d88305029f383de1eb71c0cdb20f4e19647265450 bash scripts/build-engine.sh
 python3 scripts/fetch-content.py
 python3 scripts/fetch-dependency-sources.py
 npm test
