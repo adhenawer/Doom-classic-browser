@@ -3,6 +3,7 @@
 import './style.css';
 import modernHud from '../engine/modern-hud.lua?raw';
 import { InputState, engineKeys } from './input';
+import { TouchControls, detectTouch, type ControlMode } from './touch';
 import { baseSettings as gameplayDefaults, sanitizeSettings as sanitizeGameplay, turnPresets, applyTurnPreset, selectedTurnPreset, gameplayProfile, type GameplaySettings, type TurnPreset } from './preferences';
 import { Presentation, sanitizePresentation, type PresentationSettings } from './presentation';
 import { validateWad, wadHash, MAX_WAD } from './wad';
@@ -64,6 +65,58 @@ function offlineFailed(name='') {
 }
 let initialized = false;
 const say = (message: string) => { status.textContent = message; };
+let controlMode: ControlMode = 'auto';
+let controlExperienceState = '', saveGeneration = 0;
+try { const saved = localStorage.getItem('doom-control-mode'); if (saved === 'mobile' || saved === 'desktop') controlMode = saved; } catch { /* Storage can be unavailable. */ }
+const coarsePointer = matchMedia('(pointer: coarse)');
+const mobileControls = () => controlMode === 'mobile' || (controlMode === 'auto' && detectTouch(coarsePointer.matches, navigator.maxTouchPoints));
+const touch = new TouchControls(game, (source, actions) => {
+  if (!running || suspended || game.hidden || engine?._web_menu()) return;
+  input.setActions(source, actions); updateInput();
+}, key => {
+  if (!running || suspended || game.hidden) return;
+  engine?._web_audio();
+  if (key === 'shell') showShell();
+  else { reset(); tap(key); }
+}, name => {
+  if (!engine?._web_text() || suspended) return;
+  reset(); const generation = saveGeneration;
+  const keys: [number, number][] = Array.from({length:24}, () => [127, 127]);
+  for (const character of name) keys.push([character.toLowerCase().charCodeAt(0), character.charCodeAt(0)]);
+  keys.push([13, 13]);
+  const send = async () => {
+    for (let offset = 0; offset < keys.length; offset += 8) {
+      if (generation !== saveGeneration || suspended || !engine?._web_text()) return;
+      const tic = engine._web_state(0);
+      for (const [key, character] of keys.slice(offset, offset + 8)) tap(key, character);
+      // DOOM has a 64-event ring. Wait for the engine to consume each small batch.
+      do { await new Promise(resolve => setTimeout(resolve, 35)); }
+      while (generation === saveGeneration && !suspended && engine._web_state(0) === tic);
+    }
+    canvas.focus();
+  };
+  send().catch(error);
+});
+function updateControlExperience() {
+  const mobile = mobileControls();
+  const state = `${mobile}/${game.hidden}/${running}/${suspended}/${matchMedia('(orientation: portrait)').matches}/${engine?._web_menu()}/${engine?._web_text()}`;
+  if (state === controlExperienceState) return;
+  controlExperienceState = state;
+  el('rotatePrompt').hidden = !(mobile && !game.hidden && matchMedia('(orientation: portrait)').matches);
+  document.documentElement.dataset.controls = mobile ? 'mobile' : 'desktop';
+  el('deviceExperience').textContent = mobile ? 'Mobile · paisagem · touch + teclado' : 'Desktop · teclado';
+  el('resumeInstruction').textContent = mobile ? 'Toque em Retomar para entrar e ativar o áudio.' : 'Pressione Enter para entrar e ativar o áudio.';
+  el('resumeButton').textContent = mobile ? 'Retomar partida' : 'Enter para retomar ↵';
+  el('resumeGuide').textContent = mobile ? 'Jogue na horizontal. Esquerda: mover. Direita: mantenha deslocado para girar. Use os botões para atirar e interagir. Teclado também funciona.' : 'WASD mover · ← → girar · J atirar · E interagir · P menu · H interface. Seus remapeamentos continuam ativos.';
+  touch.update(mobile && running && !suspended && !game.hidden, !!engine?._web_menu(), !!engine?._web_text());
+}
+coarsePointer.addEventListener('change', () => { reset(); updateControlExperience(); });
+window.addEventListener('resize', () => {
+  touch.clear();
+  if (mobileControls() && matchMedia('(orientation: portrait)').matches && running && !game.hidden) suspend();
+});
+updateControlExperience();
+
 const error = (e: unknown) => { say(`Erro: ${e instanceof Error ? e.message : String(e)}`); console.error(e); };
 function sanitizeSettings(raw: unknown): Settings {
   const resolution = raw && typeof raw === 'object' ? sanitizeResolution((raw as Record<string, unknown>).resolution) : 'classic';
@@ -94,6 +147,7 @@ async function saveSettings() {
   say('Configurações armazenadas neste navegador.');
 }
 function reset() {
+  saveGeneration++; touch.clear();
   // Preserve complete down/up pairs if a DOM event was queued before a menu
   // transition but has not reached the next engine tic yet.
   for (const key of sent) engine?._web_key(key,0,key);
@@ -102,15 +156,19 @@ function reset() {
 function suspend() {
   if (!engine || !running) return;
   reset(); engine._web_suspend(1); suspended = true; presentation.setActive(false);
-  el('resume').hidden = false;
+  el('resume').hidden = false; updateControlExperience();
   if (!document.hidden && !game.hidden) el('resumeButton').focus();
 }
 function resume() {
-  if (!engine || !running) return;
+  if (!engine || !running || (mobileControls() && matchMedia('(orientation: portrait)').matches)) return;
+  if (mobileControls()) {
+    const orientation = screen.orientation as ScreenOrientation & { lock?: (orientation: string) => Promise<void> };
+    orientation?.lock?.('landscape').catch(() => { /* Browser may require installed PWA/fullscreen. */ });
+  }
   if (graphicsLost) { game.hidden=true; shell.hidden=false; restartResolution(); return; }
   reset(); applyConfig(); engine._web_audio(); engine._web_suspend(0);
   suspended = false; el('resume').hidden = true;
-  shell.hidden = true; game.hidden = false; presentation.setActive(true); canvas.focus();
+  shell.hidden = true; game.hidden = false; presentation.setActive(true); canvas.focus(); updateControlExperience();
   if (queuedLoad) { queuedLoad = false; tap(189); }
 }
 function showShell() {
@@ -179,6 +237,18 @@ async function content() {
 function controls() {
   showPanel('Controles');
   paragraph('Partida: WASD + setas. Enter confirma. P abre o menu, M abre o mapa, K salva, L carrega e H volta à interface. Nos menus do motor: Y confirma perguntas e N cancela. Para nomear saves, digite e confirme com Enter.');
+  paragraph('Touch: joystick esquerdo move e desloca lateralmente; mantenha o controle direito deslocado para girar. Tiro, usar e correr podem ser segurados junto do movimento. O giro tem zona morta e usa a resposta configurada do teclado. Sem mira vertical, pulo ou recarga manual.');
+  const label = document.createElement('label'); label.textContent = 'Experiência de controles';
+  const mode = document.createElement('select'); mode.id = 'controlMode';
+  for (const [value, text] of [['auto', 'Automática · detectar dispositivo'], ['mobile', 'Mobile · touch e teclado'], ['desktop', 'Desktop · teclado']]) {
+    const option = document.createElement('option'); option.value = value; option.textContent = text; mode.append(option);
+  }
+  mode.value = controlMode; mode.onchange = () => {
+    reset(); controlMode = mode.value as ControlMode;
+    try { localStorage.setItem('doom-control-mode', controlMode); } catch { /* Keep in-memory selection. */ }
+    updateControlExperience();
+  };
+  label.append(mode); panel.append(label);
   paragraph('Escolha uma ação para remapear. Escape cancela a captura. Teclas reservadas pelo sistema podem não chegar ao aplicativo.');
   for (const [action, keys] of Object.entries(input.bindings)) {
     const b = button(`${actionLabels[action]}: ${keys.map(keyLabel).join(' / ')}`, () => { reset(); remapping = action; b.textContent = `${actionLabels[action]}: pressione uma tecla…`; });
@@ -509,6 +579,11 @@ function updateInput() {
 const menuCodes: Record<string, number> = { ArrowUp: 173, ArrowDown: 175, ArrowLeft: 172, ArrowRight: 174, Enter: 13, NumpadEnter: 13, Escape: 27, Backspace: 127 };
 window.addEventListener('keydown', event => {
   const code = event.code;
+  if ((event.target as HTMLElement).closest?.('.touch-name')) {
+    if (engine) event.stopImmediatePropagation();
+    if (code === 'Escape') { event.preventDefault(); tap(27); canvas.focus(); }
+    return;
+  }
   if (event.metaKey || event.altKey || (event.ctrlKey && code !== 'ControlLeft' && code !== 'ControlRight')) { if (running) suspend(); return; }
   // SDL installs window handlers that prevent browser defaults even while its
   // canvas is hidden. Keep shell Enter, form fields and remapping usable.
@@ -575,6 +650,7 @@ function watchMenu() {
     const now = !!engine._web_menu();
     if (now !== previousMenu) { reset(); previousMenu = now; }
   }
+  updateControlExperience();
   requestAnimationFrame(watchMenu);
 }
 requestAnimationFrame(watchMenu);
@@ -585,6 +661,7 @@ el('import').onclick = () => el<HTMLInputElement>('wadFile').click();
 el('settings').onclick = configure; el('controls').onclick = controls;
 el('saves').onclick = () => { saves().catch(error); };
 el('resumeButton').onclick = resume;
+el('rotateHome').onclick = showShell;
 el<HTMLInputElement>('wadFile').onchange = async event => {
   const target = event.target as HTMLInputElement;
   try { if (target.files?.[0]) await importWad(target.files[0]); } catch (e) { error(e); } finally { target.value = ''; }

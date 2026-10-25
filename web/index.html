@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0a0c10"><meta name="description" content="Porte de DOOM para browsers com teclado, dados locais e modo offline após preparação.">
+  <meta name="theme-color" content="#0a0c10"><meta name="description" content="Porte de DOOM para browsers com teclado e touch, dados locais e modo offline após preparação.">
   <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <meta name="application-name" content="DOOM Classic Browser">
@@ -85,7 +85,7 @@
       <button id="controls" data-index="05" disabled>Controles</button>
       <button id="load" data-index="06" disabled>Carregar jogo</button>
       <button id="saves" data-index="07" disabled>Gerenciar saves e backups</button>
-      <div class="keyboard-guide" aria-label="Controles principais"><span><kbd>WASD</kbd> mover</span><span><kbd>← →</kbd> girar</span><span><kbd>J</kbd> atirar</span><span><kbd>E</kbd> interagir</span></div>
+      <p id="deviceExperience" class="hint" aria-live="polite"></p><p class="touch-guide hint">Joystick esquerdo para mover, controle direito para girar e botões para agir. Jogue na horizontal.</p><div class="keyboard-guide" aria-label="Controles principais"><span><kbd>WASD</kbd> mover</span><span><kbd>← →</kbd> girar</span><span><kbd>J</kbd> atirar</span><span><kbd>E</kbd> interagir</span></div>
     </nav>
     <section id="panel" hidden aria-label="Opções do jogo"></section>
     <footer>
@@ -94,7 +94,7 @@
       <p class="file-note">Para importar conteúdo, use o seletor de arquivos do navegador. Os arquivos permanecem neste dispositivo.</p>
     </footer>
   </main>
-  <section id="game" hidden aria-label="Jogo"><canvas id="canvas" width="640" height="480" tabindex="0" aria-label="DOOM"></canvas><div id="resume" hidden><div class="resume-card"><p class="eyebrow">AGUARDANDO VOCÊ</p><h2>Partida suspensa</h2><p>Pressione Enter para entrar e ativar o áudio.</p><button id="resumeButton">Enter para retomar <span aria-hidden="true">↵</span></button><dl class="resume-controls"><div><dt>WASD</dt><dd>Mover</dd></div><div><dt>← →</dt><dd>Girar</dd></div><div><dt>J / E</dt><dd>Atirar / interagir</dd></div><div><dt>P / H</dt><dd>Menu / interface</dd></div></dl><p class="resume-hint">Os controles acima são os padrões. Seus remapeamentos continuam ativos.</p></div></div></section>
+  <section id="game" hidden aria-label="Jogo"><div id="rotatePrompt" hidden role="status"><div><span aria-hidden="true">↻</span><h2>Gire o aparelho</h2><p>Jogue na horizontal para acessar os controles.<br>A partida fica suspensa na vertical.</p><button id="rotateHome">Voltar à interface</button></div></div><canvas id="canvas" width="640" height="480" tabindex="0" aria-label="DOOM"></canvas><div id="resume" hidden><div class="resume-card"><p class="eyebrow">AGUARDANDO VOCÊ</p><h2>Partida suspensa</h2><p id="resumeInstruction">Pressione Enter para entrar e ativar o áudio.</p><button id="resumeButton">Enter para retomar <span aria-hidden="true">↵</span></button><dl class="resume-controls" hidden><div><dt>WASD</dt><dd>Mover</dd></div><div><dt>← →</dt><dd>Girar</dd></div><div><dt>J / E</dt><dd>Atirar / interagir</dd></div><div><dt>P / H</dt><dd>Menu / interface</dd></div></dl><p id="resumeGuide" class="resume-hint"></p></div></div></section>
   <input id="wadFile" type="file" accept=".wad" hidden><input id="backupFile" type="file" accept=".json" hidden>
   <script type="module" src="./main.ts"></script>
 </body>

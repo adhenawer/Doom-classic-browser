@@ -1,12 +1,13 @@
 # Arquitetura do porte para browsers
 
-O produto é um porte web para browsers com teclado físico. O iPad é um dos dispositivos de uso previstos; a aplicação usa APIs de navegador e não faz seleção de plataforma por user-agent. Há três perfis explícitos: Clássica (Chocolate Doom), Alta (Crispy Doom) e Moderno HD (EDGE-Classic/WebGL2). Instalações novas selecionam Moderno; preferências existentes preservam a escolha. A base Clássica usa Chocolate Doom em C, revisão `a2dfd51fcc00d272dc8a17a97ccd6683333ff4ea`, preservada em `engine/upstream`. Não usamos binários de terceiros. `scripts/prepare-engine.py` cria uma cópia em `build/engine`, verifica contextos dos patches e aplica as adaptações. O build falha se o contexto esperado divergir.
+O produto é um porte web para browsers com teclado físico ou touch. O iPad é um dos dispositivos de uso previstos; a aplicação usa APIs de navegador e não faz seleção de plataforma por user-agent. Há três perfis explícitos: Clássica (Chocolate Doom), Alta (Crispy Doom) e Moderno HD (EDGE-Classic/WebGL2). Instalações novas selecionam Moderno; preferências existentes preservam a escolha. A base Clássica usa Chocolate Doom em C, revisão `a2dfd51fcc00d272dc8a17a97ccd6683333ff4ea`, preservada em `engine/upstream`. Não usamos binários de terceiros. `scripts/prepare-engine.py` cria uma cópia em `build/engine`, verifica contextos dos patches e aplica as adaptações. O build falha se o contexto esperado divergir.
 
 ## Responsabilidades
 
 - `engine/turn.c`: controlador de rotação, executado em `G_BuildTiccmd`, uma vez por comando/tic. Mantém frações de ângulo. As setas opostas zeram a rampa; inversão recomeça na velocidade inicial. Parada imediata é padrão; desaceleração é opcional.
 - `engine/bridge.c`: entrada C exportada, configuração limitada, suspensão, limpeza de estados e observação somente leitura para testes.
-- `web/input.ts`: conjunto de códigos físicos pressionados, aliases, remapeamento e validação. Não usa repetição do sistema para movimento. Soltar um alias não solta a ação enquanto outro alias continua pressionado.
+- `web/touch.ts`: HUD multi-pointer com captura independente, joysticks digitais, botões seguráveis, navegação de menus e campo para nomes de save.
+- `web/input.ts`: união de fontes touch por ação e códigos físicos pressionados, aliases, remapeamento e validação. Não usa repetição do sistema para movimento. Soltar um alias não solta a ação enquanto outro alias continua pressionado.
 - `web/main.ts`: estados interface/jogo/menu/texto, inicialização WASM, arquivos e configurações. Menus de gameplay continuam sendo os do motor. Durante nomes de saves, letras deixam de ser atalhos.
 - `web/wad.ts`: limites e verificação estrutural dos IWADs. Não transforma um arquivo desconhecido em confiável; o conteúdo continua sendo interpretado pelo motor dentro do sandbox WASM.
 - `web/storage.ts`: transações IndexedDB para conteúdo e preferências. O filesystem persistente do Emscripten guarda saves em outra base IDBFS.
@@ -71,6 +72,12 @@ Crispy rasteriza 640×400; os seletores C somente leitura 17/18 expõem o buffer
 O backend Alta requer `-sEMULATE_FUNCTION_POINTER_CASTS=1`: ações Crispy são chamadas por ponteiros de três argumentos mesmo quando a função original recebe um. WebAssembly exige assinatura compatível; a emulação conserva o comportamento nativo de argumentos extras ignorados. A flag é exclusiva do link Alta e o custo foi avaliado junto do backend. Não é habilitada no Classic.
 
 Saves Classic mantêm `/persist/saves/<hash>`; Alta usa `/persist/saves-hires/<hash>`. Bootstrap em perfil Alta vazio copia os seis slots Classic e persiste um marcador; nunca substitui os originais ou slots Alta existentes. Não há conversão Alta→Classic. Backup v1 permanece Classic; v2 identifica revisões/perfis e inclui os dois namespaces. Todos os paths/metadados são validados antes das escritas. Ambos os motores e a licença extra entram no precache, permitindo selecionar Alta offline mesmo se somente Classic tiver sido jogado. Ver [resultados e limites](HIRES.md).
+
+## Entrada mobile
+
+A seleção automática exige `(pointer: coarse)` e `navigator.maxTouchPoints > 0`; não usa user-agent nem largura como identificação de dispositivo. A preferência Automática/Mobile/Desktop é local (`doom-control-mode`), separada do remapeamento existente. Cada pointer tem uma fonte independente; soltar toque não solta teclas ou outros toques da mesma ação. Cancelamento de ponteiro, perda de captura, resize, suspensão e transições de menu limpam estados. O modo mobile só permite retomar em paisagem e suspende ao girar para vertical; orientação é solicitada ao browser como best effort.
+
+O joystick é digital com zona morta; giro chama a mesma ponte `_web_rotate` e usa a rampa do teclado. A simulação, motores, física, saves e APIs exportadas C não mudam. Nomes de save são enviados em lotes de oito teclas (16 eventos), aguardando avanço do motor para respeitar a fila nativa de 64 eventos; reset invalida lotes pendentes. Nenhum novo asset externo ou dependência de runtime foi adicionado.
 
 
 ## Moderno HD 0.4.0

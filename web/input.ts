@@ -15,11 +15,16 @@ export const engineKeys: Record<string, number> = {
 };
 export class InputState {
   held = new Set<string>();
+  private virtual = new Map<string, Set<string>>();
+  setActions(source: string, actions: string[]) {
+    if (actions.length) this.virtual.set(source, new Set(actions));
+    else this.virtual.delete(source);
+  }
   constructor(public bindings: Record<string, string[]> = structuredClone(defaults)) {}
   press(code: string) { this.held.add(code); }
   release(code: string) { this.held.delete(code); }
-  clear() { this.held.clear(); }
-  active(action: string) { return this.bindings[action]?.some(k => this.held.has(k)) ?? false; }
+  clear() { this.held.clear(); this.virtual.clear(); }
+  active(action: string) { return (this.bindings[action]?.some(k => this.held.has(k)) ?? false) || [...this.virtual.values()].some(actions => actions.has(action)); }
   action(code: string) { return Object.keys(this.bindings).find(a => this.bindings[a].includes(code)); }
   remap(action: string, code: string) {
     if (!Object.hasOwn(defaults, action)) throw new Error('Ação desconhecida');

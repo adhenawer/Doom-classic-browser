@@ -1,6 +1,6 @@
 # DOOM Classic Browser — porte de DOOM para browsers
 
-Porte jogável de **DOOM para o navegador, com EDGE-Classic/WebGL2 (Moderno HD), Crispy Doom (Alta) e Chocolate Doom (Clássica), compilados de C/C++ para WebAssembly**, com teclado físico, dados locais e modo offline após a preparação inicial. O projeto atende browsers em computadores, notebooks e tablets. O Chrome de um iPad é um dos ambientes de uso previstos.
+Porte jogável de **DOOM para o navegador, com EDGE-Classic/WebGL2 (Moderno HD), Crispy Doom (Alta) e Chocolate Doom (Clássica), compilados de C/C++ para WebAssembly**, com teclado físico ou controles touch, dados locais e modo offline após a preparação inicial. O projeto atende browsers em computadores, notebooks e tablets. O Chrome de um iPad é um dos ambientes de uso previstos.
 
 **[Jogar no browser](https://adhenawer.github.io/Doom-classic-browser/)** · [Builds e testes](https://github.com/adhenawer/Doom-classic-browser/actions) · [Validação](docs/VALIDATION.md)
 
@@ -8,9 +8,9 @@ O motor executa mapas reais e preserva as mecânicas clássicas. A distribuiçã
 
 ## Jogar no navegador
 
-1. Abra a URL HTTPS com conexão e teclado físico. Em tablets, paisagem é recomendada; a orientação é livre.
+1. Abra a URL HTTPS com conexão. O browser seleciona automaticamente teclado no desktop ou controles touch no mobile. No mobile, jogue na horizontal; girar para a vertical suspende a partida.
 2. Aguarde a preparação offline terminar (inclui o pacote HD de aproximadamente 380 MiB, além dos motores, conteúdo-base e mapa Estação Aurora).
-3. Selecione **Jogar** com Enter. Quando aparecer a partida suspensa, pressione Enter novamente para retomar e tentar liberar o áudio.
+3. Selecione **Jogar** por toque ou Enter. Quando aparecer a partida suspensa, toque em **Retomar partida** ou pressione Enter para retomar e tentar liberar o áudio.
 4. Para o conteúdo original, use **Importar WAD** e o seletor de arquivos do browser. A seleção inicial pode usar a interface nativa do sistema; a partida e os menus funcionam pelo teclado.
 
 Nenhum IWAD ou save é enviado ao servidor. O MVP aceita IWADs de DOOM 1 / Freedoom Phase 1; PWADs e DOOM II ficam fora do escopo.
@@ -32,6 +32,14 @@ Nenhum IWAD ou save é enviado ao servidor. O MVP aceita IWADs de DOOM 1 / Freed
 Menus nativos: setas, Enter e Backspace. Perguntas do DOOM podem exigir Y/N. Durante nomes de saves, as letras são texto. Remapeie ações em Controles. Browser e sistema operacional podem consumir atalhos antes de entregá-los à página; por isso há alternativas sem modificadores.
 
 Configurações permitem velocidade inicial, aceleração, velocidade máxima, sensibilidade e parada imediata ou desaceleração. A rotação é calculada no motor a 35 Hz. Auto-aim vertical e mecânicas clássicas são preservados. Nos campos numéricos, Enter avança e V retorna.
+
+## Controles mobile
+
+O joystick esquerdo move e desloca lateralmente; desloque e mantenha o controle direito para girar. Botões permitem segurar tiro, usar e correr junto com movimento e giro, trocar arma, abrir mapa, salvar e carregar. O giro usa a resposta de teclado configurada, com zona morta; os controles são digitais, sem prometer giro proporcional ao arrasto. Auto-aim vertical continua ativo; não há recarga manual ou pulo.
+
+Menus do DOOM têm setas, confirmar, voltar e Sim/Não na tela. Para saves, digite o nome no campo touch (até 20 caracteres ASCII) e toque em **Salvar nome**. O jogo suspende ao perder foco ou girar para vertical. O bloqueio de orientação é tentado quando permitido pelo browser; o aviso de rotação cobre os demais casos. Controles novos integram o cache offline existente.
+
+Veja [discovery e correspondência teclado/touch](docs/MOBILE-DISCOVERY.md) e [revisão independente](docs/MOBILE-QA.md). A análise de padrões de FPS usa conhecimento prévio: consulta online indisponível nesta execução. Validação em celulares e tablets físicos continua pendente.
 
 ## Moderno HD 0.4.0
 
@@ -70,7 +78,7 @@ O launcher e as configurações foram redesenhados, com orientação de teclado 
 
 ## Recursos e compatibilidade
 
-O browser precisa oferecer WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Service Worker em contexto seguro. A jogabilidade requer teclado físico, integrado ou externo; não há controles de toque sobre a partida.
+O browser precisa oferecer WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Service Worker em contexto seguro. A jogabilidade aceita teclado físico ou controles touch. A detecção usa ponteiro primário grosseiro e capacidade de toque, sem depender apenas da largura da tela. Em **Controles → Experiência de controles**, escolha Automática, Mobile ou Desktop; a seleção fica neste navegador. Teclado continua disponível no modo mobile.
 
 | Ambiente | Evidência disponível |
 |---|---|
@@ -93,7 +101,7 @@ Saves e preferências usam IndexedDB. O navegador pode remover dados. Exporte ba
 
 ### Uso pelo browser de um iPad
 
-Abra a mesma URL no Chrome do iPad e use o teclado físico. Quando disponível, a instalação pode ser feita por Compartilhar → Adicionar à Tela de Início. Confira áudio por Enter, teclas reservadas, combinações e reconexão do teclado e reabertura offline no [checklist desse dispositivo](docs/IPAD-CHECKLIST.md). Esses cuidados são específicos desse perfil de browser/sistema; o produto continua sendo o porte web.
+Abra a mesma URL no Chrome do iPad, em paisagem, com touch ou teclado físico. Quando disponível, a instalação pode ser feita por Compartilhar → Adicionar à Tela de Início. Confira áudio por Enter, teclas reservadas, combinações e reconexão do teclado e reabertura offline no [checklist desse dispositivo](docs/IPAD-CHECKLIST.md). Esses cuidados são específicos desse perfil de browser/sistema; o produto continua sendo o porte web.
 
 ## Build e publicação na nuvem
 

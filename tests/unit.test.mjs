@@ -29,3 +29,14 @@ test('WAD rejects truncated headers, signed offsets, incomplete directories and 
   const b = new ArrayBuffer(28), v=new DataView(b), u=new Uint8Array(b);u.set(new TextEncoder().encode('IWAD'));v.setInt32(4,1,true);v.setInt32(8,12,true);v.setInt32(12,-1,true);
   assert.throws(()=>validateWad(b));u.set(new TextEncoder().encode('PWAD'));assert.throws(()=>validateWad(b));
 });
+test('touch sources combine with remapped keyboard and release independently', () => {
+  const s = new InputState(); s.remap('fire','KeyZ');
+  s.press('KeyZ'); s.setActions('touch:1',['fire','forward']); s.setActions('touch:2',['fire','turnRight']);
+  s.setActions('touch:1',[]); assert(s.active('fire')); assert(!s.active('forward')); assert(s.active('turnRight'));
+  s.release('KeyZ'); assert(s.active('fire')); s.setActions('touch:2',[]); assert(!s.active('fire'));
+  s.setActions('touch:3',['run']); s.clear(); assert(!s.active('run'));
+});
+const { detectTouch } = await load('web/touch.ts');
+test('automatic touch requires primary coarse pointer and touch capability', () => {
+  assert(detectTouch(true,5)); assert(!detectTouch(false,5)); assert(!detectTouch(true,0));
+});
