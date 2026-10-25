@@ -65,3 +65,18 @@ Limitações conhecidas: quotas e remoção de dados dependem do iPadOS. Eventos
 - [ ] Trocar de resolução com partida salva e conferir os dois perfis de saves e o backup v2.
 - [ ] Preparar somente Clássica online; reabrir, trocar para Alta e carregar o save sem rede.
 - [ ] Observar estabilidade, aquecimento e consumo com Alta durante sessão prolongada; comparar Nítido e CRT separadamente.
+
+
+## Moderno HD 0.4.0 — validação física pendente
+
+- [ ] Abrir uma instalação nova em Moderno; em instalação existente selecionar Moderno HD nas configurações.
+- [ ] Comparar 1280×960, 1920×1440, 2560×1920 e 3840×2880; registrar estabilidade, nitidez, temperatura e fluidez de cada opção.
+- [ ] Conferir HUD moderno legível e completo; trocar para HUD clássico e reiniciar pelo teclado.
+- [ ] Comparar materiais HD ligados/desligados na mesma cena; conferir transparências, inimigos e sinalizações.
+- [ ] Preparar os 38 recursos (incluindo as 12 partes do pacote HD) antes de desligar a rede; iniciar Moderno pela primeira vez offline.
+- [ ] Salvar no Moderno, fechar/reabrir offline e carregar; exportar/restaurar backup v3 incluindo os três perfis.
+- [ ] Trocar Moderno/Alta/Clássica sem perder saves; formatos de save são separados e não há conversão de EDGE para os outros motores.
+- [ ] Alternar aplicativos durante jogo/áudio, voltar com Enter e confirmar que movimento e áudio retomam juntos.
+- [ ] Registrar eventuais encerramentos de aba por memória e remoções de cache pelo iPadOS; qualidade máxima não tem desempenho certificado no dispositivo.
+
+Use uma única aba de jogo por contexto e feche as abas antigas ao atualizar. Não há garantia de sincronização entre duas partidas simultâneas que escrevam nos mesmos saves. Preserve um backup externo antes da atualização.

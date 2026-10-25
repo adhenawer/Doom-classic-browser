@@ -1,0 +1,11 @@
+{
+  "repository": "https://github.com/edge-classic/EDGE-classic",
+  "commit": "9e2b61677f215861e40b631429bf322935e8f87c",
+  "version": "1.53-dev-20261019",
+  "url": "https://codeload.github.com/edge-classic/EDGE-classic/tar.gz/9e2b61677f215861e40b631429bf322935e8f87c",
+  "sha256": "fd67f6a9da631c870ca8b1212d412a6f699e9508fb275754d3af116f5ff8a83c",
+  "bytes": 23559129,
+  "file": "edge-classic-9e2b61677f215861e40b631429bf322935e8f87c.tar.gz",
+  "license": "GPL-3.0-or-later",
+  "note": "Modern WebGL2 geometry renderer. Original source and component notices remain in corresponding source. Classic and Crispy data are not converted."
+}

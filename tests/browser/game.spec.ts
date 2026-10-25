@@ -1,5 +1,6 @@
-import { test, expect } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import { test, expect } from './normal-browser';
+import {selectClassic} from './legacy-profile';
+import type { Page } from './normal-browser';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { once } from 'node:events';
@@ -13,6 +14,8 @@ async function boot(page: Page, url = '/') {
   await expect(page.locator('#resume')).toBeHidden();
   await expect.poll(() => state(page, 1)).toBe(0);
 }
+test.beforeEach(async ({page}) => { await page.goto('/'); await selectClassic(page); });
+
 test('keyboard shell, settings persistence, remapping, reserved modifier fallback', async ({page}) => {
   await page.goto('/');
   await expect(page.locator('#play')).toBeFocused();
@@ -24,7 +27,7 @@ test('keyboard shell, settings persistence, remapping, reserved modifier fallbac
   await expect(page.locator('[data-setting="acceleration"]')).toBeFocused();
   for (let n=0;n<4;n++) await page.keyboard.press('Enter');
   await expect(page.locator('[data-setting="alwaysRun"]')).toBeFocused();
-  for (let n=0;n<6;n++) await page.keyboard.press('Tab');
+  for (let n=0;n<9;n++) await page.keyboard.press('Tab');
   await expect(page.getByRole('button',{name:'Salvar configurações'})).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('#status')).toHaveText('Configurações armazenadas neste navegador.');
@@ -126,6 +129,7 @@ test('IWAD import persists metadata and blob; invalid file is rejected without r
   await expect.poll(()=>state(page,1)).toBe(0);
 });
 test('complete offline cache, re-open engine without network, persisted save', async ({page,context,browserName}) => {
+  test.setTimeout(300000); // The full cache now includes the roughly 399 MB Modern HD package.
   // Shut the actual HTTP server down: no network fallback can satisfy a cache miss.
   // Playwright's WebKit offline emulation itself produced an internal navigation error.
   const root = new URL('../../dist/', import.meta.url);
@@ -143,7 +147,7 @@ test('complete offline cache, re-open engine without network, persisted save', a
   server.listen(0,'127.0.0.1');await once(server,'listening');
   const origin = `http://127.0.0.1:${(server.address() as any).port}${mount}`;
   try {
-  await page.goto(origin); await expect(page.locator('#settings')).toBeEnabled();
+  await page.goto(origin); await selectClassic(page); await expect(page.locator('#settings')).toBeEnabled();
   await page.locator('#settings').press('Enter');
   await page.locator('[data-setting="presentation"]').selectOption('crt');
   await page.locator('[data-setting="brightness"]').fill('1.1');
@@ -153,7 +157,7 @@ test('complete offline cache, re-open engine without network, persisted save', a
   await expect(page.locator('#status')).toHaveText('Configurações armazenadas neste navegador.');
   await page.keyboard.press('KeyV');
   await boot(page, origin);
-  await expect(page.locator('#offline')).toContainText('Preparado para offline',{timeout:60000});
+  await expect(page.locator('#offline')).toContainText('Preparado para offline',{timeout:180000});
   await page.keyboard.press('KeyK');
   await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(1);
   await page.keyboard.press('Enter');

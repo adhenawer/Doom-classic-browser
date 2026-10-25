@@ -1,0 +1,179 @@
+{
+  "id": "freedoom-phase1-hd-v1",
+  "version": 1,
+  "source": {
+    "repository": "https://github.com/m4cd4r4/freedoom-hd",
+    "revision": "ea02b826a758a5105dfd9b635ee44711154f53aa",
+    "release": "v1.0",
+    "file": "freedoom-hd-textures.pk3",
+    "url": "https://github.com/m4cd4r4/freedoom-hd/releases/download/v1.0/freedoom-hd-textures.pk3",
+    "bytes": 402969291,
+    "sha256": "8a0d4c1abe86a1582200289db38c8562a9eaa58e5725d7a182984931c5cc6ae9",
+    "license": "BSD-3-Clause (Freedoom-derived image assets)",
+    "upstreamCodeLicense": "MIT",
+    "processing": "Upstream Real-ESRGAN 4x reconstruction; source PNGs are not modified by this port."
+  },
+  "iwad": {
+    "file": "freedoom1.wad",
+    "version": "0.13.0",
+    "bytes": 28795076,
+    "sha256": "7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d"
+  },
+  "notices": [
+    {
+      "file": "LICENSE",
+      "bytes": 1073,
+      "sha256": "d0eb4795ab8ad9d8b673bc4966f4f48e068864eeae40fda265452a85763286a5"
+    },
+    {
+      "file": "README.md",
+      "bytes": 6707,
+      "sha256": "290fee94c036deb7cb14a073da091505a819e624c88537a98d11cf9a061e8e0a"
+    }
+  ],
+  "freedoomNotices": [
+    {
+      "file": "FREEDOOM-COPYING.txt",
+      "bytes": 1644,
+      "sha256": "7c62f2c520769c798774f416637eec4921e5f0aafdac1245ae7c8a8cf65fe102"
+    },
+    {
+      "file": "FREEDOOM-CREDITS.txt",
+      "bytes": 15872,
+      "sha256": "72364333d295c598d75ef9553d3b3661ad0b60e27271c87b7637c74b2f46918a"
+    }
+  ],
+  "materialOverrides": [
+    {
+      "target": "BASE2",
+      "kind": "texture",
+      "logicalWidth": 128,
+      "logicalHeight": 128,
+      "asset": "blue_metal_plate",
+      "title": "Blue Metal Plate",
+      "author": "Rob Tuytel",
+      "page": "https://polyhaven.com/a/blue_metal_plate",
+      "license": "CC0-1.0",
+      "licenseURL": "https://polyhaven.com/license",
+      "legalCodeURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "file": "blue_metal_plate_diff_4k.png",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/4k/blue_metal_plate/blue_metal_plate_diff_4k.png",
+      "width": 4096,
+      "height": 4096,
+      "bytes": 88602011,
+      "sha256": "cd7dfc69866c6b67af3e1fe8a17b700fdf24954cebd9fa46d52877ae8af05d64",
+      "channel": "albedo",
+      "colorSpace": "sRGB",
+      "note": "Original 16-bit RGBA PNG; the engine decodes to its RGBA8 pipeline. Blue industrial plate intentionally replaces the gray/bronze BASE2 finish; tile remains 128x128 logical units."
+    },
+    {
+      "target": "FLAT1",
+      "kind": "flat",
+      "logicalWidth": 64,
+      "logicalHeight": 64,
+      "asset": "concrete_floor_02",
+      "title": "Concrete Floor 02",
+      "author": "Rob Tuytel",
+      "page": "https://polyhaven.com/a/concrete_floor_02",
+      "license": "CC0-1.0",
+      "licenseURL": "https://polyhaven.com/license",
+      "legalCodeURL": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "file": "concrete_floor_02_diff_4k.png",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/4k/concrete_floor_02/concrete_floor_02_diff_4k.png",
+      "width": 4096,
+      "height": 4096,
+      "bytes": 37734515,
+      "sha256": "50e483cf04c62c758cc3e5ba35998c53be4a5cc2b499352a3c0757b64470bdff",
+      "channel": "albedo",
+      "colorSpace": "sRGB",
+      "note": "Original 8-bit RGB PNG. Weathered concrete replaces plain gray FLAT1; tile remains 64x64 logical units. Floors and ceilings sharing this flat both receive the material."
+    }
+  ],
+  "selection": "Opaque wall textures and flats present in the pinned Phase 1 IWAD only: 1113 unmodified Freedoom-HD PNGs at exact 4x dimensions plus two original 4096x4096 Poly Haven CC0 albedos (BASE2 and FLAT1). Preserve original PNG bytes. Reject masked wall textures and all sprites because upstream reconstruction has opaque magenta backgrounds. Original HUD, masked textures and sprites remain active.",
+  "output": {
+    "file": "modern-hd.epk",
+    "metadata": "modern-hd.json",
+    "copying": "MODERN-CONTENT-COPYING.txt",
+    "zipMethod": "STORED",
+    "assetCount": 1115,
+    "bytes": 398681345,
+    "sha256": "f9a2cc0ea9f290af2b04a9b0227aef1fdad7596649e52101842ae6bbf8dc0562"
+  },
+  "delivery": {
+    "partBytes": 33554432,
+    "parts": [
+      {
+        "file": "modern-hd.000.bin",
+        "bytes": 33554432,
+        "offset": 0,
+        "sha256": "6f7b22662d4471172a779ab3d534f71e4b13add369ca45aef99d57d14b389e95"
+      },
+      {
+        "file": "modern-hd.001.bin",
+        "bytes": 33554432,
+        "offset": 33554432,
+        "sha256": "fd1643e5aa9e65c252826c6b80e80e6b7aec77034d3abdba59d2eb693f428590"
+      },
+      {
+        "file": "modern-hd.002.bin",
+        "bytes": 33554432,
+        "offset": 67108864,
+        "sha256": "9994ffac732cfa27478e43b643a0b11fcbc9df093dfc357d0d45f184a4a7364b"
+      },
+      {
+        "file": "modern-hd.003.bin",
+        "bytes": 33554432,
+        "offset": 100663296,
+        "sha256": "046942454ec63a0fd86b0de299159c80b3c291a38dbf25d9560d13ec15b7c311"
+      },
+      {
+        "file": "modern-hd.004.bin",
+        "bytes": 33554432,
+        "offset": 134217728,
+        "sha256": "e3dcb4dfd1508c80098f7434eee2898ba3c4b901816b6f2d0f59925a779f2e8b"
+      },
+      {
+        "file": "modern-hd.005.bin",
+        "bytes": 33554432,
+        "offset": 167772160,
+        "sha256": "6e2784472bb44ad22ef7da2c95f3a0986a360864dd9cd9ae0997c221e8d794f3"
+      },
+      {
+        "file": "modern-hd.006.bin",
+        "bytes": 33554432,
+        "offset": 201326592,
+        "sha256": "1cbd6599cece4b6184deaa9eac20e9b56c6972d5ca284223b663e95c361e0666"
+      },
+      {
+        "file": "modern-hd.007.bin",
+        "bytes": 33554432,
+        "offset": 234881024,
+        "sha256": "1858b3fb137b91c32945b9bb7b742c10d50ae99cde83c7436053d7bba4d12f1e"
+      },
+      {
+        "file": "modern-hd.008.bin",
+        "bytes": 33554432,
+        "offset": 268435456,
+        "sha256": "97b867e4bb5efd004b696b1de55faab039135a0ac2a3e359e0960099d7c8b9ba"
+      },
+      {
+        "file": "modern-hd.009.bin",
+        "bytes": 33554432,
+        "offset": 301989888,
+        "sha256": "c5242bd526be812fb787bf2b4ce87d82971ea48e61d20ec942fa81688d23ba38"
+      },
+      {
+        "file": "modern-hd.010.bin",
+        "bytes": 33554432,
+        "offset": 335544320,
+        "sha256": "4e4a271a6952e3eadd4f8a3150d2ceffb6f980d56883841be2289f91a2cdf984"
+      },
+      {
+        "file": "modern-hd.011.bin",
+        "bytes": 29582593,
+        "offset": 369098752,
+        "sha256": "88d1952cc46c261dc6d15efd9e8488e4dd9e170ca7cc773b047d2f34965e96a1"
+      }
+    ]
+  }
+}

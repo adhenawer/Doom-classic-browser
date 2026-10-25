@@ -1,4 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './normal-browser';
+import {selectClassic} from './legacy-profile';
+
+test.beforeEach(async ({page}) => { await page.goto('/'); await selectClassic(page); });
 
 test('optional CRT presents real frames, preserves keyboard/focus and falls back on context loss', async ({page}, info) => {
   await page.goto('/');

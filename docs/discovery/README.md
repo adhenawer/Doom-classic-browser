@@ -2,6 +2,8 @@
 
 Data: **25/10/2026**. Base examinada: release **0.3.0**, commit `d73fac9537469c64ad7186cde456f58a9481b3ef`. Coordenação: `doom_director`; análises independentes de rendering, arte e plataforma. Este documento registra investigação e plano técnico. Um renderer novo e pacotes HD ainda precisam de protótipo executado neste projeto.
 
+> Histórico: após este discovery, o usuário priorizou qualidade visual sem orçamento artificial de tamanho/CPU/memória. Os orçamentos de 20 MiB/64 MiB abaixo são propostas históricas substituídas. A implementação e suas provas estão em [Moderno HD 0.4.0](../modern-hd/RELEASE.md).
+
 ## Parecer executivo
 
 O caminho que ataca conjuntamente contornos e detalhe de superfície é **renderizar a geometria na GPU, em resolução ajustável, e carregar texturas de maior definição com filtragem adequada**. Aumentar somente o Canvas ou aplicar sharpening ao quadro 640×400 não entrega esses dois ganhos.

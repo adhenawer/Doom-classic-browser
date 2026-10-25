@@ -59,3 +59,10 @@ A release adiciona cobertura de preferências, conforto, áudio e apresentação
 ## Alta resolução 0.3.0
 
 Veja [provas de buffer interno, saves e offline](HIRES.md) e [revisão independente](HIRES-QA.md). Os relatórios 0.1/0.2 permanecem como histórico; alta resolução usa outro backend explicitamente selecionado.
+
+
+## Moderno HD 0.4.0
+
+A entrega introduz EDGE-Classic/WebGL2 com resolução física selecionável até 3840×2880, HUD/interface modernos e pacote HD de 1.115 imagens. Veja [release e evidências](modern-hd/RELEASE.md), [auditoria de conteúdo](modern-hd/CONTENT.md) e [revisão independente](modern-hd/QA.md). Os números do MVP acima e de `test-results.json` são históricos, não o resultado desta integração. A suíte atual tem 20 testes Node, um executável C e 28 cenários de browser; o relatório da release identifica os resultados e artefatos efetivamente aprovados.
+
+Os cenários Chromium usam perfis normais persistentes isolados; WebKit usa o contexto isolado padrão, pois o modo persistente do runner WPE falhou até no probe Cache.put de cinco bytes. Isso limita a prova WebKit a reabertura na mesma sessão, sem certificar durabilidade entre processos. Não gravamos corpos grandes em tracing. CacheStorage é preparado integralmente e o servidor é encerrado antes do primeiro boot Moderno no cenário offline. A captura GPU é feita antes do swap; dimensão CSS, drawing buffer e área nativa são verificadas separadamente. WebKit Linux continua sem representar uma validação física no Chrome do iPad.

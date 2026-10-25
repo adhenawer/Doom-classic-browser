@@ -1,6 +1,6 @@
 # Arquitetura do porte para browsers
 
-O produto é um porte web para browsers com teclado físico. O iPad é um dos dispositivos de uso previstos; a aplicação usa APIs de navegador e não faz seleção de plataforma por user-agent. O motor é Chocolate Doom em C, revisão `a2dfd51fcc00d272dc8a17a97ccd6683333ff4ea`, preservada em `engine/upstream`. Não usamos binários de terceiros. `scripts/prepare-engine.py` cria uma cópia em `build/engine`, verifica contextos dos patches e aplica as adaptações. O build falha se o contexto esperado divergir.
+O produto é um porte web para browsers com teclado físico. O iPad é um dos dispositivos de uso previstos; a aplicação usa APIs de navegador e não faz seleção de plataforma por user-agent. Há três perfis explícitos: Clássica (Chocolate Doom), Alta (Crispy Doom) e Moderno HD (EDGE-Classic/WebGL2). Instalações novas selecionam Moderno; preferências existentes preservam a escolha. A base Clássica usa Chocolate Doom em C, revisão `a2dfd51fcc00d272dc8a17a97ccd6683333ff4ea`, preservada em `engine/upstream`. Não usamos binários de terceiros. `scripts/prepare-engine.py` cria uma cópia em `build/engine`, verifica contextos dos patches e aplica as adaptações. O build falha se o contexto esperado divergir.
 
 ## Responsabilidades
 
@@ -14,7 +14,7 @@ O produto é um porte web para browsers com teclado físico. O iPad é um dos di
 
 ## Loop e renderização
 
-Uma thread. Asyncify permite ceder ao navegador em `I_Sleep` e a cada iteração do loop original. Nenhum Worker, SharedArrayBuffer ou Pointer Lock é necessário. SDL2 apresenta o framebuffer clássico via Canvas/WebGL. Não é renderização 3D acelerada da geometria do DOOM: o renderizador original continua em software.
+Uma thread. Asyncify permite ceder ao navegador em `I_Sleep` e a cada iteração do loop original. Nenhum Worker, SharedArrayBuffer ou Pointer Lock é necessário. Nos perfis Clássica/Alta, SDL2 apresenta o framebuffer via Canvas/WebGL e a geometria é rasterizada em software. Moderno usa o backend Sokol GLES3/WebGL2 do EDGE para renderizar geometria/texturas na GPU; não amplia o framebuffer clássico. Os detalhes da terceira integração estão na seção Moderno HD abaixo.
 
 O relógio lógico desconta períodos de suspensão para evitar recuperar milhares de tics ao retornar de outro aplicativo. O motor preserva 35 Hz. O controlador não promete latência inferior a um tic: em primeiro plano o orçamento é aproximadamente 28,6 ms mais entrega de eventos e apresentação, a medir em cada combinação de navegador, dispositivo e teclado.
 
@@ -28,7 +28,7 @@ O relógio lógico desconta períodos de suspensão para evitar recuperar milhar
 
 ## Conteúdo e memória
 
-Freedoom 0.13.0 Phase 1 é baixado na preparação da release, verificado por SHA-256 e hospedado junto ao app. Importações: IWAD de DOOM 1, tamanho máximo de 64 MiB e máximo de oito conteúdos. O WAD ativo é copiado para MEMFS; não se carregam todos os IWADs no motor. O heap WASM começa em 32 MiB e tem teto de 256 MiB. A memória JavaScript e do navegador é adicional e não está coberta por esse teto.
+Freedoom 0.13.0 Phase 1 é baixado na preparação da release, verificado por SHA-256 e hospedado junto ao app. Importações: IWAD de DOOM 1, tamanho máximo de 64 MiB e máximo de oito conteúdos. O WAD ativo é copiado para MEMFS; não se carregam todos os IWADs no motor. Nos perfis Clássica/Alta, o heap WASM começa em 32 MiB e tem teto de 256 MiB. Moderno começa em 512 MiB e pode crescer até 2 GiB. A memória JavaScript e do navegador é adicional e não está coberta por esse teto.
 
 Freedoom pode ter mapas que exigem recursos além dos limites vanilla; o MVP valida E1M1 e não afirma que todos os episódios foram concluídos. Os testes não contêm dados comerciais. DOOM.WAD/DOOM1.WAD são suportados como formato e caminho de integração, mas precisam ser testados com arquivos autorizados do usuário.
 
@@ -38,7 +38,7 @@ Saves são separados pelo SHA-256 do IWAD: `/persist/saves/<hash>/doomsavN.dsg`.
 
 Cache de app e IndexedDB têm funções separadas. Uma nova versão só instala após baixar o conjunto completo; não usa `skipWaiting`, preservando a versão em uso até o fechamento dos clientes. Navegação offline resolve `index.html` dentro do escopo, inclusive em subdiretórios. O cache é específico da origem e do contexto de execução; uma aba do Chrome e um app da tela inicial devem ser preparados e testados separadamente.
 
-O precache de uma atualização usa requisições com `cache: reload`, evitando copiar HTML e metadados antigos do cache HTTP para o novo cache de versão. Preferências, IWADs e saves permanecem no armazenamento existente.
+O precache de uma atualização usa requisições com `cache: no-store`, evitando reutilizar HTML/metadados antigos ou gravar o pacote HD grande no cache HTTP. Cache Storage recebe o conjunto completo separadamente. Preferências, IWADs e saves permanecem no armazenamento existente.
 
 `storage.persist()` é uma solicitação; qualquer navegador pode remover dados, conforme a política do sistema e do perfil. Não há autenticação, telemetria, API externa ou upload de arquivos durante a execução. Download inicial e atualização dependem de rede.
 
@@ -71,3 +71,16 @@ Crispy rasteriza 640×400; os seletores C somente leitura 17/18 expõem o buffer
 O backend Alta requer `-sEMULATE_FUNCTION_POINTER_CASTS=1`: ações Crispy são chamadas por ponteiros de três argumentos mesmo quando a função original recebe um. WebAssembly exige assinatura compatível; a emulação conserva o comportamento nativo de argumentos extras ignorados. A flag é exclusiva do link Alta e o custo foi avaliado junto do backend. Não é habilitada no Classic.
 
 Saves Classic mantêm `/persist/saves/<hash>`; Alta usa `/persist/saves-hires/<hash>`. Bootstrap em perfil Alta vazio copia os seis slots Classic e persiste um marcador; nunca substitui os originais ou slots Alta existentes. Não há conversão Alta→Classic. Backup v1 permanece Classic; v2 identifica revisões/perfis e inclui os dois namespaces. Todos os paths/metadados são validados antes das escritas. Ambos os motores e a licença extra entram no precache, permitindo selecionar Alta offline mesmo se somente Classic tiver sido jogado. Ver [resultados e limites](HIRES.md).
+
+
+## Moderno HD 0.4.0
+
+O terceiro perfil usa EDGE-Classic fixado em `engine/EDGE.json`, compilado de C/C++ para WASM/WebGL2 em uma thread e sem Pointer Lock. `scripts/fetch-modern-engine.py` verifica archive e preserva a fonte correspondente; `scripts/prepare-modern-engine.py` adapta somente uma cópia e inclui `engine/modern-bridge.cc` e o controlador C de giro já testado. O build usa CMake 3.31.6 e a mesma revisão Emscripten. Dados mínimos de suporte são carregados de `doom-modern.data`; o conjunto exclui packs de outros jogos e gráficos comerciais. Avisos completos permanecem na publicação.
+
+O host monta IDBFS uma única vez em `/persist` antes de `callMain`. O backend não monta nem sincroniza o mesmo volume por conta própria. Saves nativos usam `/persist/saves-modern/<iwadSHA256>/savegame/slot000` até `slot007`, com arquivos `.esg`/preview próprios. O diretório temporário `current` fica fora dos backups. O callback após a cópia completa aciona a fila de sync do host. Backup v3 valida os três perfis e só permite namespaces e arquivos conhecidos; backups v1/v2 continuam preservados. Nenhuma conversão `.dsg`→EDGE é presumida.
+
+A resolução moderna é selecionada como dimensão do drawing buffer GPU, com pixels quadrados em 4:3. A janela SDL não é redimensionável por CSS, evitando que o tamanho visual reduza silenciosamente o buffer solicitado. O seletor aceita 1280×960/1920×1440/2560×1920/3840×2880; trocar perfil, resolução, pacote HD ou HUD requer reinício após persistência. Perda do contexto suspende comandos/áudio e impede retomar naquele contexto; Enter oferece reinício controlado. Simulação e controlador permanecem em 35 Hz, com auto-aim vertical e extensões de pulo/câmera livre desligadas, sem afirmar identidade de física/demos com Chocolate.
+
+As texturas opcionais são associadas exclusivamente ao hash conhecido do Freedoom; tamanho/SHA são verificados antes de escrita em MEMFS. O gerador `scripts/fetch-modern-content.py` valida origem, dimensões lógicas e cobertura, seleciona 1.113 PNGs reconstruídos em 4× e dois materiais CC0 4096×4096, com bytes originais preservados, e produz EPK determinístico. Não traz scripts do PK3 upstream. Imagens opacas 4× entram no caminho nativo HIRES; originais de sprites/grades/HUD com transparência permanecem corretos. Mipmaps/trilinear e HQ2x nativo para UI/sprites são apresentação; não implementam PBR. Contadores 23/24/25 observam registro de substituições, chamadas nativas de upload e maior largura decodificada antes do upload; não consultam a memória física da GPU.
+
+Os três loaders/WASM, data e pacote HD entram no inventário offline. Os antigos bancos, namespaces e identidade PWA são preservados. A preferência do usuário remove os orçamentos propostos no discovery; parâmetros de heap/build e limites físicos de WebGL/browser continuam explícitos. Uma instalação nova seleciona Moderno; preferências existentes são sanitizadas sem selecionar outro motor silenciosamente. [Resultados de validação](modern-hd/RELEASE.md).

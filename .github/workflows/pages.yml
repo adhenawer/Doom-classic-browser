@@ -12,7 +12,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -21,13 +21,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm audit --audit-level=high
-      - name: Compile pinned Classic and High engines
+      - name: Compile pinned Classic, High and Modern GPU engines
         run: |
           docker run --rm --user "$(id -u):$(id -g)" \
             -e EM_CACHE=/src/build/emscripten-cache -v "$PWD:/src" -w /src \
             emscripten/emsdk@sha256:bbe90e2b00acbd1a9596087d88305029f383de1eb71c0cdb20f4e19647265450 \
             bash scripts/build-engine.sh
       - run: python3 scripts/fetch-content.py
+      - run: python3 scripts/fetch-modern-content.py
       - run: python3 scripts/fetch-dependency-sources.py
       - name: Native rotation tests
         run: |
@@ -36,7 +37,20 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit
-      - run: npm run test:e2e
+      - name: Browser integration tests
+        run: npm run test:e2e -- --reporter=line,json
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: build/browser-results.json
+      - name: Preserve browser results and visual evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: browser-validation
+          path: |
+            build/browser-results.json
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: dist

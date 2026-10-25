@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './normal-browser';
+import {selectClassic} from './legacy-profile';
 const state = (page: any, n: number) => page.evaluate((n: number) => window.doom._web_state(n), n);
 async function configure(page: any) {
   await page.locator('#settings').press('Enter');
@@ -9,6 +10,8 @@ async function save(page: any) {
   await expect(page.locator('#status')).toHaveText('Configurações armazenadas neste navegador.');
   await page.keyboard.press('KeyV');
 }
+test.beforeEach(async ({page}) => { await page.goto('/'); await selectClassic(page); });
+
 test('comfort input produces vanilla walk/run commands, releases keys and survives classic save/load', async ({page}) => {
   await page.goto('/'); await expect(page.locator('#play')).toBeEnabled();
   await configure(page);
@@ -61,6 +64,7 @@ test('launcher fits desktop and narrow browser; presets preserve remapping and l
   });
   await page.reload(); await expect(page.locator('#play')).toBeFocused(); await configure(page);
   await expect(page.locator('[data-setting="initial"]')).toHaveValue('75');
+  await expect(page.locator('[data-setting="resolution"]')).toHaveValue('classic');
   await expect(page.locator('[data-setting="alwaysRun"]')).not.toBeChecked();
   await expect(page.locator('[data-setting="musicVolume"]')).toHaveValue('6');
   await page.locator('[data-preset="responsive"]').press('Enter');

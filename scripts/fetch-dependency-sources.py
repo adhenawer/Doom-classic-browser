@@ -23,6 +23,8 @@ for dependency in json.loads((root / 'engine/DEPENDENCIES.json').read_text()):
     print('Verified corresponding dependency source:', dependency['file'])
 notices.append('\n===== Optional Crispy Doom renderer =====\n')
 notices.append((root / 'web/generated/CRISPY-COPYING.txt').read_text())
+notices.append('\n===== Modern EDGE-Classic GPU renderer =====\n')
+notices.append((root / 'web/generated/EDGE-NOTICES.txt').read_text())
 notices.append('\n===== Vite build helper / module preload polyfill =====\n')
 notices.append((root / 'node_modules/vite/LICENSE.md').read_text())
 (root / 'web/generated/THIRD-PARTY-NOTICES.txt').write_text('\n'.join(notices))

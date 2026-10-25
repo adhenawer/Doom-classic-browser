@@ -1,6 +1,6 @@
 # DOOM Classic Browser — porte de DOOM para browsers
 
-Porte jogável de **Chocolate Doom (Clássica) e Crispy Doom (Alta) em C/WebAssembly para execução no navegador**, com teclado físico, dados locais e modo offline após a preparação inicial. O projeto atende browsers em computadores, notebooks e tablets. O Chrome de um iPad é um dos ambientes de uso previstos.
+Porte jogável de **DOOM para o navegador, com EDGE-Classic/WebGL2 (Moderno HD), Crispy Doom (Alta) e Chocolate Doom (Clássica), compilados de C/C++ para WebAssembly**, com teclado físico, dados locais e modo offline após a preparação inicial. O projeto atende browsers em computadores, notebooks e tablets. O Chrome de um iPad é um dos ambientes de uso previstos.
 
 **[Jogar no browser](https://adhenawer.github.io/Doom-classic-browser/)** · [Builds e testes](https://github.com/adhenawer/Doom-classic-browser/actions) · [Validação](docs/VALIDATION.md)
 
@@ -9,7 +9,7 @@ O motor executa mapas reais e preserva as mecânicas clássicas. A distribuiçã
 ## Jogar no navegador
 
 1. Abra a URL HTTPS com conexão e teclado físico. Em tablets, paisagem é recomendada; a orientação é livre.
-2. Aguarde a preparação offline terminar (aproximadamente 33 MiB de recursos de execução).
+2. Aguarde a preparação offline terminar (inclui um pacote HD de aproximadamente 380 MiB, além dos motores e conteúdo-base).
 3. Selecione **Jogar** com Enter. Quando aparecer a partida suspensa, pressione Enter novamente para retomar e tentar liberar o áudio.
 4. Para o conteúdo original, use **Importar WAD** e o seletor de arquivos do browser. A seleção inicial pode usar a interface nativa do sistema; a partida e os menus funcionam pelo teclado.
 
@@ -33,6 +33,18 @@ Menus nativos: setas, Enter e Backspace. Perguntas do DOOM podem exigir Y/N. Dur
 
 Configurações permitem velocidade inicial, aceleração, velocidade máxima, sensibilidade e parada imediata ou desaceleração. A rotação é calculada no motor a 35 Hz. Auto-aim vertical e mecânicas clássicas são preservados. Nos campos numéricos, Enter avança e V retorna.
 
+## Moderno HD 0.4.0
+
+A nova instalação inicia no perfil **Moderno HD**, com geometria renderizada na GPU em WebGL2, resolução de **1920×1440**, 1.115 imagens Freedoom HD, incluindo dois materiais 4K e HUD integrado à cena. Preferências salvas anteriormente mantêm o perfil escolhido. Para ativar numa instalação existente: **Configurações → Resolução do motor → Moderno HD → Salvar configurações**; se já estiver jogando, salve a partida e aplique a reinicialização.
+
+A configuração moderna oferece 1280×960, 1920×1440, 2560×1920 e 3840×2880 em 4:3. Resolução é o desenho real da cena na GPU, independente da escala da página. O HUD pode usar a apresentação contemporânea do motor ou a barra clássica. Mipmaps/trilinear, suavização e HQ2x de UI/sprites tratam a amostragem; não são anunciados como novos modelos 3D ou PBR.
+
+Qualidade visual é a prioridade, conforme solicitado pelo usuário: os orçamentos propostos de 20 MiB de download e 64 MiB de texturas foram retirados. A capacidade física do browser/GPU ainda determina quais configurações conseguem executar. O perfil Moderno usa outro motor e **saves próprios**, sem converter ou sobrescrever os saves Clássica/Alta. Backups v3 incluem os três perfis; v1/v2 continuam aceitos.
+
+O pacote HD é usado somente com o hash exato de Freedoom Phase 1 0.13.0. Conteúdos importados diferentes continuam com sua arte local. A seleção exclui sprites com transparência defeituosa, texturas mascaradas e imagens incompatíveis do pack upstream; nesses casos, o motor mantém os originais. Não há upload dos IWADs ou processamento de IA durante a partida.
+
+Veja [arquitetura e validação da entrega](docs/modern-hd/RELEASE.md), [procedência do conteúdo](docs/modern-hd/CONTENT.md), [direção visual](docs/modern-hd/DESIGN.md) e [QA independente](docs/modern-hd/QA.md).
+
 ## Alta resolução 0.3.0
 
 Em **Configurações → Resolução do motor**, escolha **Alta · 640×400 · Crispy Doom** e salve. Se já há uma partida, use **Aplicar nova resolução → Aplicar resolução e reiniciar**; salve o progresso no menu do DOOM antes, pois reiniciar não cria um save. Depois entre em Jogar/Carregar jogo. Preferências antigas continuam em Clássica (320×200).
@@ -43,7 +55,7 @@ Crispy permanece com auto-aim vertical, 35 tics/s e extensões de pulo/mira livr
 
 ## Discovery de próxima evolução gráfica
 
-O [discovery de renderização, nitidez e materiais](docs/discovery/README.md) compara alternativas além de 640×400, filtros, texturas HD/PBR, memória, licenças e viabilidade offline. Recomenda um protótipo EDGE-Classic/WebGL2 com texturas livres selecionadas, condicionado à validação de memória, teclado e persistência. Esse estudo e seu plano não representam funcionalidades já integradas na versão 0.3.0.
+O [discovery de renderização, nitidez e materiais](docs/discovery/README.md) compara alternativas além de 640×400, filtros, texturas HD/PBR, memória, licenças e viabilidade offline. O estudo original antecede a implementação 0.4.0. A preferência posterior por qualidade visual, sem orçamento artificial de tamanho/CPU/memória, substitui os orçamentos propostos naquela investigação. Os resultados implementados são registrados separadamente na documentação da 0.4.0.
 
 ## Modernização 0.2.0
 
@@ -87,12 +99,13 @@ Abra a mesma URL no Chrome do iPad e use o teclado físico. Quando disponível, 
 
 O GitHub Actions compila e publica automaticamente após alterações em `main`. Pelo site do GitHub: **Actions → Build, test and publish DOOM**; use **Run workflow** para repetir. Em **Settings → Pages**, a fonte é **GitHub Actions**. Esse fluxo pode ser acompanhado pelo browser de qualquer dispositivo, inclusive um iPad, sem terminal ou compilação no dispositivo de jogo.
 
-Toolchain: Emscripten 4.0.18 em imagem fixada por digest; Chocolate Doom vendorizado em revisão fixada (`engine/UPSTREAM.json`) e Crispy Doom obtido de archive com revisão/SHA-256 fixados (`engine/CRISPY.json`). SDL e SDL_mixer vêm dos ports dessa toolchain. Freedoom 0.13.0 e as fontes das dependências são verificados por SHA-256.
+Toolchain: Emscripten 4.0.18 em imagem fixada por digest; Chocolate Doom vendorizado em revisão fixada (`engine/UPSTREAM.json`) e Crispy/EDGE-Classic obtidos de archives com revisão/SHA-256 fixados (`engine/CRISPY.json`, `engine/EDGE.json`). O build Moderno usa CMake 3.31.6 fixado; o conteúdo HD e os avisos são fixados em `engine/MODERN-CONTENT.json`. SDL e SDL_mixer vêm dos ports dessa toolchain. Freedoom 0.13.0 e as fontes das dependências são verificados por SHA-256.
 
 ```sh
 npm ci
 docker run --rm --user "$(id -u):$(id -g)" -e EM_CACHE=/src/build/emscripten-cache -v "$PWD:/src" -w /src emscripten/emsdk@sha256:bbe90e2b00acbd1a9596087d88305029f383de1eb71c0cdb20f4e19647265450 bash scripts/build-engine.sh
 python3 scripts/fetch-content.py
+python3 scripts/fetch-modern-content.py
 python3 scripts/fetch-dependency-sources.py
 npm test
 npm run build
@@ -116,6 +129,6 @@ O produto e a PWA se chamam **DOOM Classic Browser**, e o pacote é `doom-classi
 
 ## Licenças e privacidade
 
-Código do port: GPL-2.0-or-later; motores e componentes têm seus avisos preservados em `engine/upstream`, `engine/CRISPY.json` e `CRISPY-COPYING.txt` na publicação. Veja [LICENSE](LICENSE) e [engine/upstream/COPYING.md](engine/upstream/COPYING.md). Freedoom: BSD de 3 cláusulas, com licença e créditos incluídos na publicação. Não distribuímos IWADs comerciais.
+Código anterior do port: GPL-2.0-or-later; bridge Moderno e EDGE-Classic: GPL-3.0-or-later. A distribuição combinada do backend Moderno observa GPLv3 e preserva os avisos de cada componente. Motores e componentes têm seus avisos preservados em `engine/upstream`, `engine/CRISPY.json`, `CRISPY-COPYING.txt`, `EDGE-COPYING.txt`, `EDGE-NOTICES.txt` e `MODERN-CONTENT-COPYING.txt` na publicação. Veja [LICENSE](LICENSE) e [engine/upstream/COPYING.md](engine/upstream/COPYING.md). Freedoom: BSD de 3 cláusulas, com licença e créditos incluídos na publicação. Não distribuímos IWADs comerciais.
 
 A publicação inclui `source.tar.gz` com código correspondente, adaptações e scripts de build. Não inclui IWADs importados, saves ou credenciais. Não há dependências de rede durante a partida preparada para offline. O provedor de hospedagem recebe as requisições normais de download enquanto online.

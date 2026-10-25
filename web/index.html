@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#111210"><meta name="description" content="Porte de DOOM para browsers com teclado, dados locais e modo offline após preparação.">
+  <meta name="theme-color" content="#0a0c10"><meta name="description" content="Porte de DOOM para browsers com teclado, dados locais e modo offline após preparação.">
   <link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <meta name="application-name" content="DOOM Classic Browser">
@@ -10,50 +10,74 @@
 </head>
 <body>
   <main id="shell">
-    <div class="topbar"><span class="wordmark"><span class="brand-mark" aria-hidden="true">D</span> DOOM CLASSIC <span class="wordmark-divider">/</span> BROWSER</span><span class="edition">SEUS DADOS FICAM AQUI <span aria-hidden="true">↗︎</span></span></div>
+    <div class="topbar"><span class="wordmark"><span class="brand-mark" aria-hidden="true">D</span><span>DOOM CLASSIC <span class="wordmark-divider">/</span> BROWSER</span></span><span class="edition"><span class="edition-line" aria-hidden="true"></span> TECLADO. BROWSER. DOOM.</span></div>
     <header class="intro">
-      <p class="eyebrow"><span class="signal" aria-hidden="true"></span> O CLÁSSICO, NO SEU BROWSER</p>
-      <h1>DOOM <span>CLASSIC</span></h1>
-      <p class="intro-copy">Entre na base. Encontre a saída.<br>Sobreviva ao que estiver no caminho.</p>
+      <p class="eyebrow"><span class="signal" aria-hidden="true"></span> ENTRE NA PRÓXIMA FASE</p>
+      <h1>DOOM <span>CLASSIC <i aria-hidden="true">/</i> BROWSER</span></h1>
+      <p class="intro-copy">O clássico. Uma nova perspectiva.<br><span>Entre na base e sobreviva ao próximo corredor.</span></p>
       <figure class="mission-art" aria-hidden="true">
-        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" focusable="false">
+        <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" focusable="false">
           <defs>
-            <linearGradient id="hall" x2="0" y2="1"><stop stop-color="#1f2522"/><stop offset="1" stop-color="#101512"/></linearGradient>
-            <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#242820"/><stop offset="1" stop-color="#10120f"/></linearGradient>
-            <radialGradient id="door-glow"><stop stop-color="#cd6329" stop-opacity=".6"/><stop offset="1" stop-color="#a04420" stop-opacity="0"/></radialGradient>
+            <linearGradient id="hall" x2="0" y2="1"><stop stop-color="#10171f"/><stop offset="1" stop-color="#080b10"/></linearGradient>
+            <linearGradient id="left-wall" x2="1" y2=".5"><stop stop-color="#273540"/><stop offset="1" stop-color="#0d151d"/></linearGradient>
+            <linearGradient id="right-wall" x2="1" y2=".3"><stop stop-color="#131c26"/><stop offset="1" stop-color="#24313c"/></linearGradient>
+            <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#111b23"/><stop offset="1" stop-color="#020509"/></linearGradient>
+            <linearGradient id="light-strip"><stop stop-color="#ff532d" stop-opacity="0"/><stop offset=".35" stop-color="#ff5c31"/><stop offset=".7" stop-color="#ffd3a0"/><stop offset="1" stop-color="#ff532d" stop-opacity=".2"/></linearGradient>
+            <linearGradient id="door" x2="1" y2="1"><stop stop-color="#35434b"/><stop offset=".48" stop-color="#202b34"/><stop offset=".5" stop-color="#3b4a53"/><stop offset="1" stop-color="#111a22"/></linearGradient>
+            <radialGradient id="door-glow"><stop stop-color="#ff7143" stop-opacity=".32"/><stop offset=".45" stop-color="#b23e25" stop-opacity=".12"/><stop offset="1" stop-color="#141b23" stop-opacity="0"/></radialGradient>
+            <radialGradient id="cold-haze"><stop stop-color="#81cbd5" stop-opacity=".16"/><stop offset="1" stop-color="#121a23" stop-opacity="0"/></radialGradient>
+            <linearGradient id="edge-shade"><stop stop-color="#05080c" stop-opacity=".6"/><stop offset=".3" stop-color="#05080c" stop-opacity="0"/><stop offset=".7" stop-color="#05080c" stop-opacity="0"/><stop offset="1" stop-color="#05080c" stop-opacity=".6"/></linearGradient>
+            <pattern id="grate" width="20" height="8" patternUnits="userSpaceOnUse" patternTransform="skewX(-23)"><path d="M0 1h20" stroke="#55636a" stroke-opacity=".28"/><path d="M2 3h12" stroke="#05080a" stroke-width="3"/></pattern>
           </defs>
-          <path fill="url(#hall)" d="M0 0h600v280H0z"/>
-          <path fill="#0c100e" d="m0 0 205 76h190L600 0Z"/>
-          <path fill="#363a2d" d="m0 0 205 76v104L0 280Z"/>
-          <path fill="#282e25" d="M600 0 395 76v104l205 100Z"/>
-          <path fill="url(#floor)" d="m0 280 205-100h190l205 100Z"/>
-          <path fill="#151b16" d="M205 76h190v104H205z"/>
-          <path fill="#2b3025" d="M238 84h124v96H238z"/>
-          <path fill="#0b100c" d="M251 96h98v84h-98z"/>
-          <path fill="#342b1d" d="M268 104h64v76h-64z"/>
-          <path fill="#141811" d="M274 109h52v71h-52z"/>
-          <ellipse cx="300" cy="147" rx="132" ry="90" fill="url(#door-glow)"/>
-          <g fill="none" stroke="#5a5e42" stroke-width="2">
-            <path d="m37 14 182 68v119L37 267M83 31l151 55M83 31v214M165 61v143M563 14 418 68v133l145 66M517 31 402 84M517 31v214M435 61v143"/>
-            <path d="m0 104 205 22M0 208l205-53M600 104l-205 22M600 208l-205-53"/>
+          <path fill="url(#hall)" d="M0 0h960v420H0z"/>
+          <path fill="#050a10" d="M0 0h960L613 120H347Z"/>
+          <path fill="url(#left-wall)" d="m0 0 347 120v156L0 420Z"/>
+          <path fill="url(#right-wall)" d="M960 0 613 120v156l347 144Z"/>
+          <path fill="url(#floor)" d="m0 420 347-144h266l347 144Z"/>
+          <path fill="#18232d" stroke="#34434e" d="M347 120h266v156H347z"/>
+          <path fill="#0c121a" d="M371 139h218v137H371z"/>
+          <path fill="url(#door)" stroke="#59636a" d="M401 149h158v127H401z"/>
+          <path fill="#0b1016" d="M475 150h10v126h-10z"/>
+          <path fill="#f4794d" d="M474 150h2v126h-2zM485 150h2v126h-2z" opacity=".8"/>
+          <path fill="#50616a" d="m410 158 18 7v85l-18 9zm140 0-18 7v85l18 9z" opacity=".5"/>
+          <g fill="none" stroke="#6c7c83" stroke-opacity=".4">
+            <path d="M407 180h57m33 0h57m-147 14h57m33 0h57m-147 14h57m33 0h57m-147 14h57m33 0h57m-147 14h57m33 0h57"/>
+            <path d="m0 100 347 65M0 203l347 3M0 323l347-69M960 100l-347 65m347 38-347 3m347 117-347-69"/>
+            <path d="m63 22 256 96v173L63 392M145 50v308M264 91v216M897 22l-256 96v173l256 101M815 50v308M696 91v216"/>
           </g>
-          <g fill="#bba563">
-            <path d="m52 53 11 4v54l-11-1zM178 85l7 2v31l-7-1zM548 53l-11 4v54l11-1zM422 85l-7 2v31l7-1z"/>
-            <path d="M242 85h116v4H242z"/>
+          <g fill="#0b121a" stroke="#52616c" stroke-opacity=".35">
+            <path d="m86 89 47 13v105l-47-1zM170 113l58 16v79l-58-1zM279 144l36 10v55h-36zM874 89l-47 13v105l47-1zM790 113l-58 16v79l58-1zM681 144l-36 10v55h36z"/>
+            <path d="m86 230 47-4v101l-47 21zM170 222l58-5v66l-58 25zM874 230l-47-4v101l47 21zM790 222l-58-5v66l58 25z"/>
           </g>
-          <g fill="#c66c35"><path d="M255 107h5v61h-5zM340 107h5v61h-5z"/><path d="M285 96h30v3h-30z"/></g>
-          <g fill="none" stroke="#454a32"><path d="m205 180-112 100M251 180l-44 100M349 180l44 100M395 180l112 100M157 204h286M98 234h404M33 264h534"/></g>
-          <path fill="#090e0b" d="M0 245h46v35H0zM554 245h46v35h-46z"/>
-          <path fill="#6d3923" d="M0 245h46v5H0zM554 245h46v5h-46z"/>
-          <path fill="#080d0a" d="M0 0h600v8H0zM0 272h600v8H0z"/>
+          <g fill="#596a74" opacity=".38"><path d="m93 107 32 8v5l-32-8zm0 14 32 7v5l-32-7zm0 14 32 6v5l-32-6zm0 14 32 5v5l-32-5zM867 107l-32 8v5l32-8zm0 14-32 7v5l32-7zm0 14-32 6v5l32-6zm0 14-32 5v5l32-5z"/></g>
+          <path fill="#060b11" d="m0 0 48 17v380L0 420Zm960 0-48 17v380l48 23Z"/>
+          <path fill="#1c2933" stroke="#53626b" stroke-opacity=".6" d="m212 75 25 9v232l-25 10zm536 0-25 9v232l25 10zM312 109l12 4v167l-12 6zm336 0-12 4v167l12 6z"/>
+          <path fill="#f17b4d" d="m218 113 5 2v84h-5zm524 0-5 2v84h5zM316 135l3 1v61h-3zm328 0-3 1v61h3z"/>
+          <path fill="#b9d9df" d="m68 30 7 3v117l-7-1zm824 0-7 3v117l7-1zM379 131h202v3H379z"/>
+          <path fill="url(#light-strip)" d="M269 74h422l-26 8H295zM376 143h208v4H376z"/>
+          <path fill="#111d26" stroke="#5b6a73" stroke-opacity=".5" d="m290 0 83 99h214L670 0h-22l-69 88H381L312 0Z"/>
+          <path fill="#25333e" d="m350 0 48 72h164l48-72h-13l-43 60H406L363 0Z"/>
+          <path fill="#6c7475" d="M385 0h190l-6 8H391Z" opacity=".7"/>
+          <g fill="none" stroke="#60717b" stroke-opacity=".28">
+            <path d="m347 276-226 144m291-144-93 144m226-144 93 144m-25-144 226 144M308 293h344M253 316h454M182 346h596M96 382h768"/>
+          </g>
+          <path fill="url(#grate)" d="m415 280-84 140h298l-84-140z"/>
+          <path fill="#ff8554" d="m354 278-14 5h280l-14-5z" opacity=".7"/>
+          <path fill="#eb6b43" d="m440 292-24 73h12l18-73zm80 0 24 73h-12l-18-73z" opacity=".09"/>
+          <ellipse cx="480" cy="219" rx="230" ry="171" fill="url(#door-glow)"/>
+          <ellipse cx="145" cy="72" rx="260" ry="170" fill="url(#cold-haze)"/>
+          <path fill="#080d13" d="m0 334 78-30 48 25v91H0zm960 0-78-30-48 25v91h126z"/>
+          <path fill="#33424d" d="m0 334 78-30 48 25-75 30Zm960 0-78-30-48 25 75 30Z"/>
+          <path fill="#dd6c44" d="m0 348 52 22v5L0 354Zm960 0-52 22v5l52-21Z"/>
+          <path fill="url(#edge-shade)" d="M0 0h960v420H0z"/>
         </svg>
-        <figcaption><span>ACESSO À BASE</span><span>SETOR 01 <span aria-hidden="true">↗︎</span></span></figcaption>
+        <figcaption><span><span class="art-marker" aria-hidden="true">⌖</span> ILUSTRAÇÃO · SETOR 01</span><span>ACESSO À BASE <span aria-hidden="true">→</span></span></figcaption>
       </figure>
       <div class="mission-meta"><span>CONTEÚDO SELECIONADO<strong id="selectedContent">Freedoom Phase 1</strong></span><span>EXPERIÊNCIA<strong id="profileSummary">Perfil clássico</strong></span></div>
-      <p class="local-note">Seu jogo, seus dados. Offline após a preparação inicial.</p>
+      <p class="local-note">Uma conexão para preparar. Seu browser para jogar.</p>
     </header>
     <nav id="home" aria-label="Menu principal">
-      <p class="menu-caption">PRONTO PARA ENTRAR?</p>
+      <p class="menu-caption"><span>ESCOLHA SEU CAMINHO</span><span aria-hidden="true">01 — 07</span></p>
       <button id="play" data-index="01" autofocus disabled>Jogar <kbd>Enter ↵</kbd></button>
       <button id="content" data-index="02" disabled>Selecionar conteúdo</button>
       <button id="import" data-index="03" disabled>Importar WAD</button>
@@ -66,7 +90,7 @@
     <section id="panel" hidden aria-label="Opções do jogo"></section>
     <footer>
       <div class="system-status"><p id="status" role="status" aria-live="polite">Preparando…</p><p id="offline">Verificando preparação offline…</p></div>
-      <div class="footer-links"><p class="small">↑ ↓ navegar <span aria-hidden="true">/</span> Enter confirmar <span aria-hidden="true">/</span> Backspace ou V voltar</p><a href="./source.tar.gz">Código-fonte e licenças <span aria-hidden="true">↗︎</span></a></div>
+      <div class="footer-links"><p class="small">↑ ↓ navegar <span aria-hidden="true">/</span> Enter confirmar <span aria-hidden="true">/</span> Backspace ou V voltar</p><a href="./source.tar.gz">Código-fonte e licenças <span aria-hidden="true">↓</span></a></div>
       <p class="file-note">Para importar conteúdo, use o seletor de arquivos do navegador. Os arquivos permanecem neste dispositivo.</p>
     </footer>
   </main>

@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 const source = ts.transpileModule(await readFile('web/engine-profile.ts','utf8'), {
   compilerOptions:{ module:ts.ModuleKind.ES2022, target:ts.ScriptTarget.ES2022 }
 }).outputText;
-const {engineProfiles,backupProfiles,sanitizeResolution,saveDirectory,validateSavePath,validateBackupProfiles} =
+const {engineProfiles,backupProfiles,modernBackupProfiles,modernContent,modernParts,modernSizes,sanitizeModernSize,sanitizeResolution,saveDirectory,validateSavePath,validateBackupProfiles} =
   await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
 const hash='a'.repeat(64);
 
@@ -33,7 +33,7 @@ test('v1 backups stay legacy-only; v2 paths permit exactly known roots and six s
   for(const bad of [null,high+'/x',high+'\n',high.replace('saves-hires','saves/../saves-hires'),high.replace('doomsav5','doomsav6'),high.replace('doomsav5','doomsav10'),high.replace(hash,'A'.repeat(64)),high.replace('saves-hires','saves-modern')]) {
     assert(!validateSavePath(bad,1));assert(!validateSavePath(bad,2));
   }
-  for(const version of [undefined,null,0,3,'2']) assert(!validateSavePath(classic,version));
+  for(const version of [undefined,null,0,4,'2']) assert(!validateSavePath(classic,version));
 });
 
 test('backup profile metadata rejects unknown engines, mismatched pins, partial and expanded schemas',()=>{
@@ -50,4 +50,57 @@ test('backup/runtime engine identities match the independently consumed build so
   const high=JSON.parse(await readFile('engine/CRISPY.json','utf8'));
   assert.equal(engineProfiles.classic.commit,classic.commit);
   assert.equal(engineProfiles.high.commit,high.commit);
+});
+
+
+test('modern profile is a pinned GPU backend, with isolated slots and explicit quality options',async()=>{
+  assert.equal(sanitizeResolution('modern'),'modern');
+  const pin=JSON.parse(await readFile('engine/EDGE.json','utf8'));
+  assert.equal(engineProfiles.modern.commit,pin.commit);
+  assert.equal(new Set(Object.values(engineProfiles).map(p=>p.factory)).size,3);
+  assert.equal(saveDirectory('modern',hash),`/persist/saves-modern/${hash}`);
+  assert.deepEqual(modernSizes[sanitizeModernSize(undefined)],[1920,1440]);
+  assert.deepEqual(modernSizes[sanitizeModernSize('3840')],[3840,2880]);
+  assert.equal(sanitizeModernSize('99999'),'1920');
+  assert(validateBackupProfiles(modernBackupProfiles,3));
+  assert(!validateBackupProfiles(modernBackupProfiles,2));
+  assert(!validateBackupProfiles(backupProfiles,3));
+  assert(!validateBackupProfiles({...modernBackupProfiles,modern:{...modernBackupProfiles.modern,commit:'f'.repeat(40)}},3));
+});
+test('modern backup v3 isolates native chunked slots from Classic and rejects config and transient data',()=>{
+  const prefix=`/persist/saves-modern/${hash}/savegame/`;
+  for (const name of ['head.esg','e1m1.esg','e4m9.esg','head.png']) {
+    assert(validateSavePath(prefix+'slot000/'+name,3));
+    assert(!validateSavePath(prefix+'slot000/'+name,2));
+  }
+  for (const bad of ['current/head.esg','slot008/head.esg','slot999/head.esg','slot000/../../head.esg','slot000/edge.cfg','slot000/head.esg/x','slot000/map01.esg','slot000/HEAD.esg','slot000/head.esg\n']) assert(!validateSavePath(prefix+bad,3));
+  assert(validateSavePath(`/persist/saves/${hash}/doomsav0.dsg`,3));
+  assert(validateSavePath(`/persist/saves-hires/${hash}/doomsav5.dsg`,3));
+});
+
+
+test('HD runtime content pin matches the independently validated build output and targets only the known IWAD',async()=>{
+  const source=JSON.parse(await readFile('engine/MODERN-CONTENT.json','utf8'));
+  assert.equal(modernContent.iwad,source.iwad.sha256);
+  assert.equal(modernContent.sha256,source.output.sha256);
+  assert.equal(modernContent.bytes,source.output.bytes);
+  assert.equal(modernContent.images,source.output.assetCount);
+  assert.equal(modernContent.file,source.output.file);
+});
+
+
+test('chunk delivery preserves the full pinned archive, contiguous ranges and exact build pins',async()=>{
+  const {createHash}=await import('node:crypto');
+  const pin=JSON.parse(await readFile('engine/MODERN-CONTENT.json','utf8'));
+  assert.deepEqual(modernParts,pin.delivery.parts);
+  const whole=createHash('sha256');let offset=0;
+  for(const [i,part]of modernParts.entries()){
+    assert.equal(part.file,`modern-hd.${String(i).padStart(3,'0')}.bin`);
+    assert.equal(part.offset,offset);assert(part.bytes>0&&part.bytes<=32*1024*1024);
+    const bytes=await readFile('web/generated/'+part.file);
+    assert.equal(bytes.length,part.bytes);assert.equal(createHash('sha256').update(bytes).digest('hex'),part.sha256);
+    whole.update(bytes);offset+=bytes.length;
+  }
+  assert.equal(offset,modernContent.bytes);
+  assert.equal(whole.digest('hex'),modernContent.sha256);
 });

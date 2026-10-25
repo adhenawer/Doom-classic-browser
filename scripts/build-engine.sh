@@ -24,3 +24,6 @@ emcmake cmake -S build/engine-high -B build/wasm-high -DCMAKE_BUILD_TYPE=Release
 cmake --build build/wasm-high --target crispy-doom -j 4
 cp build/wasm-high/src/crispy-doom.js web/generated/doom-high.js
 cp build/wasm-high/src/crispy-doom.wasm web/generated/crispy-doom.wasm
+
+# Modern geometry renderer is compiled from its independently pinned source.
+bash scripts/build-modern-engine.sh

@@ -1,4 +1,5 @@
-import {test, expect, type Page} from '@playwright/test';
+import {test, expect, type Page} from './normal-browser';
+import {selectClassic} from './legacy-profile';
 import {readFile} from 'node:fs/promises';
 import {createServer} from 'node:http';
 import {once} from 'node:events';
@@ -33,6 +34,8 @@ async function restart(p:Page) {
   await Promise.all([p.waitForEvent('domcontentloaded'),p.getByRole('button',{name:'Aplicar resolução e reiniciar',exact:true}).press('Enter')]);
   await expect(p.locator('#play')).toBeEnabled();
 }
+test.beforeEach(async ({page}) => { await page.goto('/'); await selectClassic(page); });
+
 test('real 640x400 renderer, keyboard, classic-save copy, isolated saves, v1/v2 backups and reversible restart',async({page},info)=>{
   test.setTimeout(180000); // Three engine boots plus save/backup round-trips.
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
@@ -87,7 +90,7 @@ test('real 640x400 renderer, keyboard, classic-save copy, isolated saves, v1/v2 
   expect(await data(page,classic)).toEqual(original);expect(await data(page,high)).toEqual(highData);expect(errors).toEqual([]);
 });
 test('prepare only Classic, stop server, then select and play high resolution offline with persistent saves',async({page,context,browserName})=>{
-  test.setTimeout(180000); // Boot Classic, High twice, and return to Classic without a server.
+  test.setTimeout(360000); // Full HD preparation plus Classic/High boots, all resources retained.
   const root=new URL('../../dist/',import.meta.url),mount='/high-resolution-offline/';
   const server=createServer(async(req,res)=>{try{
     const path=new URL(req.url!,'http://localhost').pathname;if(!path.startsWith(mount)){res.writeHead(404).end();return;}
@@ -97,8 +100,8 @@ test('prepare only Classic, stop server, then select and play high resolution of
   }catch{res.writeHead(404).end();}});
   server.listen(0,'127.0.0.1');await once(server,'listening');const url=`http://127.0.0.1:${(server.address() as any).port}${mount}`;
   try{
-    await page.goto(url);await expect(page.locator('#play')).toBeEnabled();await boot(page);await save(page,'OFFCLASSIC');
-    await expect(page.locator('#offline')).toContainText('Preparado para offline',{timeout:60000});
+    await page.goto(url);await selectClassic(page);await expect(page.locator('#play')).toBeEnabled();await boot(page);await save(page,'OFFCLASSIC');
+    await expect(page.locator('#offline')).toContainText('Preparado para offline',{timeout:180000});
     server.close();server.closeAllConnections();await once(server,'close');if(browserName==='chromium')await context.setOffline(true);
     await page.keyboard.press('KeyH');await select(page,'high');await restart(page);await boot(page,true);
     expect([await state(page,17),await state(page,18)]).toEqual([640,400]);

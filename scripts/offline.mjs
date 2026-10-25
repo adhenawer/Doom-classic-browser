@@ -14,7 +14,8 @@ async function walk(path) {
     return (await stat(p)).isDirectory() ? walk(p) : [p];
   }))).flat();
 }
-for (const required of ['doom.js', 'chocolate-doom.wasm', 'freedoom1.wad', 'FREEDOOM-COPYING.txt', 'doom-high.js', 'crispy-doom.wasm', 'CRISPY-COPYING.txt', 'source.tar.gz']) {
+const modernDelivery=JSON.parse(await readFile('engine/MODERN-CONTENT.json','utf8')).delivery.parts;
+for (const required of ['doom.js', 'chocolate-doom.wasm', 'freedoom1.wad', 'FREEDOOM-COPYING.txt', 'doom-high.js', 'crispy-doom.wasm', 'CRISPY-COPYING.txt', 'doom-modern.js', 'edge.wasm', 'doom-modern.data', 'EDGE-COPYING.txt', 'EDGE-NOTICES.txt', ...modernDelivery.map(part=>part.file), 'modern-hd.json', 'MODERN-CONTENT-COPYING.txt', 'source.tar.gz']) {
   if (!(await stat(`dist/${required}`)).size) throw new Error(`Missing artifact: ${required}`);
 }
 const files = (await walk('dist')).filter(p => !p.endsWith('/sw.js') && !p.endsWith('/offline-index.json'));
@@ -30,8 +31,19 @@ const PREFIX = 'doom-' + encodeURIComponent(SCOPE.pathname) + '-';
 const CACHE = PREFIX + '${version}';
 self.addEventListener('install', event => event.waitUntil((async () => {
   const cache = await caches.open(CACHE);
-  try { await cache.addAll(RESOURCES.map(p => new Request(new URL(p, SCOPE).href, {cache: 'reload'}))); }
-  catch (e) { await caches.delete(CACHE); throw e; }
+  // Bound each Cache API transaction to one resource without reducing content.
+  // install waitUntil still requires the full set; failure removes partial data.
+  try {
+    for (const p of RESOURCES) await cache.add(new Request(new URL(p, SCOPE).href, {cache: 'no-store'}));
+  }
+  catch (e) {
+    await caches.delete(CACHE);
+    const clients = await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    for (const client of clients) if (new URL(client.url).pathname.startsWith(SCOPE.pathname)) {
+      client.postMessage({type:'doom-offline-error',name:e && e.name ? String(e.name) : 'Error'});
+    }
+    throw e;
+  }
 })()));
 self.addEventListener('activate', event => event.waitUntil((async () => {
   for (const key of await caches.keys()) if (key.startsWith(PREFIX) && key !== CACHE) await caches.delete(key);
