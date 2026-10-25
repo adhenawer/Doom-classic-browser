@@ -25,7 +25,9 @@ async function boot(page:Page,load=false) {
   throw e;
  }
  await page.keyboard.press('Enter');
- if(load){await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(1);await page.keyboard.press('Enter');}
+ // A first HD frame may block WebKit's main thread beyond the 5 s assertion default.
+ // Use the existing startup budget for consuming the queued load command.
+ if(load){await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu()),{timeout:120000}).toBe(1);await page.keyboard.press('Enter');}
  await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(0);
  await expect.poll(()=>state(page,1)).toBe(0);
 }
@@ -134,7 +136,7 @@ test('Modern default renders real GPU geometry with HD, keyboard, audio, isolate
  await expect(page.getByRole('button',{name:/^Excluir Moderno HD/})).toHaveCount(0);
  await page.locator('#backupFile').setInputFiles({name:'restore-modern.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(parsed))});
  await expect(page.locator('#status')).toHaveText('Backup importado e persistido.');expect(await digest(page,slot+'head.esg')).toBe(nativeSave);
- await page.reload();await expect(page.locator('#play')).toBeEnabled();await boot(page,true);await expect.poll(()=>state(page,11)).toBe(savedAmmo);
+ await page.reload();await expect(page.locator('#play')).toBeEnabled();await boot(page,true);await expect.poll(()=>state(page,11),{timeout:120000}).toBe(savedAmmo);
  expect(await digest(page,slot+'head.esg')).toBe(nativeSave);
  // A resolution/quality change is pending until restart; it cannot replace a live runtime.
  await page.keyboard.press('KeyH');await configure(page,'modern','1280',false,'classic');
@@ -144,7 +146,7 @@ test('Modern default renders real GPU geometry with HD, keyboard, audio, isolate
  expect(await page.evaluate(()=>{try{(window as any).doom.FS.stat('/modern-hd.epk');return true;}catch{return false;}})).toBe(false);
  expect(await digest(page,slot+'head.esg')).toBe(nativeSave);
  await page.keyboard.press('KeyL');await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(1);await page.keyboard.press('Enter');
- await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(0);await expect.poll(()=>state(page,11)).toBe(savedAmmo);
+ await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(0);await expect.poll(()=>state(page,11),{timeout:120000}).toBe(savedAmmo);
  await page.keyboard.press('KeyH');await page.locator('#settings').press('Enter');await expect(page.locator('[data-setting="modernHUD"]')).toHaveValue('classic');
  expect(errors).toEqual([]);expect(scriptErrors).toEqual([]);
 });

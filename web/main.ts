@@ -142,6 +142,7 @@ function applyConfig(mix = false) {
   presentation.apply(settings); updateSummary();
 }
 async function saveSettings() {
+  say('Armazenando configurações…');
   settings.bindings = structuredClone(input.bindings);
   await write('settings', settings); applyConfig(true);
   say('Configurações armazenadas neste navegador.');
