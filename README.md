@@ -78,7 +78,7 @@ O launcher e as configurações foram redesenhados, com orientação de teclado 
 
 ## Recursos e compatibilidade
 
-O browser precisa oferecer WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Service Worker em contexto seguro. A jogabilidade aceita teclado físico ou controles touch. A detecção usa ponteiro primário grosseiro e capacidade de toque, sem depender apenas da largura da tela. Em **Controles → Experiência de controles**, escolha Automática, Mobile ou Desktop; a seleção fica neste navegador. Teclado continua disponível no modo mobile.
+O browser precisa oferecer WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Service Worker em contexto seguro. A jogabilidade aceita teclado físico ou controles touch. A detecção usa ponteiro primário grosseiro e capacidade de toque (pontos de contato ou Touch Events), sem depender apenas da largura da tela. Em **Controles → Experiência de controles**, escolha Automática, Mobile ou Desktop; a seleção fica neste navegador. Teclado continua disponível no modo mobile.
 
 | Ambiente | Evidência disponível |
 |---|---|

@@ -8,7 +8,8 @@ permissions:
   contents: read
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: false
+  # A newer push contains the prior changes; only its validated artifact should deploy.
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 jobs:
   build:
     runs-on: ubuntu-24.04

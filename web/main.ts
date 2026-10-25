@@ -69,7 +69,7 @@ let controlMode: ControlMode = 'auto';
 let controlExperienceState = '', saveGeneration = 0;
 try { const saved = localStorage.getItem('doom-control-mode'); if (saved === 'mobile' || saved === 'desktop') controlMode = saved; } catch { /* Storage can be unavailable. */ }
 const coarsePointer = matchMedia('(pointer: coarse)');
-const mobileControls = () => controlMode === 'mobile' || (controlMode === 'auto' && detectTouch(coarsePointer.matches, navigator.maxTouchPoints));
+const mobileControls = () => controlMode === 'mobile' || (controlMode === 'auto' && detectTouch(coarsePointer.matches, navigator.maxTouchPoints, 'ontouchstart' in window));
 const touch = new TouchControls(game, (source, actions) => {
   if (!running || suspended || game.hidden || engine?._web_menu()) return;
   input.setActions(source, actions); updateInput();
@@ -96,7 +96,7 @@ const touch = new TouchControls(game, (source, actions) => {
     canvas.focus();
   };
   send().catch(error);
-});
+}, reconcileMenuState);
 function updateControlExperience() {
   const mobile = mobileControls();
   const state = `${mobile}/${game.hidden}/${running}/${suspended}/${matchMedia('(orientation: portrait)').matches}/${engine?._web_menu()}/${engine?._web_text()}`;
@@ -595,6 +595,7 @@ window.addEventListener('keydown', event => {
     return;
   }
   if (running && !game.hidden) {
+    reconcileMenuState();
     if (event.cancelable) event.preventDefault(); event.stopImmediatePropagation();
     if (input.action(code) === 'shell' && !engine!._web_menu()) { showShell(); return; }
     if (suspended) { if (code === 'Enter' && !event.repeat) resume(); return; }
@@ -645,11 +646,14 @@ canvas.addEventListener('webglcontextlost', event => {
 window.addEventListener('blur', suspend);
 window.addEventListener('pagehide', () => { suspend(); sync().catch(error); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) suspend(); });
-function watchMenu() {
+function reconcileMenuState() {
   if (engine && running) {
     const now = !!engine._web_menu();
-    if (now !== previousMenu) { reset(); previousMenu = now; }
+    if (now !== previousMenu) { previousMenu = now; reset(); }
   }
+}
+function watchMenu() {
+  reconcileMenuState();
   updateControlExperience();
   requestAnimationFrame(watchMenu);
 }

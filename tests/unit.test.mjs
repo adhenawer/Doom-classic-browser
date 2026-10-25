@@ -37,6 +37,6 @@ test('touch sources combine with remapped keyboard and release independently', (
   s.setActions('touch:3',['run']); s.clear(); assert(!s.active('run'));
 });
 const { detectTouch } = await load('web/touch.ts');
-test('automatic touch requires primary coarse pointer and touch capability', () => {
-  assert(detectTouch(true,5)); assert(!detectTouch(false,5)); assert(!detectTouch(true,0));
+test('automatic touch requires primary coarse pointer and touch points or Touch Events', () => {
+  assert(detectTouch(true,5)); assert(!detectTouch(false,5)); assert(!detectTouch(true,0)); assert(detectTouch(true,0,true)); assert(!detectTouch(false,0,true));
 });

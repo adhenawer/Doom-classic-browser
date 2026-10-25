@@ -20,8 +20,8 @@ async function boot(p:Page,load=false) {
 async function save(p:Page,label:string) {
   await p.keyboard.press('KeyK');await expect.poll(()=>p.evaluate(()=>(window as any).doom._web_menu())).toBe(1);
   await p.keyboard.press('Enter');await expect.poll(()=>p.evaluate(()=>(window as any).doom._web_text())).toBe(1);
-  for(let i=0;i<24;i++) await p.keyboard.press('Backspace');
-  await p.keyboard.type(label);await p.keyboard.press('Enter');
+  for(let i=0;i<24;i++) await p.keyboard.press('Backspace',{delay:8});
+  await p.keyboard.type(label,{delay:8});await p.keyboard.press('Enter');
   await expect(p.locator('#status')).toHaveText('Save persistido em IndexedDB.',{timeout:10000});
 }
 async function select(p:Page,resolution:'classic'|'high') {

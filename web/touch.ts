@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 export type ControlMode = 'auto' | 'mobile' | 'desktop';
-export function detectTouch(coarse: boolean, touchPoints: number) {
-  return coarse && touchPoints > 0;
+export function detectTouch(coarse: boolean, touchPoints: number, touchEvents = false) {
+  return coarse && (touchPoints > 0 || touchEvents);
 }
 export class TouchControls {
   readonly root = document.createElement('div');
   private pointers = new Map<number, { node: HTMLElement; source: string; x: number; y: number }>();
   private state = '';
   constructor(host: HTMLElement, private actions: (source: string, actions: string[]) => void,
-    private command: (key: number | 'shell') => void, private saveName: (name: string) => void) {
+    private command: (key: number | 'shell') => void, private saveName: (name: string) => void, private beforeInput: () => void = () => {}) {
     this.root.id = 'touchControls'; this.root.hidden = true;
     this.root.innerHTML = `
       <div class="touch-toolbar"><button data-command="shell">Interface</button><button data-command="27">Menu</button></div>
@@ -23,6 +23,7 @@ export class TouchControls {
     host.append(this.root);
     this.root.addEventListener('contextmenu', e => e.preventDefault());
     this.root.addEventListener('pointerdown', e => {
+      this.beforeInput();
       const node = (e.target as HTMLElement).closest<HTMLElement>('[data-stick],[data-hold]');
       if (!node || this.pointersHas(node)) return;
       e.preventDefault(); node.setPointerCapture(e.pointerId);
@@ -53,6 +54,7 @@ export class TouchControls {
   }
   private pointersHas(node: HTMLElement) { return [...this.pointers.values()].some(p => p.node === node); }
   private move(e: PointerEvent) {
+    this.beforeInput();
     const p = this.pointers.get(e.pointerId); if (!p) return;
     e.preventDefault();
     const dx = e.clientX - p.x, dy = e.clientY - p.y;

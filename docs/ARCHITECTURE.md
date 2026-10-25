@@ -75,7 +75,7 @@ Saves Classic mantêm `/persist/saves/<hash>`; Alta usa `/persist/saves-hires/<h
 
 ## Entrada mobile
 
-A seleção automática exige `(pointer: coarse)` e `navigator.maxTouchPoints > 0`; não usa user-agent nem largura como identificação de dispositivo. A preferência Automática/Mobile/Desktop é local (`doom-control-mode`), separada do remapeamento existente. Cada pointer tem uma fonte independente; soltar toque não solta teclas ou outros toques da mesma ação. Cancelamento de ponteiro, perda de captura, resize, suspensão e transições de menu limpam estados. O modo mobile só permite retomar em paisagem e suspende ao girar para vertical; orientação é solicitada ao browser como best effort.
+A seleção automática exige `(pointer: coarse)` e capacidade de toque (`navigator.maxTouchPoints > 0` ou Touch Events, para browsers que reportam zero pontos); não usa user-agent nem largura como identificação de dispositivo. A preferência Automática/Mobile/Desktop é local (`doom-control-mode`), separada do remapeamento existente. Cada pointer tem uma fonte independente; soltar toque não solta teclas ou outros toques da mesma ação. Cancelamento de ponteiro, perda de captura, resize, suspensão e transições de menu limpam estados. O modo mobile só permite retomar em paisagem e suspende ao girar para vertical; orientação é solicitada ao browser como best effort.
 
 O joystick é digital com zona morta; giro chama a mesma ponte `_web_rotate` e usa a rampa do teclado. A simulação, motores, física, saves e APIs exportadas C não mudam. Nomes de save são enviados em lotes de oito teclas (16 eventos), aguardando avanço do motor para respeitar a fila nativa de 64 eventos; reset invalida lotes pendentes. Nenhum novo asset externo ou dependência de runtime foi adicionado.
 
