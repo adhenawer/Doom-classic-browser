@@ -149,7 +149,7 @@ O servidor fica restrito a localhost por padrão. O endpoint local não existe e
 
 ## Mapa original — Estação Aurora
 
-Em **Selecionar conteúdo → Estação Aurora · mapa original**, o browser verifica e armazena o IWAD composto localmente. É uma primeira fase própria, com três salas, duas passagens, seis inimigos, shotgun, recursos e alcova secreta; após a saída, E1M2 e os outros mapas continuam sendo Freedoom. O layout não reproduz uma fase comercial. O motor Classic preserva as regras clássicas; sprites, sons e texturas são os recursos livres do Freedoom, não os originais comerciais.
+Em **Selecionar conteúdo**, **Freedoom Phase 1** e **Estação Aurora · mapa original** são opções fixas. Não é preciso importar um arquivo manualmente: ao selecionar Aurora pela primeira vez, o browser verifica e armazena o IWAD composto localmente. É uma primeira fase própria, com três salas, duas passagens, seis inimigos, shotgun, recursos e alcova secreta; após a saída, E1M2 e os outros mapas continuam sendo Freedoom. O layout não reproduz uma fase comercial. O motor Classic preserva as regras clássicas; sprites, sons e texturas são os recursos livres do Freedoom, não os originais comerciais.
 
 `npm run build` gera o mapa a partir de `maps/aurora/layout.json`, usando somente a base Freedoom pinada. O gerador e a geometria novos usam MIT; os assets preservam BSD e créditos. O PWAD `aurora-map.wad` contém apenas o mapa próprio; `aurora.wad` é o IWAD importável com os recursos livres. Ambos e seus créditos entram no cache offline.
 

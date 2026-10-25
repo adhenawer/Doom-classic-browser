@@ -71,7 +71,7 @@ function sanitizeSettings(raw: unknown): Settings {
   return { ...sanitizeGameplay(raw), ...sanitizePresentation(raw), resolution, modernSize: sanitizeModernSize(value.modernSize), modernHD: value.modernHD !== false, modernHUD: value.modernHUD === 'classic' ? 'classic' : 'overlay' };
 }
 function updateSummary() {
-  const name = selected === 'freedoom' ? 'Freedoom Phase 1' : wads.find(w => w.id === selected)?.name ?? 'Conteúdo indisponível';
+  const name = selected === 'freedoom' ? 'Freedoom Phase 1' : selected === originalMap?.sha256 ? originalMap.name : wads.find(w => w.id === selected)?.name ?? 'Conteúdo indisponível';
   shell.dataset.gameplayProfile = gameplayProfile(settings);
   if (el('selectedContent')) el('selectedContent').textContent = name;
   const runKeys = input.bindings.run.every(key => key.startsWith('Shift')) ? 'Shift' : input.bindings.run.map(keyLabel).join(' / ');
@@ -139,9 +139,14 @@ async function content() {
   showPanel('Selecionar conteúdo');
   paragraph(running ? 'Para trocar de IWAD, volte à interface e recarregue a página após selecionar.' : 'Freedoom tem mapas e arte livres. Para DOOM original, importe seu próprio IWAD autorizado.');
   if (originalMap) paragraph('Estação Aurora tem uma fase original, criada com recursos livres. Após a saída, a campanha continua com mapas de Freedoom.');
-  if (originalMap && !wads.some(w => w.id === originalMap!.sha256)) {
-    button(`${originalMap.name} · mapa original`, async () => {
+  const select = async (id: string, name: string) => {
+    selected = id; await write('selected', selected); updateSummary(); say(`Selecionado: ${name}`); content();
+  };
+  button(`${selected === 'freedoom' ? '✓ ' : ''}Freedoom Phase 1 · conteúdo livre`, () => select('freedoom', 'Freedoom Phase 1'));
+  if (originalMap) {
+    button(`${selected === originalMap.sha256 ? '✓ ' : ''}${originalMap.name} · mapa original`, async () => {
       const expected = originalMap!;
+      if (wads.some(w => w.id === expected.sha256)) { await select(expected.sha256, expected.name); return; }
       const response = await fetch('./aurora.wad', { cache: 'no-store' });
       if (!response.ok) throw new Error('Mapa original indisponível. Prepare o conteúdo novamente.');
       const data = await response.arrayBuffer();
@@ -158,10 +163,10 @@ async function content() {
       await importWad(new File([data], 'The Ultimate Doom.wad'));
     });
   }
-  for (const item of [{ id: 'freedoom', name: 'Freedoom Phase 1 · conteúdo livre' }, ...wads]) {
+  for (const item of wads.filter(w => w.id !== originalMap?.sha256)) {
     button(`${selected === item.id ? '✓ ' : ''}${item.name}`, async () => { selected = item.id; await write('selected', selected); updateSummary(); say(`Selecionado: ${item.name}`); content(); });
   }
-  for (const item of wads) button(`Remover conteúdo: ${item.name}`, () => {
+  for (const item of wads.filter(w => w.id !== originalMap?.sha256)) button(`Remover conteúdo: ${item.name}`, () => {
     showPanel('Remover IWAD'); paragraph(`Remover ${item.name} deste navegador? Preserve sua cópia em um arquivo local. Saves e a partida ativa serão mantidos.`);
     button('Confirmar remoção', async () => {
       wads = wads.filter(w => w.id !== item.id); await write('wads', wads); await remove('wad:' + item.id);

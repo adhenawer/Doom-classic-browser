@@ -7,9 +7,19 @@ test('original map selection persists, allows combat/traversal, and activates it
   await selectClassic(page);
   await page.locator('#content').click();
   await page.getByRole('button', { name: 'Estação Aurora · mapa original', exact: true }).click();
-  await expect(page.locator('#panel')).toContainText('✓ Estação Aurora.wad');
+  await expect(page.locator('#panel')).toContainText('✓ Estação Aurora · mapa original');
   await page.reload();
-  await expect(page.locator('#selectedContent')).toHaveText('Estação Aurora.wad');
+  await expect(page.locator('#selectedContent')).toHaveText('Estação Aurora');
+  await page.locator('#content').click();
+  await expect(page.getByRole('button', { name: '✓ Estação Aurora · mapa original', exact: true })).toHaveCount(1);
+  await page.getByRole('button', { name: 'Freedoom Phase 1 · conteúdo livre', exact: true }).click();
+  await expect(page.locator('#selectedContent')).toHaveText('Freedoom Phase 1');
+  // Aurora remains a built-in choice and reuses its verified stored data.
+  await page.route('**/aurora.wad', route => route.abort());
+  await page.getByRole('button', { name: 'Estação Aurora · mapa original', exact: true }).click();
+  await expect(page.locator('#selectedContent')).toHaveText('Estação Aurora');
+  await expect(page.getByRole('button', { name: '✓ Estação Aurora · mapa original', exact: true })).toHaveCount(1);
+  await page.getByRole('button', { name: 'Voltar', exact: true }).click();
   await page.locator('#play').click();
   await expect(page.locator('#resume')).toBeVisible({ timeout: 60000 });
   await page.keyboard.press('Enter');

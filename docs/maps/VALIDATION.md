@@ -42,3 +42,7 @@ Somente E1M1 é geometria nova. Os outros 35 mapas e os assets são Freedoom BSD
 ## Integração para envio ao GitHub
 
 As alterações foram reaplicadas sobre Modern HD `55dec9d`, preservando `graphicsLost`, a configuração de Modern HD e seus recursos obrigatórios do cache. TypeScript foi verificado após a integração. O teste unitário de entrega HD requer os chunks não existentes neste executor; essa dependência passa à CI completa, não à build independente do mapa. `npm run build:map` executa os sete testes e gera o ZIP distribuível sem compilar os motores nem usar assets comerciais. O workflow `map.yml` executa preparação de base pinada, geração, testes e upload do pacote.
+
+## Seleção permanente junto de Freedoom
+
+Freedoom Phase 1 e Estação Aurora permanecem opções fixas mesmo após armazenar o mapa no navegador; Aurora não passa a aparecer como arquivo importado `.wad`. A revisão independente aprovou o ajuste. Seis testes passaram novamente no Chromium/WebKit: troca de Freedoom para Aurora depois de uma recarga, com o download do WAD bloqueado, comprovou reaproveitamento do conteúdo local; integridade, timeout e percurso/saída seguem aprovados. Captura em `evidence/content-selection.png`.
