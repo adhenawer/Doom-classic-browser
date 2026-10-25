@@ -1,6 +1,6 @@
-# Resultados e limites de validação
+# Validação do porte para browsers
 
-Data: 2026-10-25. Executor Linux de nuvem, sem Mac ou Xcode. Nenhum iPad físico foi usado.
+Data: 2026-10-25. Executor Linux de nuvem, com Chromium e WebKit desktop. A validação é organizada por browser, sistema, dispositivo e teclado; o Chrome no iPad é um perfil de uso pendente de teste físico.
 
 ## Build
 
@@ -27,9 +27,9 @@ O cenário do motor usa o **WASM real e Freedoom Phase 1 E1M1**, sem mock de eng
 
 O cenário de importação armazena um IWAD livre real, reabre a página, confere seleção e inicializa o motor com o blob persistido. Arquivo inválido não substitui a seleção válida.
 
-O cenário offline serve o app sob `/Doom-classic-ipad/`, prepara o Service Worker e saves, **desliga o servidor HTTP**, recarrega e carrega a partida pelo botão Carregar jogo. Chromium também é colocado em modo offline pela automação. Em WebKit, usamos a indisponibilidade real do servidor porque a emulação offline do Playwright produziu erro interno de navegação. Não há resposta de rede de fallback que possa mascarar cache incompleto.
+O cenário offline serve o app em um subdiretório de teste (atualmente `/doom-browser-check/`), prepara o Service Worker e saves, **desliga o servidor HTTP**, recarrega e carrega a partida pelo botão Carregar jogo. Chromium também é colocado em modo offline pela automação. Em WebKit, usamos a indisponibilidade real do servidor porque a emulação offline do Playwright produziu erro interno de navegação. Não há resposta de rede de fallback que possa mascarar cache incompleto.
 
-Atalhos reservados: testes verificam a suspensão defensiva ao receber modificadores e o funcionamento das teclas alternativas. Não simulam nem certificam o gerenciador de atalhos do iPadOS.
+Atalhos reservados: testes verificam a suspensão defensiva ao receber modificadores e o funcionamento das teclas alternativas. Não simulam nem certificam os atalhos reservados de todos os sistemas; isso inclui o iPadOS.
 
 ## Evidência visual
 
@@ -44,8 +44,10 @@ Atalhos reservados: testes verificam a suspensão defensiva ao receber modificad
 - URL de produção: https://adhenawer.github.io/Doom-classic-ipad/
 - Os resultados detalhados acima foram medidos no executor desta sessão; a execução do Actions repete a suíte antes da publicação.
 
-## Pendências de hardware
+## Compatibilidade e validação manual
 
-Siga [IPAD-CHECKLIST.md](IPAD-CHECKLIST.md). Em especial: Enter para áudio, teclado Bluetooth real e rollover, reconexão sem `keyup`, atalhos consumidos, paisagem, desempenho prolongado, execução em aba versus tela inicial, reabertura offline, quotas e retenção de dados. DOOM.WAD/DOOM1.WAD comerciais devem ser testados pelo usuário com arquivos autorizados; nenhum foi distribuído ou testado nesta sessão.
+O porte usa WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Service Worker, com teclado físico. Os testes publicados cobrem Chromium e WebKit desktop Linux. Isso não certifica automaticamente cada produto que usa esses motores, nem outros motores de browser. Firefox e outras combinações não foram validados nesta sessão.
 
-O MVP não deve ser considerado validado no iPad até o feedback do usuário.
+Siga [BROWSER-CHECKLIST.md](BROWSER-CHECKLIST.md) em cada browser e dispositivo. Para o uso do usuário no Chrome de um iPad, há o perfil complementar [IPAD-CHECKLIST.md](IPAD-CHECKLIST.md). Ele descreve teclado Bluetooth, atalhos do iPadOS e instalação pela tela inicial; não define o escopo geral do projeto.
+
+DOOM.WAD/DOOM1.WAD comerciais devem ser testados com arquivos autorizados; nenhum foi distribuído ou testado nesta sessão. Registre resultados de hardware separadamente dos automatizados.

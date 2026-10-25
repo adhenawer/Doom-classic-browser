@@ -127,7 +127,7 @@ test('complete offline cache, re-open engine without network, persisted save', a
   // Shut the actual HTTP server down: no network fallback can satisfy a cache miss.
   // Playwright's WebKit offline emulation itself produced an internal navigation error.
   const root = new URL('../../dist/', import.meta.url);
-  const mount = '/Doom-classic-ipad/';
+  const mount = '/doom-browser-check/';
   const server = createServer(async (req, res) => {
     try {
       const path = new URL(req.url!, 'http://localhost').pathname;

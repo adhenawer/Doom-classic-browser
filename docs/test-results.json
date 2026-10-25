@@ -1,6 +1,6 @@
 {
   "date": "2026-10-25",
-  "environment": "Cloud Linux; desktop Chromium and WebKit; no physical iPad",
+  "environment": "Cloud Linux; automated desktop browser validation in Chromium and WebKit",
   "stats": {
     "startTime": "2026-10-25T15:05:56.831Z",
     "duration": 57186.157,
@@ -67,5 +67,5 @@
   "npm_audit_known_vulnerabilities": 0,
   "engine_rebuild_same_environment": "matching SHA-256 for WASM and loader",
   "github_actions": "See https://github.com/adhenawer/Doom-classic-ipad/actions for the run associated with the commit",
-  "hardware_validation": "pending"
+  "hardware_validation": "Manual validation is tracked per browser/device profile; Chrome on iPad remains pending"
 }

@@ -1,14 +1,19 @@
-# DOOM Classic — iPad, teclado e offline
+# DOOM Classic Browser — porte de DOOM para browsers
 
-Port real do **Chocolate Doom em C / WebAssembly**, com Freedoom Phase 1 livre. Sem clone JavaScript, telemetria, servidor de jogo ou Pointer Lock. O IWAD original de DOOM deve ser importado pelo proprietário.
+Porte jogável do **Chocolate Doom em C/WebAssembly para execução no navegador**, com teclado físico, dados locais e modo offline após a preparação inicial. O projeto atende browsers em computadores, notebooks e tablets. O Chrome de um iPad é um dos ambientes de uso previstos.
 
-Estado: MVP compilado no executor de nuvem e testado em Chromium e WebKit desktop automatizados. **Nenhum teste em iPad físico foi realizado pelo desenvolvedor.** O pipeline de produção compila, testa e publica pelo GitHub Actions. Consulte o resultado da execução antes de usar a URL publicada. Os resultados reais ficam em [docs/VALIDATION.md](docs/VALIDATION.md).
+**[Jogar no browser](https://adhenawer.github.io/Doom-classic-ipad/)** · [Builds e testes](https://github.com/adhenawer/Doom-classic-ipad/actions) · [Validação](docs/VALIDATION.md)
 
-## Jogar pelo iPad
+O motor executa mapas reais e preserva as mecânicas clássicas. A distribuição inclui Freedoom Phase 1, com conteúdo livre próprio. Os mapas originais exigem um `DOOM.WAD` ou `DOOM1.WAD` autorizado, importado pelo usuário. Não há telemetria, servidor de jogo ou Pointer Lock.
 
-Após o workflow verde e a publicação, abra `https://adhenawer.github.io/Doom-classic-ipad/` no Chrome. Espere a preparação offline terminar (cerca de 33 MiB). Selecione Jogar com Enter. Quando aparecer a tela de partida suspensa, pressione Enter novamente para retomar e tentar liberar o áudio.
+## Jogar no navegador
 
-Freedoom contém mapas, arte e sons próprios. Para os mapas originais, importe seu `DOOM.WAD` ou `DOOM1.WAD` autorizado pelo seletor do app Arquivos. Nenhum arquivo é enviado ao servidor. Este MVP aceita IWADs de DOOM 1 / Freedoom Phase 1; PWADs e DOOM II ficam fora do escopo.
+1. Abra a URL HTTPS com conexão e teclado físico. Em tablets, paisagem é recomendada; a orientação é livre.
+2. Aguarde a preparação offline terminar (aproximadamente 33 MiB de recursos de execução).
+3. Selecione **Jogar** com Enter. Quando aparecer a partida suspensa, pressione Enter novamente para retomar e tentar liberar o áudio.
+4. Para o conteúdo original, use **Importar WAD** e o seletor de arquivos do browser. A seleção inicial pode usar a interface nativa do sistema; a partida e os menus funcionam pelo teclado.
+
+Nenhum IWAD ou save é enviado ao servidor. O MVP aceita IWADs de DOOM 1 / Freedoom Phase 1; PWADs e DOOM II ficam fora do escopo.
 
 | Ação | Teclas padrão |
 |---|---|
@@ -24,27 +29,42 @@ Freedoom contém mapas, arte e sons próprios. Para os mapas originais, importe 
 | Salvar / carregar | K / L ou F2 / F3 |
 | Voltar à interface, fora do menu DOOM | H ou F10 |
 
-Menus nativos: setas, Enter e Backspace. Perguntas nativas do DOOM podem exigir Y/N. Durante a digitação de nomes de saves, as letras são texto. Remapeie ações em Controles. O iPadOS pode consumir combinações antes de entregá-las ao navegador.
+Menus nativos: setas, Enter e Backspace. Perguntas do DOOM podem exigir Y/N. Durante nomes de saves, as letras são texto. Remapeie ações em Controles. Browser e sistema operacional podem consumir atalhos antes de entregá-los à página; por isso há alternativas sem modificadores.
 
-Configurações permitem velocidade inicial, aceleração, velocidade máxima, sensibilidade e parada imediata ou desaceleração. A rotação é calculada no motor a 35 Hz. Auto-aim vertical e mecânicas clássicas são preservados.
+Configurações permitem velocidade inicial, aceleração, velocidade máxima, sensibilidade e parada imediata ou desaceleração. A rotação é calculada no motor a 35 Hz. Auto-aim vertical e mecânicas clássicas são preservados. Nos campos numéricos, Enter avança e V retorna.
+
+## Recursos e compatibilidade
+
+O browser precisa oferecer WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Service Worker em contexto seguro. A jogabilidade requer teclado físico, integrado ou externo; não há controles de toque sobre a partida.
+
+| Ambiente | Evidência disponível |
+|---|---|
+| Chromium desktop em Linux | Testes automatizados de jogo, áudio, entrada, persistência e offline aprovados |
+| WebKit desktop em Linux | Mesma suíte automatizada aprovada; teste offline com servidor desligado |
+| Chrome no iPad | Perfil de uso do usuário; validação em dispositivo físico pendente |
+| Outros browsers e dispositivos | Validar por combinação de browser, sistema, dispositivo e teclado |
+
+Resultados de um motor desktop não certificam automaticamente todos os browsers que o utilizam. Veja [checklist geral de browsers](docs/BROWSER-CHECKLIST.md) e [perfil complementar do Chrome no iPad](docs/IPAD-CHECKLIST.md).
 
 ## Offline e instalação
 
-1. Abra com conexão no Chrome, fora do modo privado.
+1. Abra com conexão, fora do modo privado.
 2. Aguarde **Preparado para offline neste contexto** e importe seu conteúdo, se desejar.
 3. Jogue e salve. A confirmação de persistência aparece na interface (H).
-4. Feche a página, desligue a conexão e reabra para confirmar a preparação.
-5. Para instalar: Compartilhar → Adicionar à Tela de Início, quando disponível. Abra o ícone e prepare/teste esse contexto separadamente. Não presumimos armazenamento compartilhado com a aba do Chrome.
+4. Feche a página, desligue a conexão e reabra a mesma URL no mesmo browser/perfil.
+5. Se o browser oferecer instalação como PWA, use a opção de instalar ou adicionar à tela inicial. Prepare e valide também esse contexto; não presuma armazenamento compartilhado entre diferentes browsers, perfis e aplicativos instalados.
 
-Saves e preferências usam IndexedDB. O navegador pode remover dados. Exporte backups em Gerenciar saves e backups; a exportação pode abrir interface nativa. IWADs não entram no backup de saves e devem ser preservados no Arquivos.
+Saves e preferências usam IndexedDB. O navegador pode remover dados. Exporte backups em **Gerenciar saves e backups**; a exportação pode abrir uma interface nativa. IWADs não entram no backup de saves: preserve suas cópias em arquivos locais.
 
-## Somente nuvem, sem terminal no iPad
+### Uso pelo browser de um iPad
 
-O GitHub Actions compila e publica automaticamente após alterações em `main`. No GitHub pelo navegador: Actions → Build, test and publish DOOM → veja o resultado; use Run workflow para repetir. Em Settings → Pages, a fonte deve ser GitHub Actions. Não são necessários Mac, Xcode, jailbreak ou compilação local.
+Abra a mesma URL no Chrome do iPad e use o teclado físico. Quando disponível, a instalação pode ser feita por Compartilhar → Adicionar à Tela de Início. Confira áudio por Enter, teclas reservadas, combinações e reconexão do teclado e reabertura offline no [checklist desse dispositivo](docs/IPAD-CHECKLIST.md). Esses cuidados são específicos desse perfil de browser/sistema; o produto continua sendo o porte web.
 
-## Desenvolvimento na nuvem
+## Build e publicação na nuvem
 
-Toolchain: Emscripten 4.0.18 em imagem fixada por digest; Chocolate Doom vendorizado em revisão fixada (engine/UPSTREAM.json). SDL e SDL_mixer vêm dos ports dessa toolchain. Freedoom 0.13.0 é verificado por SHA-256.
+O GitHub Actions compila e publica automaticamente após alterações em `main`. Pelo site do GitHub: **Actions → Build, test and publish DOOM**; use **Run workflow** para repetir. Em **Settings → Pages**, a fonte é **GitHub Actions**. Esse fluxo pode ser acompanhado pelo browser de qualquer dispositivo, inclusive um iPad, sem terminal ou compilação no dispositivo de jogo.
+
+Toolchain: Emscripten 4.0.18 em imagem fixada por digest; Chocolate Doom vendorizado em revisão fixada (`engine/UPSTREAM.json`). SDL e SDL_mixer vêm dos ports dessa toolchain. Freedoom 0.13.0 e as fontes das dependências são verificados por SHA-256.
 
 ```sh
 npm ci
@@ -57,10 +77,14 @@ npx playwright install --with-deps chromium webkit
 npm run test:e2e
 ```
 
-Os comandos são para o executor de nuvem, não para executar no iPad. A imagem de toolchain já inclui Python e CMake. O adaptador usa Asyncify para ceder ao navegador durante esperas, transições e a execução contínua, mantendo o loop original. A primeira versão usa uma thread; não requer COOP/COEP.
+Esses comandos são para o executor de desenvolvimento na nuvem. A imagem de toolchain inclui Python e CMake. Asyncify permite ceder ao browser durante esperas, transições e o loop original. A versão atual usa uma thread e não requer COOP/COEP.
+
+## Nomes legados e dados existentes
+
+O produto e a PWA se chamam **DOOM Classic Browser**, e o pacote é `doom-classic-browser`. O nome histórico do repositório e o endereço `/Doom-classic-ipad/` foram preservados para manter os links e as instalações existentes. O banco `doom-ipad-v1` conserva os IWADs e as preferências já salvos. Esses identificadores não restringem o browser nem o dispositivo. Veja [arquitetura](docs/ARCHITECTURE.md).
 
 ## Licenças e privacidade
 
 Código do port: GPL-2.0-or-later; motor e componentes têm seus avisos preservados em `engine/upstream`. Veja [LICENSE](LICENSE) e [engine/upstream/COPYING.md](engine/upstream/COPYING.md). Freedoom: BSD de 3 cláusulas, com licença e créditos incluídos na publicação. Não distribuímos IWADs comerciais.
 
-A publicação inclui `source.tar.gz` com código correspondente, adaptações e scripts de build. Não inclui IWADs importados, saves ou credenciais. Nenhuma telemetria; sem dependências de rede durante a partida offline. O provedor de hospedagem recebe apenas as requisições normais de download enquanto online.
+A publicação inclui `source.tar.gz` com código correspondente, adaptações e scripts de build. Não inclui IWADs importados, saves ou credenciais. Não há dependências de rede durante a partida preparada para offline. O provedor de hospedagem recebe as requisições normais de download enquanto online.

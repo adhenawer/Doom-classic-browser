@@ -1,6 +1,6 @@
-# Arquitetura do MVP
+# Arquitetura do porte para browsers
 
-O motor é Chocolate Doom em C, revisão `a2dfd51fcc00d272dc8a17a97ccd6683333ff4ea`, preservada em `engine/upstream`. Não usamos binários de terceiros. `scripts/prepare-engine.py` cria uma cópia em `build/engine`, verifica contextos dos patches e aplica as adaptações. O build falha se o contexto esperado divergir.
+O produto é um porte web para browsers com teclado físico. O iPad é um dos dispositivos de uso previstos; a aplicação usa APIs de navegador e não faz seleção de plataforma por user-agent. O motor é Chocolate Doom em C, revisão `a2dfd51fcc00d272dc8a17a97ccd6683333ff4ea`, preservada em `engine/upstream`. Não usamos binários de terceiros. `scripts/prepare-engine.py` cria uma cópia em `build/engine`, verifica contextos dos patches e aplica as adaptações. O build falha se o contexto esperado divergir.
 
 ## Responsabilidades
 
@@ -16,7 +16,7 @@ O motor é Chocolate Doom em C, revisão `a2dfd51fcc00d272dc8a17a97ccd6683333ff4
 
 Uma thread. Asyncify permite ceder ao navegador em `I_Sleep` e a cada iteração do loop original. Nenhum Worker, SharedArrayBuffer ou Pointer Lock é necessário. SDL2 apresenta o framebuffer clássico via Canvas/WebGL. Não é renderização 3D acelerada da geometria do DOOM: o renderizador original continua em software.
 
-O relógio lógico desconta períodos de suspensão para evitar recuperar milhares de tics ao retornar de outro aplicativo. O motor preserva 35 Hz. O controlador não promete latência inferior a um tic: em primeiro plano o orçamento é aproximadamente 28,6 ms mais entrega de eventos e apresentação, a medir no iPad.
+O relógio lógico desconta períodos de suspensão para evitar recuperar milhares de tics ao retornar de outro aplicativo. O motor preserva 35 Hz. O controlador não promete latência inferior a um tic: em primeiro plano o orçamento é aproximadamente 28,6 ms mais entrega de eventos e apresentação, a medir em cada combinação de navegador, dispositivo e teclado.
 
 ## Alterações intencionais no comportamento de interface
 
@@ -38,8 +38,12 @@ Saves são separados pelo SHA-256 do IWAD: `/persist/saves/<hash>/doomsavN.dsg`.
 
 Cache de app e IndexedDB têm funções separadas. Uma nova versão só instala após baixar o conjunto completo; não usa `skipWaiting`, preservando a versão em uso até o fechamento dos clientes. Navegação offline resolve `index.html` dentro do escopo, inclusive em subdiretórios. O cache é específico da origem e do contexto de execução; uma aba do Chrome e um app da tela inicial devem ser preparados e testados separadamente.
 
-`storage.persist()` é uma solicitação; o iPadOS ainda pode remover dados. Não há autenticação, telemetria, API externa ou upload de arquivos durante a execução. Download inicial e atualização dependem de rede.
+`storage.persist()` é uma solicitação; qualquer navegador pode remover dados, conforme a política do sistema e do perfil. Não há autenticação, telemetria, API externa ou upload de arquivos durante a execução. Download inicial e atualização dependem de rede.
 
 ## Reprodutibilidade
 
 Fontes upstream vendorizadas, toolchain fixada por digest, dependências npm exatas com lockfile, Actions fixadas por SHA e conteúdo livre verificado por hash. O objetivo comprovável é recompilar a partir das entradas fixadas. Identidade byte a byte entre executores só pode ser afirmada após comparação específica; não é presumida.
+
+## Identificadores legados
+
+O caminho publicado `/Doom-classic-ipad/` e o banco IndexedDB `doom-ipad-v1` são mantidos por compatibilidade com links, caches, instalações e dados existentes. Não representam uma restrição ao iPad. O nome público da aplicação é **DOOM Classic Browser** e o pacote é `doom-classic-browser`. O ID e o escopo da PWA permanecem estáveis; a orientação é livre.

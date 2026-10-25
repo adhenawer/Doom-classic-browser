@@ -91,7 +91,7 @@ async function content() {
     button(`${selected === item.id ? '✓ ' : ''}${item.name}`, async () => { selected = item.id; await write('selected', selected); say(`Selecionado: ${item.name}`); content(); });
   }
   for (const item of wads) button(`Remover conteúdo: ${item.name}`, () => {
-    showPanel('Remover IWAD'); paragraph(`Remover ${item.name} deste navegador? Preserve sua cópia no app Arquivos. Saves e a partida ativa serão mantidos.`);
+    showPanel('Remover IWAD'); paragraph(`Remover ${item.name} deste navegador? Preserve sua cópia em um arquivo local. Saves e a partida ativa serão mantidos.`);
     button('Confirmar remoção', async () => {
       wads = wads.filter(w => w.id !== item.id); await write('wads', wads); await remove('wad:' + item.id);
       if (selected === item.id) { selected = 'freedoom'; await write('selected', selected); }
@@ -149,7 +149,7 @@ function download(name: string, data: Blob) {
 }
 async function saves() {
   showPanel('Saves e backups');
-  paragraph('Saves originais: K salva e L carrega durante o jogo. Cópias persistidas ficam associadas ao SHA-256 do IWAD. Exporte backups: o iPadOS pode remover dados locais.');
+  paragraph('Saves originais: K salva e L carrega durante o jogo. Cópias persistidas ficam associadas ao SHA-256 do IWAD. Exporte backups: o navegador pode remover dados locais.');
   if (engine) {
     for (const path of listFiles().filter(p => /\/doomsav[0-5]\.dsg$/.test(p))) {
       paragraph(`${path.includes(activeSavePath + '/') ? 'Atual' : 'Outro IWAD'} · ${path.split('/').slice(-2).join('/')}`);
@@ -208,7 +208,7 @@ async function start(load = false) {
     const custom = wads.find(w => w.id === selected);
     if (selected !== 'freedoom' && !custom) throw new Error('IWAD selecionado não está armazenado.');
     let data = custom ? await read<ArrayBuffer>('wad:' + custom.id) : undefined;
-    if (custom && !data) throw new Error('Arquivo IWAD ausente. Importe-o novamente pelo Arquivos.');
+    if (custom && !data) throw new Error('Arquivo IWAD ausente. Importe-o novamente pelo seletor de arquivos.');
     if (!data) { const response = await fetch('./freedoom1.wad', { cache: 'no-store' }); if (!response.ok) throw new Error('Freedoom indisponível.'); data = await response.arrayBuffer(); }
     validateWad(data); const hash = await wadHash(data);
     if (hash !== (custom?.id ?? '7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d')) throw new Error('IWAD corrompido: SHA-256 divergente. Importe novamente.');

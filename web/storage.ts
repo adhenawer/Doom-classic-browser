@@ -2,6 +2,7 @@
 let database: Promise<IDBDatabase> | undefined;
 function db() {
   return database ??= new Promise((resolve, reject) => {
+    // Legacy database name: keep existing users' IWADs and preferences when branding changes.
     const r = indexedDB.open('doom-ipad-v1', 1);
     r.onupgradeneeded = () => r.result.createObjectStore('data');
     r.onsuccess = () => resolve(r.result);

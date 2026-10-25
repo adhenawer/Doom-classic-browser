@@ -1,8 +1,10 @@
-# Validação no Chrome do iPad
+# Perfil de validação: Chrome no iPad
+
+Este é um perfil específico do **porte para browsers**. Use também o [checklist geral](BROWSER-CHECKLIST.md); o iPad é um dos dispositivos de uso.
 
 **Este checklist está pendente. Nenhum resultado de hardware é inferido a partir dos testes Playwright.**
 
-Registre modelo do iPad, versão do iPadOS, versão do Chrome, modelo/layout do teclado, modo aba ou tela inicial, data e observações. Alvo inicial: iPadOS 17 ou superior. A elegibilidade real depende das APIs detectadas e do comportamento medido.
+Registre modelo do iPad, versão do iPadOS, versão do Chrome, modelo/layout do teclado, modo aba ou tela inicial, data e observações. Para este perfil, a referência inicial é iPadOS 17 ou superior. A elegibilidade real depende das APIs detectadas e do comportamento medido.
 
 ## Preparação
 
