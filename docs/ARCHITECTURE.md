@@ -38,6 +38,8 @@ Saves são separados pelo SHA-256 do IWAD: `/persist/saves/<hash>/doomsavN.dsg`.
 
 Cache de app e IndexedDB têm funções separadas. Uma nova versão só instala após baixar o conjunto completo; não usa `skipWaiting`, preservando a versão em uso até o fechamento dos clientes. Navegação offline resolve `index.html` dentro do escopo, inclusive em subdiretórios. O cache é específico da origem e do contexto de execução; uma aba do Chrome e um app da tela inicial devem ser preparados e testados separadamente.
 
+O precache de uma atualização usa requisições com `cache: reload`, evitando copiar HTML e metadados antigos do cache HTTP para o novo cache de versão. Preferências, IWADs e saves permanecem no armazenamento existente.
+
 `storage.persist()` é uma solicitação; qualquer navegador pode remover dados, conforme a política do sistema e do perfil. Não há autenticação, telemetria, API externa ou upload de arquivos durante a execução. Download inicial e atualização dependem de rede.
 
 ## Reprodutibilidade

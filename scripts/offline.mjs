@@ -30,7 +30,7 @@ const PREFIX = 'doom-' + encodeURIComponent(SCOPE.pathname) + '-';
 const CACHE = PREFIX + '${version}';
 self.addEventListener('install', event => event.waitUntil((async () => {
   const cache = await caches.open(CACHE);
-  try { await cache.addAll(RESOURCES.map(p => new URL(p, SCOPE).href)); }
+  try { await cache.addAll(RESOURCES.map(p => new Request(new URL(p, SCOPE).href, {cache: 'reload'}))); }
   catch (e) { await caches.delete(CACHE); throw e; }
 })()));
 self.addEventListener('activate', event => event.waitUntil((async () => {
