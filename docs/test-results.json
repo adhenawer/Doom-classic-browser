@@ -66,6 +66,6 @@
   "native_rotation_suite": "passed",
   "npm_audit_known_vulnerabilities": 0,
   "engine_rebuild_same_environment": "matching SHA-256 for WASM and loader",
-  "github_actions": "not run: integration write permission denied",
+  "github_actions": "See https://github.com/adhenawer/Doom-classic-ipad/actions for the run associated with the commit",
   "hardware_validation": "pending"
 }

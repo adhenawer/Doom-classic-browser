@@ -29,8 +29,6 @@ Nenhum problema crítico foi identificado nesta revisão. Isso não equivale a a
 - **Médio / arquivos hostis:** validação estrutural, limites e sandbox WASM reduzem exposição. O motor histórico não foi totalmente reescrito para processar conteúdo malicioso. Arquivos inválidos podem abortar a instância; a interface informa a necessidade de recarregar.
 - **Baixo / reprodução de demos:** o novo perfil de entrada produz comandos diferentes do teclado DOS; não foi certificada identidade de demos gravadas com esse perfil.
 
-## Bloqueio externo de entrega
+## Acesso para entrega
 
-GitHub Pages está configurado com `build_type: workflow`. A credencial disponível consegue consultar a conta e os metadados, mas `git push` e a criação de arquivo pelo plugin foram recusados com HTTP 403. A lista de instalações acessíveis retornou somente a organização `tray-tecnologia`, sem instalação na conta pessoal `adhenawer`. A correção precisa ocorrer na instalação/autorização do app para o repositório pessoal. Não é falta de autorização conversacional do usuário.
-
-Enquanto esse acesso não for confirmado, não é correto declarar envio de código, execução do GitHub Actions ou publicação como concluídos. O repositório local contém o commit e os artefatos compilados na nuvem.
+O bloqueio anterior de escrita (HTTP 403) foi resolvido após o usuário autorizar a instalação da integração na conta pessoal `adhenawer`. O envio simulado confirmou acesso ao repositório. GitHub Pages está configurado com `build_type: workflow`; o pipeline valida o motor e o app antes da publicação.

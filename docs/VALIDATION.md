@@ -39,8 +39,10 @@ Atalhos reservados: testes verificam a suspensão defensiva ao receber modificad
 
 - Repositório de destino: https://github.com/adhenawer/Doom-classic-ipad
 - GitHub Pages confirmado com fonte `workflow`.
-- O envio pela integração foi recusado: HTTP 403 em `git push` e na API de criação de arquivo. Metadados de administrador da conta não equivalem a permissão da credencial.
-- Enquanto esse acesso não for liberado, **o workflow não foi executado no GitHub e a URL não está publicada**. A compilação e os testes descritos ocorreram no executor de nuvem desta sessão.
+- A autorização de escrita da integração foi confirmada por um envio simulado sem erro 403.
+- Builds e publicação são executados no [GitHub Actions](https://github.com/adhenawer/Doom-classic-ipad/actions). O resultado da execução associada ao commit é a evidência de compilação/teste no GitHub.
+- URL de produção: https://adhenawer.github.io/Doom-classic-ipad/
+- Os resultados detalhados acima foram medidos no executor desta sessão; a execução do Actions repete a suíte antes da publicação.
 
 ## Pendências de hardware
 

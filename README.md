@@ -2,7 +2,7 @@
 
 Port real do **Chocolate Doom em C / WebAssembly**, com Freedoom Phase 1 livre. Sem clone JavaScript, telemetria, servidor de jogo ou Pointer Lock. O IWAD original de DOOM deve ser importado pelo proprietário.
 
-Estado: MVP compilado no executor de nuvem e testado em Chromium e WebKit desktop automatizados. **Nenhum teste em iPad físico foi realizado pelo desenvolvedor.** Publicação e GitHub Actions dependem do acesso de escrita da integração ao repositório. Os resultados reais ficam em [docs/VALIDATION.md](docs/VALIDATION.md).
+Estado: MVP compilado no executor de nuvem e testado em Chromium e WebKit desktop automatizados. **Nenhum teste em iPad físico foi realizado pelo desenvolvedor.** O pipeline de produção compila, testa e publica pelo GitHub Actions. Consulte o resultado da execução antes de usar a URL publicada. Os resultados reais ficam em [docs/VALIDATION.md](docs/VALIDATION.md).
 
 ## Jogar pelo iPad
 
