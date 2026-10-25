@@ -4,6 +4,7 @@ import type { Page } from './normal-browser';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { once } from 'node:events';
+import { basename } from 'node:path';
 const state = (page: Page, n: number) => page.evaluate(n => (window as any).doom._web_state(n), n);
 async function boot(page: Page, url = '/') {
   await page.goto(url);
@@ -117,13 +118,15 @@ test('real IWAD, rendered level, simultaneous input, ramp, shooting, menu, focus
 });
 test('IWAD import persists metadata and blob; invalid file is rejected without replacement', async ({page}) => {
   await page.goto('/');await expect(page.locator('#play')).toBeEnabled();
-  await page.locator('#wadFile').setInputFiles('web/generated/freedoom1.wad');
+  const wadPath = process.env.DOOM_TEST_WAD || 'web/generated/freedoom1.wad';
+  const wadName = basename(wadPath);
+  await page.locator('#wadFile').setInputFiles(wadPath);
   await expect(page.locator('#status')).toContainText('IWAD validado e armazenado');
   await page.reload();await expect(page.locator('#play')).toBeEnabled();
-  await page.locator('#content').press('Enter');await expect(page.locator('#panel')).toContainText('✓ freedoom1.wad');
+  await page.locator('#content').press('Enter');await expect(page.locator('#panel')).toContainText(`✓ ${wadName}`);
   await page.locator('#wadFile').setInputFiles({name:'bad.wad',mimeType:'application/octet-stream',buffer:Buffer.from('not a wad')});
   await expect(page.locator('#status')).toContainText('Erro:');
-  await expect(page.locator('#panel')).toContainText('✓ freedoom1.wad');
+  await expect(page.locator('#panel')).toContainText(`✓ ${wadName}`);
   await page.keyboard.press('Backspace');await page.locator('#play').press('Enter');
   await expect(page.locator('#resume')).toBeVisible({timeout:60000});await page.keyboard.press('Enter');
   await expect.poll(()=>state(page,1)).toBe(0);

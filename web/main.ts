@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
+/// <reference types="vite/client" />
 import './style.css';
 import modernHud from '../engine/modern-hud.lua?raw';
 import { InputState, engineKeys } from './input';
@@ -44,6 +45,9 @@ const keyLabels: Record<string, string> = { ArrowUp: '↑', ArrowDown: '↓', Ar
 const keyLabel = (key: string) => keyLabels[key] ?? key.replace(/^Key/, '');
 let settings = structuredClone(baseSettings), input = new InputState(), engine: Engine | undefined;
 let wads: Wad[] = [], selected = 'freedoom', running = false, suspended = false, starting = false;
+let originalMap: { name: string; sha256: string; bytes: number } | undefined;
+let localDoomAvailable = false;
+const localDoomHash = '6fdf361847b46228cfebd9f3af09cd844282ac75f3edbb61ca4cb27103ce2e7f';
 let queuedLoad = false, graphicsLost = false;
 let activeResolution: Resolution | undefined;
 let activeModernSize: ModernSize | undefined, activeModernHD: boolean | undefined, activeModernHUD: Settings['modernHUD'] | undefined;
@@ -134,6 +138,26 @@ function back() { button('Voltar', showHome); panel.querySelector<HTMLElement>('
 async function content() {
   showPanel('Selecionar conteúdo');
   paragraph(running ? 'Para trocar de IWAD, volte à interface e recarregue a página após selecionar.' : 'Freedoom tem mapas e arte livres. Para DOOM original, importe seu próprio IWAD autorizado.');
+  if (originalMap) paragraph('Estação Aurora tem uma fase original, criada com recursos livres. Após a saída, a campanha continua com mapas de Freedoom.');
+  if (originalMap && !wads.some(w => w.id === originalMap!.sha256)) {
+    button(`${originalMap.name} · mapa original`, async () => {
+      const expected = originalMap!;
+      const response = await fetch('./aurora.wad', { cache: 'no-store' });
+      if (!response.ok) throw new Error('Mapa original indisponível. Prepare o conteúdo novamente.');
+      const data = await response.arrayBuffer();
+      if (data.byteLength !== expected.bytes || await wadHash(data) !== expected.sha256) throw new Error('Mapa original corrompido: SHA-256 ou tamanho divergente.');
+      await importWad(new File([data], `${expected.name}.wad`));
+    });
+  }
+  if (localDoomAvailable && !wads.some(w => w.id === localDoomHash)) {
+    button('The Ultimate Doom · 4 episódios · arquivo local', async () => {
+      const response = await fetch('./__local-doom.wad');
+      if (!response.ok) throw new Error('DOOM.WAD local indisponível.');
+      const data = await response.arrayBuffer();
+      if (await wadHash(data) !== localDoomHash) throw new Error('DOOM.WAD local com SHA-256 inesperado.');
+      await importWad(new File([data], 'The Ultimate Doom.wad'));
+    });
+  }
   for (const item of [{ id: 'freedoom', name: 'Freedoom Phase 1 · conteúdo livre' }, ...wads]) {
     button(`${selected === item.id ? '✓ ' : ''}${item.name}`, async () => { selected = item.id; await write('selected', selected); updateSummary(); say(`Selecionado: ${item.name}`); content(); });
   }
@@ -592,6 +616,20 @@ async function init() {
     wads = await read<Wad[]>('wads') ?? []; selected = await read<string>('selected') ?? 'freedoom';
     if (selected !== 'freedoom' && !wads.some(w => w.id === selected)) { selected = 'freedoom'; say('IWAD anterior ausente; Freedoom selecionado.'); }
     else say('Pronto. Enter em Jogar inicia Freedoom ou o IWAD selecionado.');
+    const mapDiscovery = new AbortController();
+    const mapDiscoveryTimer = setTimeout(() => mapDiscovery.abort(), 3000);
+    try {
+      const response = await fetch('./aurora.json', { signal: mapDiscovery.signal });
+      if (response.ok) {
+        const value = await response.json();
+        if (value.name === 'Estação Aurora' && /^[a-f0-9]{64}$/.test(value.sha256) && Number.isSafeInteger(value.bytes) && value.bytes > 12 && value.bytes <= MAX_WAD) originalMap = value;
+      }
+    } catch { /* Optional map metadata must not block existing content. */ }
+    finally { clearTimeout(mapDiscoveryTimer); }
+    if (import.meta.env.DEV) {
+      try { localDoomAvailable = (await fetch('./__local-doom.wad', { method: 'HEAD' })).ok; }
+      catch { localDoomAvailable = false; }
+    }
     presentation.apply(settings); updateSummary();
     initialized = true;
     home.querySelectorAll<HTMLButtonElement>('button').forEach(button => { button.disabled = false; });

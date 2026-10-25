@@ -9,7 +9,7 @@ O motor executa mapas reais e preserva as mecânicas clássicas. A distribuiçã
 ## Jogar no navegador
 
 1. Abra a URL HTTPS com conexão e teclado físico. Em tablets, paisagem é recomendada; a orientação é livre.
-2. Aguarde a preparação offline terminar (inclui um pacote HD de aproximadamente 380 MiB, além dos motores e conteúdo-base).
+2. Aguarde a preparação offline terminar (inclui o pacote HD de aproximadamente 380 MiB, além dos motores, conteúdo-base e mapa Estação Aurora).
 3. Selecione **Jogar** com Enter. Quando aparecer a partida suspensa, pressione Enter novamente para retomar e tentar liberar o áudio.
 4. Para o conteúdo original, use **Importar WAD** e o seletor de arquivos do browser. A seleção inicial pode usar a interface nativa do sistema; a partida e os menus funcionam pelo teclado.
 
@@ -113,6 +113,14 @@ npx playwright install --with-deps chromium webkit
 npm run test:e2e
 ```
 
+Para testar a importação com um IWAD externo autorizado, sem adicioná-lo à distribuição:
+
+```sh
+DOOM_TEST_WAD=work/doom1.wad npx playwright test --project=chromium -g 'IWAD import persists'
+```
+
+O diretório `work/` é local, ignorado pelo Git e excluído do pacote de fontes. O teste padrão continua usando Freedoom. Em 25/10/2026, o teste passou no Chromium com o shareware DOOM 1.9 obtido de [Thurbeen/thurbox-doom](https://github.com/Thurbeen/thurbox-doom/blob/main/wad/doom1.wad): 4.196.020 bytes, MD5 `f0cefca49926d00903cf57551d901abe`, SHA-256 `1d7d43be501e67d927e415e0b8f3e29c3bf33075e859721816f652a526cac771`. Foram verificadas importação, persistência após recarga, seleção, rejeição de arquivo inválido e abertura da fase. Isso não valida todos os mapas ou a progressão da campanha. A execução posterior também passou no WebKit desktop após preparar as bibliotecas locais de teste. O shareware não foi incorporado aos assets publicados.
+
 Esses comandos são para o executor de desenvolvimento na nuvem. A imagem de toolchain inclui Python e CMake. Asyncify permite ceder ao browser durante esperas, transições e o loop original. A versão atual usa uma thread e não requer COOP/COEP.
 
 ## Equipe de modernização
@@ -132,3 +140,19 @@ O produto e a PWA se chamam **DOOM Classic Browser**, e o pacote é `doom-classi
 Código anterior do port: GPL-2.0-or-later; bridge Moderno e EDGE-Classic: GPL-3.0-or-later. A distribuição combinada do backend Moderno observa GPLv3 e preserva os avisos de cada componente. Motores e componentes têm seus avisos preservados em `engine/upstream`, `engine/CRISPY.json`, `CRISPY-COPYING.txt`, `EDGE-COPYING.txt`, `EDGE-NOTICES.txt` e `MODERN-CONTENT-COPYING.txt` na publicação. Veja [LICENSE](LICENSE) e [engine/upstream/COPYING.md](engine/upstream/COPYING.md). Freedoom: BSD de 3 cláusulas, com licença e créditos incluídos na publicação. Não distribuímos IWADs comerciais.
 
 A publicação inclui `source.tar.gz` com código correspondente, adaptações e scripts de build. Não inclui IWADs importados, saves ou credenciais. Não há dependências de rede durante a partida preparada para offline. O provedor de hospedagem recebe as requisições normais de download enquanto online.
+
+## The Ultimate Doom na execução local
+
+Com o arquivo autorizado `work/DOOM.WAD` já presente, execute `npm run dev` e abra o endereço local exibido (por padrão, `http://127.0.0.1:5173/`). Em **Selecionar conteúdo**, escolha **The Ultimate Doom · 4 episódios · arquivo local**. O jogo importa o WAD para o armazenamento do navegador, preserva a seleção após recarregar e mantém os saves separados pelo conteúdo. Depois use **Voltar → Jogar**.
+
+O servidor fica restrito a localhost por padrão. O endpoint local não existe em builds/preview; o WAD não entra no Git, nos assets publicados ou no pacote de fontes. O arquivo esperado é Ultimate Doom 1.9, SHA-256 `6fdf361847b46228cfebd9f3af09cd844282ac75f3edbb61ca4cb27103ce2e7f`. A escolha e a abertura da partida foram verificadas no Chromium; isso não valida a campanha inteira.
+
+## Mapa original — Estação Aurora
+
+Em **Selecionar conteúdo → Estação Aurora · mapa original**, o browser verifica e armazena o IWAD composto localmente. É uma primeira fase própria, com três salas, duas passagens, seis inimigos, shotgun, recursos e alcova secreta; após a saída, E1M2 e os outros mapas continuam sendo Freedoom. O layout não reproduz uma fase comercial. O motor Classic preserva as regras clássicas; sprites, sons e texturas são os recursos livres do Freedoom, não os originais comerciais.
+
+`npm run build` gera o mapa a partir de `maps/aurora/layout.json`, usando somente a base Freedoom pinada. O gerador e a geometria novos usam MIT; os assets preservam BSD e créditos. O PWAD `aurora-map.wad` contém apenas o mapa próprio; `aurora.wad` é o IWAD importável com os recursos livres. Ambos e seus créditos entram no cache offline.
+
+Documentação detalhada: [análise estrutural do WAD](docs/maps/WAD-ANALYSIS.md), [inventário completo de metadados](docs/maps/wad-inventory.json), [brief passado ao criador](docs/maps/ORIGINAL-MAP-BRIEF.md), [design e procedência de Aurora](docs/maps/AURORA.md) e [revisão independente](docs/maps/QA.md) e [validação funcional](docs/maps/VALIDATION.md). A análise comercial não é um mapa reconstruível nem fornece assets ao gerador.
+
+Último commit remoto consultado: `55dec9dcfe7557d8e91fedcbc48b9707087a1d26`, Modern HD/WebGL2. O checkout desta entrega permanece em `073b980` com as alterações locais; o importador remoto tem o mesmo contrato, mas esta entrega não foi testada no Modern HD nem aplica automaticamente seu pacote de materiais a um IWAD de hash diferente.

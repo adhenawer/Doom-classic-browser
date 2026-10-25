@@ -1,0 +1,22 @@
+{
+  "name": "Estação Aurora",
+  "x": [0, 384, 512, 1024, 1152, 1536],
+  "y": [-256, -96, 96, 256],
+  "columns": [
+    {"rows": [0, 1, 2], "area": "Recepção", "ceiling": 160, "light": 192, "wall": "STARTAN3"},
+    {"rows": [1], "area": "Passagem de serviço", "ceiling": 96, "light": 128, "wall": "BROWN1"},
+    {"rows": [0, 1, 2], "area": "Núcleo de energia", "ceiling": 192, "light": 160, "wall": "TEKWALL4"},
+    {"rows": [1], "area": "Passagem de evacuação", "ceiling": 96, "light": 128, "wall": "BROWN1"},
+    {"rows": [0, 1, 2], "area": "Controle de evacuação", "ceiling": 128, "light": 224, "wall": "COMPTALL"}
+  ],
+  "secret_cell": [2, 2],
+  "things": [
+    [128, 0, 0, 1, 7], [208, 0, 0, 2001, 7], [272, 0, 0, 2008, 7],
+    [304, 176, 180, 3004, 7], [608, -176, 180, 3004, 7],
+    [720, 128, 180, 3001, 7], [896, -128, 180, 3004, 7],
+    [1248, 176, 180, 3001, 7], [1408, -176, 180, 3004, 7],
+    [640, 0, 0, 2008, 7], [800, 0, 0, 2012, 7],
+    [848, 192, 0, 2018, 7], [912, 192, 0, 2008, 7],
+    [1200, 0, 0, 2008, 7], [1328, 0, 0, 2011, 7]
+  ]
+}
