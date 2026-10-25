@@ -1,6 +1,6 @@
-# Roadmap proposto de modernização
+# Roadmap de modernização — execução 0.2.0
 
-Status: **plano da equipe; funcionalidades abaixo não foram implementadas por esta entrega**. A base jogável continua sendo Chocolate Doom em browser. Os incrementos devem ser pequenos e orientados por tarefas autorizadas, com demonstração antes de expandir o escopo.
+Status: **primeira execução autorizada pelo usuário, versão 0.2.0**. As entregas e os limites estão no [relatório da release](../docs/modernization/RELEASE.md). A base continua Chocolate Doom; o estudo de renderer e a proposta de novas regras não significam que todas as ideias abaixo foram habilitadas.
 
 ## Visão
 
@@ -46,6 +46,18 @@ Medir em M00: inicialização fria/quente, frame times mediano/p95/p99, long tas
 
 Não há orçamento novo aceito ou medido nesta entrega. O time deve propor limites relativos à baseline e registrar qualquer trade-off. Não anunciar “60 fps”, “baixo consumo” ou “latência zero” a partir de screenshots, heap configurado ou reputação de outro motor.
 
-## Primeira tarefa recomendada
+## Execução registrada
 
-Executar M00 e M10 e produzir uma proposta M20: direção de arte do launcher e das configurações, fluxos de teclado e capturas de referência. Em paralelo, documentar dois experimentos pequenos de apresentação/controles para M30. Essa escolha entrega progresso visível antes de assumir custo de reconstruir o renderer ou produzir assets em grande escala.
+| Etapa | Entrega 0.2.0 |
+|---|---|
+| M00 | Baseline antes das alterações, IWAD/hash e medições reproduzíveis em `scripts/measure-browser.mjs`; evidências em `docs/modernization/evidence/` |
+| M10 | Brief industrial, hierarquia, prioridades e procedência em `DESIGN.md` |
+| M20 | Launcher e cartão suspenso redesenhados, conteúdo/perfil visíveis e configurações pelo teclado |
+| M30 | Presets Clássico/Precisão/Ágil, apresentação Nítido/Suave/CRT e brilho reversível |
+| M40 | Volumes independentes, mute efetivo da contribuição OPL e suspensão/retomada de Web Audio; avaliação acústica humana pendente |
+| M50 | E1M1 livre como fatia visual real, shader próprio, capturas e custo CPU/API registrado |
+| M60 | Comparação com a base e Crispy; protótipo WebGL de pós-processamento integrado e fallback. Outro renderer de geometria não foi adotado |
+| M70 | Recorte executável de conforto `comfort-v1`, Shift invertido e saves compatíveis; proposta de regras futuras no relatório, sem pulo ou nova física habilitados |
+| M80 | Regressão, revisão independente, fonte correspondente, notas e rollback da release |
+
+Novas regras ou alta resolução interna exigem o protótipo específico identificado no estudo, em vez de serem atribuídas aos filtros desta versão. A liberação de outro motor não foi decidida.

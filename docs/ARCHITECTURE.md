@@ -51,3 +51,13 @@ Fontes upstream vendorizadas, toolchain fixada por digest, dependências npm exa
 O repositório é `adhenawer/Doom-classic-browser`, publicado sob `/Doom-classic-browser/`. O código usa caminhos relativos e o Service Worker usa o escopo da instalação, portanto o build não depende do nome anterior do repositório.
 
 O banco IndexedDB legado `doom-ipad-v1` e o IDBFS `/persist` são mantidos para acesso aos dados já existentes. O novo caminho continua sob a origem `https://adhenawer.github.io`; o acesso aos dados pressupõe o mesmo browser, perfil e contexto. Uma PWA instalada pode usar contexto próprio, conforme o browser. O namespace dos caches inclui o caminho, então a nova URL precisa de sua própria preparação offline. A identidade e o escopo relativos da PWA passam a resolver no novo caminho. Veja [migração do repositório](REPOSITORY-MIGRATION.md).
+
+## Modernização 0.2.0
+
+`web/preferences.ts` valida e migra preferências legadas sem mudar o banco. Presets alteram apenas parâmetros do controlador existente. `classic-v1` e `comfort-v1` produzem comandos vanilla; autorun inverte somente a ação Shift e os saves mantêm o formato/diretório anterior. Nenhuma regra de colisão, dano, arma ou IA foi alterada.
+
+`web/presentation.ts` mantém Nítido/Suave sem Canvas extra; CRT cria um contexto WebGL 1 e shader próprios. `scripts/prepare-engine.py` adiciona um callback síncrono depois do `SDL_RenderPresent` de frames. Isso permite copiar o drawing buffer antes de ele ser descartado. Um quad faz pós-processamento opcional da imagem, sem substituir o renderer C. Perda de contexto ou falhas restauram a fonte; foco e teclado permanecem no Canvas SDL. Não há loop rAF adicional para o efeito. Os diagnósticos medem submissão CPU/API, não GPU ou FPS do motor.
+
+Volumes web usam setters nativos e variáveis dos menus. Volume OPL zero é silenciado por gate apenas na contribuição musical em `opl/opl_sdl.c`, via adaptação no build; síntese e avanço de tempo continuam, SFX não são zerados por esse gate. O código upstream vendorizado continua intacto. `web_suspend(1)` também solicita suspensão de Web Audio; o primeiro resume ocorre diretamente no gesto de teclado. Conclusões assíncronas reconciliam a última intenção se suspensão e retomada se sobrepuserem, sem repetir indefinidamente por estado interrompido do sistema. Valores nativos de volume são capturados ao voltar à interface e persistidos nas mesmas preferências.
+
+Novos recursos de interface/SVG/shader são próprios e entram no bundle e no precache existentes. Licenças e fonte correspondente continuam na distribuição. Ver [release e revisão](modernization/RELEASE.md).

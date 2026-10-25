@@ -10,20 +10,67 @@
 </head>
 <body>
   <main id="shell">
-    <header><p class="eyebrow">PORTE PARA BROWSER</p><h1>DOOM <span>CLASSIC</span></h1><p>DOOM clássico no navegador. Teclado físico e modo offline.</p></header>
+    <div class="topbar"><span class="wordmark"><span class="brand-mark" aria-hidden="true">D</span> DOOM CLASSIC <span class="wordmark-divider">/</span> BROWSER</span><span class="edition">SEUS DADOS FICAM AQUI <span aria-hidden="true">↗︎</span></span></div>
+    <header class="intro">
+      <p class="eyebrow"><span class="signal" aria-hidden="true"></span> O CLÁSSICO, NO SEU BROWSER</p>
+      <h1>DOOM <span>CLASSIC</span></h1>
+      <p class="intro-copy">Entre na base. Encontre a saída.<br>Sobreviva ao que estiver no caminho.</p>
+      <figure class="mission-art" aria-hidden="true">
+        <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" focusable="false">
+          <defs>
+            <linearGradient id="hall" x2="0" y2="1"><stop stop-color="#1f2522"/><stop offset="1" stop-color="#101512"/></linearGradient>
+            <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#242820"/><stop offset="1" stop-color="#10120f"/></linearGradient>
+            <radialGradient id="door-glow"><stop stop-color="#cd6329" stop-opacity=".6"/><stop offset="1" stop-color="#a04420" stop-opacity="0"/></radialGradient>
+          </defs>
+          <path fill="url(#hall)" d="M0 0h600v280H0z"/>
+          <path fill="#0c100e" d="m0 0 205 76h190L600 0Z"/>
+          <path fill="#363a2d" d="m0 0 205 76v104L0 280Z"/>
+          <path fill="#282e25" d="M600 0 395 76v104l205 100Z"/>
+          <path fill="url(#floor)" d="m0 280 205-100h190l205 100Z"/>
+          <path fill="#151b16" d="M205 76h190v104H205z"/>
+          <path fill="#2b3025" d="M238 84h124v96H238z"/>
+          <path fill="#0b100c" d="M251 96h98v84h-98z"/>
+          <path fill="#342b1d" d="M268 104h64v76h-64z"/>
+          <path fill="#141811" d="M274 109h52v71h-52z"/>
+          <ellipse cx="300" cy="147" rx="132" ry="90" fill="url(#door-glow)"/>
+          <g fill="none" stroke="#5a5e42" stroke-width="2">
+            <path d="m37 14 182 68v119L37 267M83 31l151 55M83 31v214M165 61v143M563 14 418 68v133l145 66M517 31 402 84M517 31v214M435 61v143"/>
+            <path d="m0 104 205 22M0 208l205-53M600 104l-205 22M600 208l-205-53"/>
+          </g>
+          <g fill="#bba563">
+            <path d="m52 53 11 4v54l-11-1zM178 85l7 2v31l-7-1zM548 53l-11 4v54l11-1zM422 85l-7 2v31l7-1z"/>
+            <path d="M242 85h116v4H242z"/>
+          </g>
+          <g fill="#c66c35"><path d="M255 107h5v61h-5zM340 107h5v61h-5z"/><path d="M285 96h30v3h-30z"/></g>
+          <g fill="none" stroke="#454a32"><path d="m205 180-112 100M251 180l-44 100M349 180l44 100M395 180l112 100M157 204h286M98 234h404M33 264h534"/></g>
+          <path fill="#090e0b" d="M0 245h46v35H0zM554 245h46v35h-46z"/>
+          <path fill="#6d3923" d="M0 245h46v5H0zM554 245h46v5h-46z"/>
+          <path fill="#080d0a" d="M0 0h600v8H0zM0 272h600v8H0z"/>
+        </svg>
+        <figcaption><span>ACESSO À BASE</span><span>SETOR 01 <span aria-hidden="true">↗︎</span></span></figcaption>
+      </figure>
+      <div class="mission-meta"><span>CONTEÚDO SELECIONADO<strong id="selectedContent">Freedoom Phase 1</strong></span><span>EXPERIÊNCIA<strong id="profileSummary">Perfil clássico</strong></span></div>
+      <p class="local-note">Seu jogo, seus dados. Offline após a preparação inicial.</p>
+    </header>
     <nav id="home" aria-label="Menu principal">
-      <button id="play" autofocus disabled>Jogar <kbd>Enter</kbd></button>
-      <button id="content" disabled>Selecionar conteúdo</button>
-      <button id="import" disabled>Importar WAD</button>
-      <button id="settings" disabled>Configurações</button>
-      <button id="controls" disabled>Controles</button>
-      <button id="load" disabled>Carregar jogo</button>
-      <button id="saves" disabled>Gerenciar saves e backups</button>
+      <p class="menu-caption">PRONTO PARA ENTRAR?</p>
+      <button id="play" data-index="01" autofocus disabled>Jogar <kbd>Enter ↵</kbd></button>
+      <button id="content" data-index="02" disabled>Selecionar conteúdo</button>
+      <button id="import" data-index="03" disabled>Importar WAD</button>
+      <button id="settings" data-index="04" disabled>Configurações</button>
+      <button id="controls" data-index="05" disabled>Controles</button>
+      <button id="load" data-index="06" disabled>Carregar jogo</button>
+      <button id="saves" data-index="07" disabled>Gerenciar saves e backups</button>
+      <div class="keyboard-guide" aria-label="Controles principais"><span><kbd>WASD</kbd> mover</span><span><kbd>← →</kbd> girar</span><span><kbd>J</kbd> atirar</span><span><kbd>E</kbd> interagir</span></div>
     </nav>
-    <section id="panel" hidden></section>
-    <footer><p id="status" role="status" aria-live="polite">Preparando…</p><p id="offline">Verificando preparação offline…</p><p class="small">Setas: navegar · Enter: confirmar · Backspace/V: voltar. A importação usa o seletor nativo de arquivos.</p><a href="./source.tar.gz">Código-fonte e licenças · download online</a></footer>
+    <section id="panel" hidden aria-label="Opções do jogo"></section>
+    <footer>
+      <div class="system-status"><p id="status" role="status" aria-live="polite">Preparando…</p><p id="offline">Verificando preparação offline…</p></div>
+      <div class="footer-links"><p class="small">↑ ↓ navegar <span aria-hidden="true">/</span> Enter confirmar <span aria-hidden="true">/</span> Backspace ou V voltar</p><a href="./source.tar.gz">Código-fonte e licenças <span aria-hidden="true">↗︎</span></a></div>
+      <p class="file-note">Para importar conteúdo, use o seletor de arquivos do navegador. Os arquivos permanecem neste dispositivo.</p>
+    </footer>
   </main>
-  <section id="game" hidden aria-label="Jogo"><canvas id="canvas" width="640" height="480" tabindex="0" aria-label="DOOM"></canvas><div id="resume" hidden><p>Partida suspensa</p><button id="resumeButton">Enter para retomar</button><p>H: interface · P: menu do DOOM</p></div></section>
+  <section id="game" hidden aria-label="Jogo"><canvas id="canvas" width="640" height="480" tabindex="0" aria-label="DOOM"></canvas><div id="resume" hidden><div class="resume-card"><p class="eyebrow">AGUARDANDO VOCÊ</p><h2>Partida suspensa</h2><p>Pressione Enter para entrar e ativar o áudio.</p><button id="resumeButton">Enter para retomar <span aria-hidden="true">↵</span></button><dl class="resume-controls"><div><dt>WASD</dt><dd>Mover</dd></div><div><dt>← →</dt><dd>Girar</dd></div><div><dt>J / E</dt><dd>Atirar / interagir</dd></div><div><dt>P / H</dt><dd>Menu / interface</dd></div></dl><p class="resume-hint">Os controles acima são os padrões. Seus remapeamentos continuam ativos.</p></div></div></section>
   <input id="wadFile" type="file" accept=".wad" hidden><input id="backupFile" type="file" accept=".json" hidden>
   <script type="module" src="./main.ts"></script>
 </body>

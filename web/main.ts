@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 import './style.css';
-import { InputState, defaults, engineKeys, validateBindings } from './input';
+import { InputState, engineKeys } from './input';
+import { baseSettings as gameplayDefaults, sanitizeSettings as sanitizeGameplay, turnPresets, applyTurnPreset, selectedTurnPreset, gameplayProfile, type GameplaySettings, type TurnPreset } from './preferences';
+import { Presentation, sanitizePresentation, type PresentationSettings } from './presentation';
 import { validateWad, wadHash, MAX_WAD } from './wad';
 import { read, write, remove } from './storage';
 
 type Wad = { id: string; name: string; bytes: number };
-type Settings = { initial: number; acceleration: number; maximum: number; sensitivity: number; deceleration: number; bindings: Record<string, string[]> };
+type Settings = GameplaySettings & PresentationSettings;
 type FS = {
   mkdirTree(p: string): void; mount(type: unknown, options: object, p: string): void;
   filesystems: { IDBFS: unknown }; syncfs(populate: boolean, cb: (e?: Error) => void): void;
@@ -14,17 +16,20 @@ type FS = {
 };
 type Engine = { FS: FS; callMain(args: string[]): void; _web_key(k: number, d: number, c: number): void;
   _web_rotate(l: number, r: number): void; _web_reset(): void; _web_suspend(v: number): void;
+  _web_comfort(v: number): void; _web_mix(sfx: number, music: number): void;
   _web_menu(): number; _web_text(): number; _web_audio(): number; _web_state(n: number): number;
   _web_config(a: number,b: number,c: number,d: number,e: number): void;
 };
 declare global { interface Window {
   createDoom?: (options: object) => Promise<Engine>;
-  doom?: Engine;
+  doom?: Engine; doomPresentation?: Presentation;
 } }
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const shell = el('shell'), game = el('game'), panel = el('panel'), home = el('home');
 const canvas = el<HTMLCanvasElement>('canvas'), status = el('status');
-const baseSettings: Settings = { initial: 60, acceleration: 360, maximum: 180, sensitivity: 1, deceleration: 0, bindings: structuredClone(defaults) };
+const baseSettings: Settings = { ...gameplayDefaults, ...sanitizePresentation(undefined) };
+const presentation = new Presentation(canvas, game);
+window.doomPresentation = presentation;
 const actionLabels: Record<string, string> = {
   forward: 'Avançar', backward: 'Recuar', strafeLeft: 'Deslocar para a esquerda', strafeRight: 'Deslocar para a direita',
   turnLeft: 'Girar para a esquerda', turnRight: 'Girar para a direita', fire: 'Atirar', run: 'Correr',
@@ -43,21 +48,30 @@ let initialized = false;
 const say = (message: string) => { status.textContent = message; };
 const error = (e: unknown) => { say(`Erro: ${e instanceof Error ? e.message : String(e)}`); console.error(e); };
 function sanitizeSettings(raw: unknown): Settings {
-  if (!raw || typeof raw !== 'object') return structuredClone(baseSettings);
-  const s = raw as Settings;
-  const number = (v: number, low: number, high: number, fallback: number) => Number.isFinite(v) ? Math.max(low, Math.min(high, v)) : fallback;
-  const initial = number(s.initial, 1, 360, 60);
-  return { initial, acceleration: number(s.acceleration, 0, 2000, 360), maximum: number(s.maximum, initial, 720, 180),
-    sensitivity: number(s.sensitivity, .1, 3, 1), deceleration: number(s.deceleration, 0, 4000, 0), bindings: validateBindings(s.bindings) };
+  return { ...sanitizeGameplay(raw), ...sanitizePresentation(raw) };
 }
-function applyConfig() {
+function updateSummary() {
+  const name = selected === 'freedoom' ? 'Freedoom Phase 1' : wads.find(w => w.id === selected)?.name ?? 'Conteúdo indisponível';
+  shell.dataset.gameplayProfile = gameplayProfile(settings);
+  if (el('selectedContent')) el('selectedContent').textContent = name;
+  const runKeys = input.bindings.run.every(key => key.startsWith('Shift')) ? 'Shift' : input.bindings.run.map(keyLabel).join(' / ');
+  if (el('profileSummary')) el('profileSummary').textContent = settings.alwaysRun ? `Conforto · ${runKeys} para caminhar` : `Clássico · ${runKeys} para correr`;
+}
+function applyConfig(mix = false) {
   engine?._web_config(settings.initial, settings.acceleration, settings.maximum, settings.sensitivity, settings.deceleration);
+  engine?._web_comfort(+settings.alwaysRun);
+  if (mix) engine?._web_mix(settings.sfxVolume, settings.musicVolume);
+  presentation.apply(settings); updateSummary();
 }
-async function saveSettings() { settings.bindings = structuredClone(input.bindings); await write('settings', settings); applyConfig(); say('Configurações armazenadas neste navegador.'); }
+async function saveSettings() {
+  settings.bindings = structuredClone(input.bindings);
+  await write('settings', settings); applyConfig(true);
+  say('Configurações armazenadas neste navegador.');
+}
 function reset() { input.clear(); sent.clear(); engine?._web_reset(); }
 function suspend() {
   if (!engine || !running) return;
-  reset(); engine._web_suspend(1); suspended = true;
+  reset(); engine._web_suspend(1); suspended = true; presentation.setActive(false);
   el('resume').hidden = false;
   if (!document.hidden && !game.hidden) el('resumeButton').focus();
 }
@@ -65,15 +79,21 @@ function resume() {
   if (!engine || !running) return;
   reset(); applyConfig(); engine._web_audio(); engine._web_suspend(0);
   suspended = false; el('resume').hidden = true;
-  shell.hidden = true; game.hidden = false; canvas.focus();
+  shell.hidden = true; game.hidden = false; presentation.setActive(true); canvas.focus();
   if (queuedLoad) { queuedLoad = false; tap(189); }
 }
 function showShell() {
-  suspend(); game.hidden = true; shell.hidden = false; showHome();
+  suspend(); game.hidden = true; shell.hidden = false;
+  if (engine && running) {
+    settings.sfxVolume = engine._web_state(15); settings.musicVolume = engine._web_state(16);
+    write('settings', settings).catch(error);
+  }
+  showHome();
+  if (presentation.diagnostics().message) say(presentation.diagnostics().message);
 }
 function showHome() {
   panel.hidden = true; panel.replaceChildren(); home.hidden = false; remapping = undefined;
-  el('play').textContent = running ? 'Retomar partida' : 'Jogar'; el('play').focus();
+  el('play').textContent = running ? 'Retomar partida' : 'Jogar'; updateSummary(); el('play').focus();
 }
 function showPanel(title: string) {
   home.hidden = true; panel.hidden = false; panel.replaceChildren();
@@ -88,14 +108,14 @@ async function content() {
   showPanel('Selecionar conteúdo');
   paragraph(running ? 'Para trocar de IWAD, volte à interface e recarregue a página após selecionar.' : 'Freedoom tem mapas e arte livres. Para DOOM original, importe seu próprio IWAD autorizado.');
   for (const item of [{ id: 'freedoom', name: 'Freedoom Phase 1 · conteúdo livre' }, ...wads]) {
-    button(`${selected === item.id ? '✓ ' : ''}${item.name}`, async () => { selected = item.id; await write('selected', selected); say(`Selecionado: ${item.name}`); content(); });
+    button(`${selected === item.id ? '✓ ' : ''}${item.name}`, async () => { selected = item.id; await write('selected', selected); updateSummary(); say(`Selecionado: ${item.name}`); content(); });
   }
   for (const item of wads) button(`Remover conteúdo: ${item.name}`, () => {
     showPanel('Remover IWAD'); paragraph(`Remover ${item.name} deste navegador? Preserve sua cópia em um arquivo local. Saves e a partida ativa serão mantidos.`);
     button('Confirmar remoção', async () => {
       wads = wads.filter(w => w.id !== item.id); await write('wads', wads); await remove('wad:' + item.id);
       if (selected === item.id) { selected = 'freedoom'; await write('selected', selected); }
-      say('IWAD removido do armazenamento local.'); content();
+      updateSummary(); say('IWAD removido do armazenamento local.'); content();
     }); button('Cancelar', content); panel.querySelector<HTMLElement>('button')?.focus();
   });
   back();
@@ -111,8 +131,19 @@ function controls() {
   button('Restaurar controles padrão', async () => { input = new InputState(); await saveSettings(); controls(); }); back();
 }
 function configure() {
-  showPanel('Rotação e desempenho');
-  const fields: [keyof Omit<Settings,'bindings'>, string, number, number, number][] = [
+  showPanel('Configurações');
+  paragraph('Escolha a resposta do giro, a apresentação e o som. As alterações são reversíveis; seus saves continuam compatíveis.');
+  const presets = document.createElement('div'); presets.className = 'preset-grid'; panel.append(presets);
+  for (const [name, preset] of Object.entries(turnPresets)) {
+    const b = button(preset.label, async () => {
+      settings = applyTurnPreset(settings, name as TurnPreset); await saveSettings(); configure();
+    });
+    b.dataset.preset = name; b.title = preset.description;
+    b.setAttribute('aria-pressed', String(selectedTurnPreset(settings) === name)); presets.append(b);
+  }
+  const heading = (text: string) => { const h = document.createElement('h3'); h.textContent = text; panel.append(h); };
+  heading('Resposta do giro');
+  const fields: [keyof Pick<Settings,'initial'|'acceleration'|'maximum'|'sensitivity'|'deceleration'>, string, number, number, number][] = [
     ['initial', 'Velocidade inicial (°/s)', 1, 360, 1], ['acceleration', 'Aceleração (°/s²)', 0, 2000, 10],
     ['maximum', 'Velocidade máxima (°/s)', 1, 720, 1], ['sensitivity', 'Sensibilidade', .1, 3, .1],
     ['deceleration', 'Desaceleração (°/s²; zero = parada imediata)', 0, 4000, 10]
@@ -122,11 +153,43 @@ function configure() {
     const field = document.createElement('input'); field.type = 'number'; field.min = `${min}`; field.max = `${max}`; field.step = `${step}`; field.value = `${settings[key]}`; field.dataset.setting = key;
     label.append(field); panel.append(label);
   }
-  paragraph('Renderização clássica 320×200, aspecto 4:3 e escala por pixels. Simulação de 35 tics/s. Sem mira vertical, Pointer Lock ou controles de toque.');
+  heading('Movimento');
+  const runLabel = document.createElement('label');
+  const run = document.createElement('input'); run.type = 'checkbox'; run.checked = settings.alwaysRun; run.dataset.setting = 'alwaysRun';
+  const runKeys = input.bindings.run.every(key => key.startsWith('Shift')) ? 'Shift' : input.bindings.run.map(keyLabel).join(' / ');
+  runLabel.append(run, ` Correr continuamente · ${runKeys} para caminhar`); panel.append(runLabel);
+  paragraph('WASD move, setas giram, J atira e E abre portas. Auto-aim vertical e física clássica preservados.');
+  heading('Apresentação');
+  const displayLabel = document.createElement('label'); displayLabel.textContent = 'Estilo da imagem';
+  const display = document.createElement('select'); display.dataset.setting = 'presentation';
+  for (const [value,text] of [['sharp','Nítido · pixels clássicos'],['smooth','Suave · escala suavizada'],['crt','CRT · linhas e vinheta leves']]) {
+    const option = document.createElement('option'); option.value = value; option.textContent = text; display.append(option);
+  }
+  display.value = settings.presentation; displayLabel.append(display); panel.append(displayLabel);
+  const numberField = (key: 'brightness'|'sfxVolume'|'musicVolume', text: string, min: number, max: number, step: number) => {
+    const label = document.createElement('label'); label.textContent = text;
+    const field = document.createElement('input'); field.type = 'number'; field.min = `${min}`; field.max = `${max}`; field.step = `${step}`;
+    field.value = `${settings[key]}`; field.dataset.setting = key; label.append(field); panel.append(label);
+  };
+  numberField('brightness','Brilho da apresentação', .75, 1.35, .05);
+  paragraph('A imagem mantém a proporção 4:3 e a resolução interna clássica. CRT é opcional e usa o modo nítido se o efeito estiver indisponível.');
+  heading('Áudio');
+  numberField('sfxVolume','Efeitos sonoros · 0 silencia',0,15,1);
+  numberField('musicVolume','Música · 0 silencia',0,15,1);
+  paragraph('Enter ao retomar tenta liberar o áudio. Som confirmado no browser não substitui o teste de escuta no seu dispositivo.');
   button('Salvar configurações', async () => {
     const next = { ...settings };
-    panel.querySelectorAll<HTMLInputElement>('[data-setting]').forEach(f => { next[f.dataset.setting as keyof Omit<Settings,'bindings'>] = f.valueAsNumber; });
+    panel.querySelectorAll<HTMLInputElement|HTMLSelectElement>('[data-setting]').forEach(f => {
+      const key = f.dataset.setting!;
+      if (f instanceof HTMLSelectElement) next.presentation = f.value as Settings['presentation'];
+      else if (key === 'alwaysRun') next.alwaysRun = f.checked;
+      else (next as unknown as Record<string, unknown>)[key] = f.valueAsNumber;
+    });
     settings = sanitizeSettings(next); await saveSettings(); configure();
+  });
+  button('Restaurar experiência clássica', async () => {
+    settings = { ...structuredClone(baseSettings), bindings: structuredClone(input.bindings) };
+    await saveSettings(); configure();
   }); back();
 }
 function sync(populate = false) {
@@ -190,7 +253,7 @@ async function importWad(file: File) {
   const next = [...wads.filter(w => w.id !== id), item];
   if (next.length > 8) throw new Error('Limite de 8 IWADs.');
   await write('wad:' + id, data); await write('wads', next); wads = next; selected = id; await write('selected', selected);
-  say(`IWAD validado e armazenado: ${item.name}`); content();
+  updateSummary(); say(`IWAD validado e armazenado: ${item.name}`); content();
 }
 async function loadScript() {
   if (window.createDoom) return;
@@ -214,6 +277,7 @@ async function start(load = false) {
     if (hash !== (custom?.id ?? '7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d')) throw new Error('IWAD corrompido: SHA-256 divergente. Importe novamente.');
     await loadScript();
     engine = await window.createDoom!({ canvas, noInitialRun: true,
+      onFrame: () => presentation.frame(),
       locateFile: (path: string) => new URL(path, location.href).href,
       print: (line: string) => console.info('[doom]', line), printErr: (line: string) => console.warn('[doom]', line),
       onAbort: (reason: string) => { showShell(); error(new Error(`Motor abortado: ${reason}. Recarregue para tentar novamente.`)); },
@@ -224,9 +288,9 @@ async function start(load = false) {
     await sync(true);
     activeSavePath = `/persist/saves/${hash}`; engine.FS.mkdirTree(activeSavePath);
     engine.FS.writeFile('/game.wad', new Uint8Array(data));
-    engine.FS.writeFile('/default.cfg', 'mouse_sensitivity 0\nsfx_volume 8\nmusic_volume 6\nshow_messages 1\nscreenblocks 10\n');
+    engine.FS.writeFile('/default.cfg', `mouse_sensitivity 0\nsfx_volume ${settings.sfxVolume}\nmusic_volume ${settings.musicVolume}\nshow_messages 1\nscreenblocks 10\n`);
     engine.FS.writeFile('/chocolate.cfg', 'fullscreen 0\nwindow_width 640\nwindow_height 480\naspect_ratio_correct 1\ninteger_scaling 0\nforce_software_renderer 0\nsnd_musicdevice 3\nsnd_sfxdevice 3\nsnd_samplerate 22050\nuse_mouse 0\ngrabmouse 0\nshow_endoom 0\nvanilla_savegame_limit 0\n');
-    shell.hidden = true; game.hidden = false; canvas.focus();
+    shell.hidden = true; game.hidden = false; presentation.apply(settings); presentation.setActive(true); canvas.focus();
     engine.callMain(['-iwad', '/game.wad', '-config', '/default.cfg', '-extraconfig', '/chocolate.cfg', '-savedir', activeSavePath + '/', '-nomouse', '-nojoystick', '-noautoload', '-warp', '1', '1', '-skill', '3']);
     await new Promise<void>((resolve, reject) => {
       const until = performance.now() + 45000;
@@ -235,7 +299,7 @@ async function start(load = false) {
         else if (performance.now() > until) { clearInterval(timer); reject(new Error('Motor não chegou à fase em 45 segundos.')); }
       }, 50);
     });
-    running = true; queuedLoad = load; applyConfig(); suspend();
+    running = true; queuedLoad = load; applyConfig(true); suspend();
     say('Motor pronto. Enter retoma a partida e tenta desbloquear o áudio.');
   } catch (e) { shell.hidden = false; game.hidden = true; error(e); }
   finally { starting = false; el<HTMLButtonElement>('play').disabled = false; }
@@ -291,6 +355,8 @@ window.addEventListener('keydown', event => {
     }
     if (code === 'Escape' || code === 'KeyV') { event.preventDefault(); showHome(); return; }
   }
+  if (!panel.hidden && (target instanceof HTMLSelectElement || (target instanceof HTMLInputElement && target.type === 'checkbox')) && ['Escape','Backspace','KeyV'].includes(code)) { event.preventDefault(); showHome(); return; }
+  if (target instanceof HTMLInputElement && target.type === 'checkbox' && code === 'Enter') { event.preventDefault(); target.checked = !target.checked; return; }
   if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return;
   if (code === 'ArrowDown' || code === 'ArrowUp') {
     event.preventDefault();
@@ -348,6 +414,7 @@ async function init() {
     wads = await read<Wad[]>('wads') ?? []; selected = await read<string>('selected') ?? 'freedoom';
     if (selected !== 'freedoom' && !wads.some(w => w.id === selected)) { selected = 'freedoom'; say('IWAD anterior ausente; Freedoom selecionado.'); }
     else say('Pronto. Enter em Jogar inicia Freedoom ou o IWAD selecionado.');
+    presentation.apply(settings); updateSummary();
     initialized = true;
     home.querySelectorAll<HTMLButtonElement>('button').forEach(button => { button.disabled = false; });
     if (document.activeElement === document.body) el('play').focus();

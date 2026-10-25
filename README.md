@@ -9,7 +9,7 @@ O motor executa mapas reais e preserva as mecânicas clássicas. A distribuiçã
 ## Jogar no navegador
 
 1. Abra a URL HTTPS com conexão e teclado físico. Em tablets, paisagem é recomendada; a orientação é livre.
-2. Aguarde a preparação offline terminar (aproximadamente 33 MiB de recursos de execução).
+2. Aguarde a preparação offline terminar (aproximadamente 30 MiB de recursos de execução).
 3. Selecione **Jogar** com Enter. Quando aparecer a partida suspensa, pressione Enter novamente para retomar e tentar liberar o áudio.
 4. Para o conteúdo original, use **Importar WAD** e o seletor de arquivos do browser. A seleção inicial pode usar a interface nativa do sistema; a partida e os menus funcionam pelo teclado.
 
@@ -32,6 +32,17 @@ Nenhum IWAD ou save é enviado ao servidor. O MVP aceita IWADs de DOOM 1 / Freed
 Menus nativos: setas, Enter e Backspace. Perguntas do DOOM podem exigir Y/N. Durante nomes de saves, as letras são texto. Remapeie ações em Controles. Browser e sistema operacional podem consumir atalhos antes de entregá-los à página; por isso há alternativas sem modificadores.
 
 Configurações permitem velocidade inicial, aceleração, velocidade máxima, sensibilidade e parada imediata ou desaceleração. A rotação é calculada no motor a 35 Hz. Auto-aim vertical e mecânicas clássicas são preservados. Nos campos numéricos, Enter avança e V retorna.
+
+## Modernização 0.2.0
+
+O launcher e as configurações foram redesenhados, com orientação de teclado antes de entrar na partida. Em **Configurações**:
+
+- **Clássico, Precisão e Ágil:** presets de resposta do giro, com ajustes numéricos preservados.
+- **Correr continuamente:** opcional; Shift passa a caminhar. Desativado por padrão, sem alterar velocidades, física ou compatibilidade dos saves.
+- **Nítido, Suave e CRT:** apresentação opcional do framebuffer; CRT experimental usa um passe WebGL próprio com fallback Nítido e custo adicional medido; Nítido é o padrão. Brilho afeta também o HUD. A resolução interna continua 320×200, em 4:3.
+- **Música e efeitos independentes:** valores 0–15; zero silencia a respectiva contribuição. Suspender a partida também suspende o áudio; Enter tenta retomá-lo.
+
+**Restaurar experiência clássica** desfaz esses ajustes e preserva o remapeamento. Todas as mudanças continuam locais e disponíveis offline após preparar a nova versão. Veja [execução do roadmap e evidências](docs/modernization/RELEASE.md), [direção visual](docs/modernization/DESIGN.md) e [estudo de renderização](docs/modernization/RENDERING.md). Não há novo renderer de geometria, mira vertical ou assets comerciais adicionados.
 
 ## Recursos e compatibilidade
 
@@ -83,7 +94,7 @@ Esses comandos são para o executor de desenvolvimento na nuvem. A imagem de too
 
 A [equipe de agentes](agents/README.md) reúne nove especialidades para evoluir design, gráficos e jogabilidade do porte para browsers. Há perfis de trabalho, pesquisa de competências publicadas por estúdios, referências de especialistas, plano incremental e configuração nativa para clientes Codex compatíveis. Veja também [AGENTS.md](AGENTS.md).
 
-A criação da equipe não muda o jogo publicado nem implementa automaticamente o [roadmap proposto](agents/ROADMAP.md). Cada melhoria precisa de uma tarefa concreta, evidência e validação adequada; a base Classic continua disponível.
+A equipe executou a primeira release do [roadmap de modernização](agents/ROADMAP.md), com responsabilidades, evidências e revisão independente. A base Classic continua disponível; regras de simulação novas e um renderer de geometria diferente permanecem propostas documentadas.
 
 ## Repositório, URL e dados existentes
 

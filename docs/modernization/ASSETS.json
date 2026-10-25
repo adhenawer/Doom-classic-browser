@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-25",
+  "assets": [
+    {
+      "id": "launcher",
+      "source": "web/index.html",
+      "author": "Criado para DOOM Classic Browser nesta implementação",
+      "license": "GPL-2.0-or-later",
+      "sha256": "ec65919aca6a0d6d8fe5cf96cb51037cc52f48b798d5c9e2c0a4472831d45480",
+      "modifications": "SVG inline do corredor, extraído do elemento viewBox 0 0 600 280; geometria original"
+    },
+    {
+      "id": "style",
+      "source": "web/style.css",
+      "author": "Criado para DOOM Classic Browser nesta implementação",
+      "license": "GPL-2.0-or-later",
+      "sha256": "56d85bff09497c459bdb78de10fb3325a92cd8ad518c4f2ee4c2167cb3581e9f",
+      "modifications": "Identidade e estados próprios; fontes apenas do sistema"
+    },
+    {
+      "id": "presentation",
+      "source": "web/presentation.ts",
+      "author": "Criado para DOOM Classic Browser nesta implementação",
+      "license": "GPL-2.0-or-later",
+      "sha256": "a28f24b1e388e3faa0b425c40c885ed063b886be119b8d83cc4d9d12107725c6",
+      "modifications": "Shaders e integração WebGL próprios"
+    },
+    {
+      "id": "freedoom-reference",
+      "source": "web/generated/freedoom1.wad",
+      "origin": "https://github.com/freedoom/freedoom/releases/tag/v0.13.0",
+      "version": "0.13.0",
+      "license": "BSD-3-Clause",
+      "sha256": "7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d",
+      "modifications": "Nenhuma; E1M1 usado para capturas e testes",
+      "attribution": [
+        "FREEDOOM-COPYING.txt",
+        "FREEDOOM-CREDITS.txt",
+        "FREEDOOM-CREDITS-MUSIC.txt"
+      ]
+    }
+  ]
+}

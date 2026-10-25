@@ -36,8 +36,8 @@ Exemplos de tarefas:
 
 - [TEAM.md](TEAM.md): missão, responsabilidades, coordenação e evidências.
 - [RESEARCH.md](RESEARCH.md): fontes primárias, requisitos observados e referências pessoais.
-- [ROADMAP.md](ROADMAP.md): evolução proposta e limites técnicos; nenhuma dessas funcionalidades é declarada implementada.
+- [ROADMAP.md](ROADMAP.md): planejamento, execução da primeira release e limites técnicos.
 - [REVIEW.md](REVIEW.md): revisão da configuração e limites do que foi validado nesta entrega.
 - [Proposta](templates/proposal.md) e [revisão](templates/review.md): contratos de entrega.
 
-Esta entrega cria a equipe e o plano. A modernização visual e de gameplay será executada em tarefas concretas; o jogo publicado continua com suas mecânicas e apresentação atuais.
+A equipe já executou a primeira release do roadmap, documentada em [RELEASE.md](../docs/modernization/RELEASE.md). Os perfis seguem disponíveis para novas tarefas; não significam agentes permanentemente em execução.

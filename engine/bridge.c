@@ -6,16 +6,39 @@
 #include "m_menu.h"
 #include "m_controls.h"
 #include "turn.h"
+/* The first resume is requested directly in the keyboard gesture. Completion
+ * handlers reconcile the latest intent if blur/resume overlap asynchronously. */
+EM_JS(int, web_audio_request, (int wants_running), {
+    var context = Module['SDL2']?.audioContext;
+    if (!context || context.state === 'closed') return -1;
+    Module['webAudioWanted'] = !!wants_running;
+    var reconcile = function() {
+        var requested = Module['webAudioWanted'];
+        var operation = requested ? context.resume() : context.suspend();
+        operation.then(function() {
+            if (requested !== Module['webAudioWanted']) reconcile();
+        }).catch(function() {});
+    };
+    reconcile();
+    return context.state === 'running' ? 1 : 0;
+});
 extern boolean menuactive;
 extern int saveStringEnter;
 extern void web_clock_pause(int paused);
 int web_suspended = 0;
 static int web_left = 0, web_right = 0;
+/* Physical Shift is separate from the logical run key: Comfort inverts only
+ * this input action and still uses the original walking/running speeds. */
+static int web_always_run = 0, web_speed_down = 0;
 static web_turn_t web_turn = {60, 360, 180, 1, 0, 0, 0, 0};
 static int web_last_forward, web_last_side, web_last_angle, web_last_buttons;
 EMSCRIPTEN_KEEPALIVE void web_key(int key, int down, int character) {
     event_t event = {0};
     if (key < 0 || key >= NUMKEYS) return;
+    if (key == KEY_RSHIFT) {
+        web_speed_down = !!down;
+        down = web_speed_down ^ web_always_run;
+    }
     event.type = down ? ev_keydown : ev_keyup;
     event.data1 = key;
     event.data2 = character;
@@ -32,6 +55,8 @@ EMSCRIPTEN_KEEPALIVE void web_reset(void) {
     mousex = mousey = joyxmove = joyymove = joystrafemove = 0;
     next_weapon = 0;
     web_left = web_right = 0;
+    web_speed_down = 0;
+    gamekeydown[KEY_RSHIFT] = web_always_run;
     web_turn_reset(&web_turn);
 }
 EMSCRIPTEN_KEEPALIVE void web_suspend(int value) {
@@ -39,20 +64,26 @@ EMSCRIPTEN_KEEPALIVE void web_suspend(int value) {
     web_reset();
     web_suspended = !!value;
     web_clock_pause(web_suspended);
+    if (web_suspended) web_audio_request(0);
 }
 EMSCRIPTEN_KEEPALIVE int web_menu(void) { return menuactive; }
 EMSCRIPTEN_KEEPALIVE int web_text(void) { return saveStringEnter; }
-EMSCRIPTEN_KEEPALIVE int web_audio(void) {
-    return EM_ASM_INT({
-        var context = Module['SDL2']?.audioContext;
-        if (!context) return -1;
-        if (context.state !== 'running') context.resume().catch(() => {});
-        return context.state === 'running' ? 1 : 0;
-    });
-}
+EMSCRIPTEN_KEEPALIVE int web_audio(void) { return web_audio_request(1); }
+
 static double bounded(double v, double low, double high, double fallback) {
     if (!isfinite(v)) return fallback;
     return v < low ? low : (v > high ? high : v);
+}
+EMSCRIPTEN_KEEPALIVE void web_comfort(int always_run) {
+    web_always_run = !!always_run;
+    gamekeydown[KEY_RSHIFT] = web_speed_down ^ web_always_run;
+}
+EMSCRIPTEN_KEEPALIVE void web_mix(int sfx, int music) {
+    sfxVolume = sfx < 0 ? 0 : (sfx > 15 ? 15 : sfx);
+    musicVolume = music < 0 ? 0 : (music > 15 ? 15 : music);
+    /* Match the native menu's scale and values so its sliders stay truthful. */
+    S_SetSfxVolume(sfxVolume * 8);
+    S_SetMusicVolume(musicVolume * 8);
 }
 EMSCRIPTEN_KEEPALIVE void web_config(double initial, double acceleration, double maximum,
                                    double sensitivity, double deceleration) {
@@ -85,6 +116,9 @@ EMSCRIPTEN_KEEPALIVE double web_state(int selector) {
         case 11: return p->ammo[am_clip];
         case 12: return p->readyweapon;
         case 13: return paused;
+        case 14: return web_always_run;
+        case 15: return sfxVolume;
+        case 16: return musicVolume;
         default: return -1;
     }
 }

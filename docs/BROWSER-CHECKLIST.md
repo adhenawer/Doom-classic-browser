@@ -49,3 +49,13 @@ Os resultados automatizados em Chromium e WebKit desktop Linux estão em [VALIDA
 - [ ] Atualizar online, fechar os clientes antigos e verificar a próxima abertura offline.
 
 Cada browser controla quotas, persistência, instalação, atalhos e ativação de áudio. O resultado de um perfil não certifica os demais. Mantenha cópias de IWADs e backups de saves fora do armazenamento do browser.
+
+## Modernização 0.2.0
+
+- [ ] Launcher e opções sem overflow; fluxo completo por setas, Enter, Tab e alternativas de voltar.
+- [ ] Presets e Correr continuamente com WASD/setas/Shift simultâneos; Classic continua reversível.
+- [ ] Efeito CRT opt-in apresenta cena/HUD corretos; indisponibilidade/perda de contexto restitui Nítido sem parar o motor.
+- [ ] Brilho, áudio independente e remapeamentos persistem e entram em backup.
+- [ ] Suspensão interrompe tics e áudio; Enter retoma, inclusive em alternância rápida de foco.
+- [ ] Atualização preserva dados existentes e ativa somente após fechar os clientes.
+- [ ] Reabertura offline mantém as preferências modernas, IWAD e save; avaliar custo gráfico no hardware usado.

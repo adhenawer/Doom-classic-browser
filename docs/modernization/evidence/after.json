@@ -1,0 +1,117 @@
+{
+  "commit": "3166c39054d8fa15c6e3d1fa526df22ed8e00c5c",
+  "workingTree": "modified",
+  "browser": "141.0.7390.37",
+  "viewport": {
+    "width": 1180,
+    "height": 820
+  },
+  "iwadSHA256": "7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d",
+  "scene": "Freedoom 0.13 E1M1 spawn, no input for 180 requestAnimationFrame callbacks",
+  "artifactVersion": "5261381f364e9178",
+  "runtimeHashes": {
+    "assets/index-BrkKRrg6.css": "956ddc860e2682f8c9513dec34358ad8b1c7a81d5cb30e2f9e3f3e48d5f30244",
+    "assets/index-CJw_e-Lb.js": "db3b158ebd5944c1bcdeee735bc8f82e9da2a3ef19580f926ce4e4081cdb136d",
+    "chocolate-doom.wasm": "a797c52114ba95b8139d6466780e3aa59c9fdaabc9aecc5de57a6d5b466e6faf",
+    "doom.js": "6ddb775dad5c55a592f94e44fbe03a79d67cfd133cebfa34c8cb2f5c7ed9853b"
+  },
+  "resources": 16,
+  "runtimeBytes": 31224761,
+  "results": [
+    {
+      "mode": "sharp",
+      "warmth": "cold",
+      "shellMs": 175.64723200000003,
+      "bootMs": 3597.897601,
+      "samples": 180,
+      "rafMedianMs": 16.699999999999818,
+      "rafP95Ms": 33.399999999999636,
+      "rafP99Ms": 33.400000000000546,
+      "longTasks": 0,
+      "longestTaskMs": 0,
+      "presentation": {
+        "requested": "sharp",
+        "active": "sharp",
+        "frames": 0,
+        "renderMs": {
+          "mean": 0,
+          "p95": 0
+        },
+        "message": ""
+      }
+    },
+    {
+      "mode": "sharp",
+      "warmth": "warm",
+      "shellMs": 66.1083950000002,
+      "bootMs": 2290.473887,
+      "samples": 180,
+      "rafMedianMs": 16.699999999999818,
+      "rafP95Ms": 33.399999999999636,
+      "rafP99Ms": 33.40000000000009,
+      "longTasks": 0,
+      "longestTaskMs": 0,
+      "presentation": {
+        "requested": "sharp",
+        "active": "sharp",
+        "frames": 0,
+        "renderMs": {
+          "mean": 0,
+          "p95": 0
+        },
+        "message": ""
+      }
+    },
+    {
+      "mode": "crt",
+      "warmth": "cold",
+      "shellMs": 94.59951099999853,
+      "bootMs": 3766.4147790000025,
+      "samples": 180,
+      "rafMedianMs": 16.700000000000728,
+      "rafP95Ms": 50.100000000000364,
+      "rafP99Ms": 100.10000000000036,
+      "longTasks": 15,
+      "longestTaskMs": 121,
+      "presentation": {
+        "requested": "crt",
+        "active": "crt",
+        "frames": 106,
+        "renderMs": {
+          "mean": 6.365094339615613,
+          "p95": 10.5
+        },
+        "message": ""
+      }
+    },
+    {
+      "mode": "crt",
+      "warmth": "warm",
+      "shellMs": 87.71872400000211,
+      "bootMs": 2313.7564170000005,
+      "samples": 180,
+      "rafMedianMs": 16.700000000000728,
+      "rafP95Ms": 66.60000000000036,
+      "rafP99Ms": 116.59999999999945,
+      "longTasks": 23,
+      "longestTaskMs": 123,
+      "presentation": {
+        "requested": "crt",
+        "active": "crt",
+        "frames": 104,
+        "renderMs": {
+          "mean": 7.169230769245098,
+          "p95": 12.299999998882413
+        },
+        "message": ""
+      }
+    }
+  ],
+  "limitations": [
+    "Two samples per mode in headless Linux; not sustained target-device performance",
+    "rAF cadence is browser scheduling, not engine render FPS",
+    "renderMs is CPU/API upload and submission cost, not GPU time",
+    "No physical input, Bluetooth latency, device memory, listening quality or energy measurement",
+    "Cold CRT shader compilation happens before this cadence window; bootMs includes startup but does not isolate shader cost"
+  ]
+}

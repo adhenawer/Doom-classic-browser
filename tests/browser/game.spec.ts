@@ -18,11 +18,13 @@ test('keyboard shell, settings persistence, remapping, reserved modifier fallbac
   await expect(page.locator('#play')).toBeFocused();
   for (let i=0;i<3;i++) await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
-  await expect(page.locator('#panel h2')).toHaveText('Rotação e desempenho');
+  await expect(page.locator('#panel h2')).toHaveText('Configurações');
   await page.locator('[data-setting="initial"]').fill('75');
   await page.keyboard.press('Enter');
   await expect(page.locator('[data-setting="acceleration"]')).toBeFocused();
   for (let n=0;n<4;n++) await page.keyboard.press('Enter');
+  await expect(page.locator('[data-setting="alwaysRun"]')).toBeFocused();
+  for (let n=0;n<5;n++) await page.keyboard.press('Tab');
   await expect(page.getByRole('button',{name:'Salvar configurações'})).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('#status')).toHaveText('Configurações armazenadas neste navegador.');
@@ -141,6 +143,15 @@ test('complete offline cache, re-open engine without network, persisted save', a
   server.listen(0,'127.0.0.1');await once(server,'listening');
   const origin = `http://127.0.0.1:${(server.address() as any).port}${mount}`;
   try {
+  await page.goto(origin); await expect(page.locator('#settings')).toBeEnabled();
+  await page.locator('#settings').press('Enter');
+  await page.locator('[data-setting="presentation"]').selectOption('crt');
+  await page.locator('[data-setting="brightness"]').fill('1.1');
+  await page.locator('[data-setting="alwaysRun"]').press('Enter');
+  await page.locator('[data-setting="musicVolume"]').fill('0');
+  await page.getByRole('button',{name:'Salvar configurações',exact:true}).press('Enter');
+  await expect(page.locator('#status')).toHaveText('Configurações armazenadas neste navegador.');
+  await page.keyboard.press('KeyV');
   await boot(page, origin);
   await expect(page.locator('#offline')).toContainText('Preparado para offline',{timeout:60000});
   await page.keyboard.press('KeyK');
@@ -160,5 +171,10 @@ test('complete offline cache, re-open engine without network, persisted save', a
   await page.keyboard.press('Enter');
   await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(0);
   await expect.poll(()=>state(page,1)).toBe(0);
+  await expect.poll(()=>state(page,14)).toBe(1);
+  await expect.poll(()=>state(page,16)).toBe(0);
+  expect(await page.evaluate(()=>(window as any).doomPresentation.diagnostics().requested)).toBe('crt');
+  await expect(page.locator('#canvas')).toHaveCSS('filter','brightness(1.1)');
+  await page.keyboard.down('KeyW'); await expect.poll(()=>state(page,6)).toBe(50); await page.keyboard.up('KeyW');
   } finally { server.closeAllConnections(); server.close(); }
 });

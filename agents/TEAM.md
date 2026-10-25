@@ -34,7 +34,7 @@ O diretor é responsável por resolver prioridades e registrar decisões, não p
 
 ## Classic e evolução
 
-Classic é a base atual: motor real, simulação de 35 Hz, auto-aim vertical, física e mapas compatíveis, WASD e giro independente por setas. Modern é uma trilha **proposta**, não um modo já implementado.
+Classic é a base atual: motor real, simulação de 35 Hz, auto-aim vertical, física e mapas compatíveis, WASD e giro independente por setas. A release 0.2.0 entrega apresentação opcional e o perfil de entrada `comfort-v1`; regras Modern que alterem a simulação continuam propostas.
 
 Mudanças de apresentação podem preservar a simulação. Mudanças de câmera, colisão, armas, IA, pulo ou habilidades precisam ser identificadas como novas regras. Antes de introduzir incompatibilidade, defina versão de engine/perfil e separação ou migração de saves; preserve o acesso aos saves Classic. Não habilite mira vertical como suposto recurso original.
 

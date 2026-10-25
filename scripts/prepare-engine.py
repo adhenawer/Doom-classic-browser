@@ -54,6 +54,21 @@ s = p.read_text()
 a = s.index('            case SDL_KEYDOWN:')
 b = s.index('            case SDL_MOUSEBUTTONDOWN:', a)
 p.write_text(s[:a] + '            case SDL_KEYDOWN:\n            case SDL_KEYUP:\n                break;\n\n' + s[b:])
+# The OPL emulation attenuates at volume zero but retains a small analog-like
+# residual. Gate only its contribution; still generate and advance music time.
+# This web build selects the SDL OPL backend, with no hardware OPL drivers.
+replace('opl/opl_sdl.c', 'static uint8_t *mix_buffer = NULL;',
+    'static uint8_t *mix_buffer = NULL;\nint web_opl_music_muted = 0;')
+replace('src/i_oplmusic.c', 'static int current_music_volume;',
+    'static int current_music_volume;\nextern int web_opl_music_muted;')
+replace('src/i_oplmusic.c', 'static void I_OPL_SetMusicVolume(int volume)\n{\n    unsigned int i;',
+    'static void I_OPL_SetMusicVolume(int volume)\n{\n    unsigned int i;\n    web_opl_music_muted = volume == 0;')
+replace('opl/opl_sdl.c', '    SDL_MixAudioFormat(buffer, mix_buffer, AUDIO_S16SYS, nsamples * 4,\n                       SDL_MIX_MAXVOLUME);',
+    '    if (!web_opl_music_muted)\n        SDL_MixAudioFormat(buffer, mix_buffer, AUDIO_S16SYS, nsamples * 4,\n                           SDL_MIX_MAXVOLUME);')
+# Present the optional post-process synchronously before WebGL discards its buffer.
+replace('src/i_video.c', '#include "SDL.h"', '#include "SDL.h"\n#include <emscripten.h>')
+replace('src/i_video.c', '    // Draw!\n\n    SDL_RenderPresent(renderer);',
+    '    // Draw!\n\n    SDL_RenderPresent(renderer);\n    EM_ASM({ Module["onFrame"]?.(); });')
 # Disable pointer capture unconditionally in this keyboard-only build.
 replace('src/i_video.c', 'static void UpdateGrab(void)\n{', 'static void UpdateGrab(void)\n{\n    return;')
 # Upstream exports runtime symbols through EXPORTED_FUNCTIONS; current emcc uses a separate option.

@@ -46,3 +46,14 @@ Registre modelo do iPad, versão do iPadOS, versão do Chrome, modelo/layout do 
 - [ ] Rodar por pelo menos 15 minutos em paisagem, verificando latência, aquecimento, fluidez e áudio.
 
 Limitações conhecidas: quotas e remoção de dados dependem do iPadOS. Eventos Bluetooth de conexão/desconexão não são garantidos para páginas. Orientação e fullscreen não são impostos; Canvas ocupa a área disponível. O seletor de arquivos e exportação podem usar UI nativa na preparação/gerência, fora da jogabilidade.
+
+## Modernização 0.2.0 — validação em dispositivo pendente
+
+- [ ] Conferir novo launcher em paisagem e em tamanho de texto maior, inclusive foco/rolagem em Configurações.
+- [ ] Comparar Clássico/Precisão/Ágil andando com WASD; avaliar conforto, não apenas a existência da aceleração.
+- [ ] Ativar Correr continuamente; Shift deve caminhar, soltar deve correr; trocar de aplicativo não pode deixar direção/tiro presos.
+- [ ] Comparar Nítido/Suave/CRT na mesma cena, incluindo HUD, leitura de inimigos e fadiga; testar retorno a Nítido.
+- [ ] Observar desempenho/temperatura/bateria com CRT e sem CRT durante uma sessão; nenhum ganho ou consumo foi certificado em hardware.
+- [ ] Ouvir música/efeitos separadamente, zero, níveis intermediários e retorno de outra aplicação; conferir que o áudio para ao suspender.
+- [ ] Reabrir offline com CRT/Conforto e preferências salvas; carregar save criado em Classic.
+- [ ] Restaurar experiência clássica sem perder remapeamentos, IWADs e saves.

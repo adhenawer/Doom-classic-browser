@@ -51,3 +51,7 @@ O porte usa WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Service Worker, co
 Siga [BROWSER-CHECKLIST.md](BROWSER-CHECKLIST.md) em cada browser e dispositivo. Para o uso do usuário no Chrome de um iPad, há o perfil complementar [IPAD-CHECKLIST.md](IPAD-CHECKLIST.md). Ele descreve teclado Bluetooth, atalhos do iPadOS e instalação pela tela inicial; não define o escopo geral do projeto.
 
 DOOM.WAD/DOOM1.WAD comerciais devem ser testados com arquivos autorizados; nenhum foi distribuído ou testado nesta sessão. Registre resultados de hardware separadamente dos automatizados.
+
+## Modernização 0.2.0
+
+A release adiciona cobertura de preferências, conforto, áudio e apresentação. Veja [resultados, medições e limites](modernization/RELEASE.md) e [revisão independente](modernization/QA.md). Os registros anteriores deste arquivo permanecem como histórico do MVP.

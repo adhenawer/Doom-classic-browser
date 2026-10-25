@@ -1,0 +1,45 @@
+{
+  "commit": "3166c39054d8fa15c6e3d1fa526df22ed8e00c5c",
+  "browser": "141.0.7390.37",
+  "viewport": {
+    "width": 1180,
+    "height": 820
+  },
+  "environment": "Linux headless Chromium in cloud; rAF cadence is not engine render time or physical input latency",
+  "iwadSHA256": "7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d",
+  "scene": "Freedoom 0.13 E1M1 spawn; baseline screenshots suspended at startup",
+  "results": [
+    {
+      "label": "cold",
+      "shellMs": 114,
+      "bootMs": 3809,
+      "rafMedianMs": 16.699999999999818,
+      "rafP95Ms": 33.30000000000018,
+      "rafP99Ms": 33.400000000000546,
+      "samples": 180,
+      "engine": {
+        "tic": 123,
+        "heapBytes": null
+      }
+    },
+    {
+      "label": "warm",
+      "shellMs": 75,
+      "bootMs": 2245,
+      "rafMedianMs": 16.699999999999818,
+      "rafP95Ms": 33.40000000000009,
+      "rafP99Ms": 50,
+      "samples": 180,
+      "engine": {
+        "tic": 127,
+        "heapBytes": null
+      }
+    }
+  ],
+  "resources": 16,
+  "limitations": [
+    "Two samples; not sustained hardware performance",
+    "HTTP/browser cache warm only; no CPU/GPU/RAM/energy claim",
+    "Bluetooth latency and iPad hardware unmeasured"
+  ]
+}
