@@ -65,3 +65,9 @@ Novas regras ou alta resolução interna exigem o protótipo específico identif
 ## Continuação 0.3.0 — alta resolução
 
 O usuário autorizou alta resolução. A opção Alta integra Crispy Doom fixado e compilado na mesma toolchain, com rasterização real 640×400; Clássica mantém Chocolate 320×200. Saves são separados e os slots legados copiados no primeiro perfil Alta vazio. A troca usa novo documento e ambos os binários entram no cache offline. [Provas, medidas e limites](../docs/HIRES.md) e [revisão](../docs/HIRES-QA.md) registram a entrega. As notas anteriores permanecem como histórico da 0.2.0; alta resolução não é atribuída ao shader.
+
+## Discovery posterior à 0.3.0 — nitidez e materiais
+
+Status: **investigação concluída em 25/10/2026; implementação do novo renderer pendente**. O [relatório consolidado](../docs/discovery/README.md) reúne análises independentes de rendering, arte e plataforma. Define o recorte D1–D4: build próprio EDGE-Classic/WebGL2 singlethread, ponte de teclado, metas de saída 4:3 960×720/1280×960/1600×1200 e uma cena com 8–12 texturas livres HD. O heap inicial upstream de 512 MiB é condição de viabilidade, não consumo medido; revisar e medir antes de adotar.
+
+O estudo cobre Woof, DSDA, GZDoom/UZDoom e forks web, filtros, mipmaps, texturas CC0, upscale offline por IA e obrigações por asset. PBR efetivo no caminho web não foi comprovado e exige outro gate. Preservar Classic/Alta e seus saves; um backend novo terá dados próprios. D5–D8 descrevem filtros, persistência/offline, QA/hardware e investigação de material avançado. Não há novo binário, pack HD integrado, benchmark de candidato ou teste físico declarado por esta pesquisa.

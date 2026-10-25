@@ -41,6 +41,10 @@ Alta rasteriza **quatro vezes mais pixels**, mantendo o aspecto de exibição 4:
 
 Crispy permanece com auto-aim vertical, 35 tics/s e extensões de pulo/mira livre desativadas. Sua simulação não é declarada idêntica à do Chocolate; Clássica mantém a base anterior. O custo da alta resolução precisa ser avaliado em cada dispositivo. Veja [arquitetura, medições e validação](docs/HIRES.md) e [revisão independente](docs/HIRES-QA.md).
 
+## Discovery de próxima evolução gráfica
+
+O [discovery de renderização, nitidez e materiais](docs/discovery/README.md) compara alternativas além de 640×400, filtros, texturas HD/PBR, memória, licenças e viabilidade offline. Recomenda um protótipo EDGE-Classic/WebGL2 com texturas livres selecionadas, condicionado à validação de memória, teclado e persistência. Esse estudo e seu plano não representam funcionalidades já integradas na versão 0.3.0.
+
 ## Modernização 0.2.0
 
 O launcher e as configurações foram redesenhados, com orientação de teclado antes de entrar na partida. Em **Configurações**:
