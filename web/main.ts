@@ -25,6 +25,14 @@ const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElem
 const shell = el('shell'), game = el('game'), panel = el('panel'), home = el('home');
 const canvas = el<HTMLCanvasElement>('canvas'), status = el('status');
 const baseSettings: Settings = { initial: 60, acceleration: 360, maximum: 180, sensitivity: 1, deceleration: 0, bindings: structuredClone(defaults) };
+const actionLabels: Record<string, string> = {
+  forward: 'Avançar', backward: 'Recuar', strafeLeft: 'Deslocar para a esquerda', strafeRight: 'Deslocar para a direita',
+  turnLeft: 'Girar para a esquerda', turnRight: 'Girar para a direita', fire: 'Atirar', run: 'Correr',
+  use: 'Interagir / abrir portas', next: 'Próxima arma', previous: 'Arma anterior', map: 'Mapa',
+  menu: 'Menu / pausa', back: 'Voltar', save: 'Salvar jogo', load: 'Carregar jogo', shell: 'Interface e configurações'
+};
+const keyLabels: Record<string, string> = { ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', Space: 'Espaço', ControlLeft: 'Ctrl esquerdo', ShiftLeft: 'Shift esquerdo', ShiftRight: 'Shift direito', Escape: 'Esc' };
+const keyLabel = (key: string) => keyLabels[key] ?? key.replace(/^Key/, '');
 let settings = structuredClone(baseSettings), input = new InputState(), engine: Engine | undefined;
 let wads: Wad[] = [], selected = 'freedoom', running = false, suspended = false, starting = false;
 let queuedLoad = false;
@@ -97,7 +105,7 @@ function controls() {
   paragraph('Partida: WASD + setas. Enter confirma. P abre o menu, M abre o mapa, K salva, L carrega e H volta à interface. Nos menus do motor: Y confirma perguntas e N cancela. Para nomear saves, digite e confirme com Enter.');
   paragraph('Escolha uma ação para remapear. Escape cancela a captura. Teclas reservadas pelo sistema podem não chegar ao aplicativo.');
   for (const [action, keys] of Object.entries(input.bindings)) {
-    const b = button(`${action}: ${keys.join(' / ')}`, () => { reset(); remapping = action; b.textContent = `${action}: pressione uma tecla…`; });
+    const b = button(`${actionLabels[action]}: ${keys.map(keyLabel).join(' / ')}`, () => { reset(); remapping = action; b.textContent = `${actionLabels[action]}: pressione uma tecla…`; });
     b.dataset.action = action;
   }
   button('Restaurar controles padrão', async () => { input = new InputState(); await saveSettings(); controls(); }); back();
@@ -274,6 +282,15 @@ window.addEventListener('keydown', event => {
     return;
   }
   const target = event.target as HTMLElement;
+  if (target instanceof HTMLInputElement && target.type === 'number' && !panel.hidden) {
+    if (code === 'Enter') {
+      event.preventDefault();
+      const fields = [...panel.querySelectorAll<HTMLElement>('input,button,select')];
+      fields[(fields.indexOf(target) + 1) % fields.length]?.focus();
+      return;
+    }
+    if (code === 'Escape' || code === 'KeyV') { event.preventDefault(); showHome(); return; }
+  }
   if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return;
   if (code === 'ArrowDown' || code === 'ArrowUp') {
     event.preventDefault();
@@ -332,7 +349,7 @@ async function init() {
     if (selected !== 'freedoom' && !wads.some(w => w.id === selected)) { selected = 'freedoom'; say('IWAD anterior ausente; Freedoom selecionado.'); }
     else say('Pronto. Enter em Jogar inicia Freedoom ou o IWAD selecionado.');
     initialized = true;
-    el<HTMLButtonElement>('play').disabled = false;
+    home.querySelectorAll<HTMLButtonElement>('button').forEach(button => { button.disabled = false; });
     if (document.activeElement === document.body) el('play').focus();
     if (navigator.storage?.persist) await navigator.storage.persist();
   } catch (e) { error(e); }
