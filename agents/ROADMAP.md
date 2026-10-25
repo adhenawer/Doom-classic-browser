@@ -61,3 +61,7 @@ Não há orçamento novo aceito ou medido nesta entrega. O time deve propor limi
 | M80 | Regressão, revisão independente, fonte correspondente, notas e rollback da release |
 
 Novas regras ou alta resolução interna exigem o protótipo específico identificado no estudo, em vez de serem atribuídas aos filtros desta versão. A liberação de outro motor não foi decidida.
+
+## Continuação 0.3.0 — alta resolução
+
+O usuário autorizou alta resolução. A opção Alta integra Crispy Doom fixado e compilado na mesma toolchain, com rasterização real 640×400; Clássica mantém Chocolate 320×200. Saves são separados e os slots legados copiados no primeiro perfil Alta vazio. A troca usa novo documento e ambos os binários entram no cache offline. [Provas, medidas e limites](../docs/HIRES.md) e [revisão](../docs/HIRES-QA.md) registram a entrega. As notas anteriores permanecem como histórico da 0.2.0; alta resolução não é atribuída ao shader.

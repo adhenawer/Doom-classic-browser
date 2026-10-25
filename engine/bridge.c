@@ -6,6 +6,7 @@
 #include "m_menu.h"
 #include "m_controls.h"
 #include "turn.h"
+#include "r_state.h"
 /* The first resume is requested directly in the keyboard gesture. Completion
  * handlers reconcile the latest intent if blur/resume overlap asynchronously. */
 EM_JS(int, web_audio_request, (int wants_running), {
@@ -119,6 +120,22 @@ EMSCRIPTEN_KEEPALIVE double web_state(int selector) {
         case 14: return web_always_run;
         case 15: return sfxVolume;
         case 16: return musicVolume;
+        case 17: return SCREENWIDTH;
+        case 18: return SCREENHEIGHT;
+        case 19:
+#ifdef WEB_HIRES_ENGINE
+            return 1;
+#else
+            return 0;
+#endif
+        case 20: return viewwidth;
+        case 21: return viewheight;
+        case 22:
+#ifdef WEB_HIRES_ENGINE
+            return crispy->freelook | crispy->freeaim | crispy->jump | crispy->overunder;
+#else
+            return 0;
+#endif
         default: return -1;
     }
 }

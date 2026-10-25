@@ -21,6 +21,8 @@ for dependency in json.loads((root / 'engine/DEPENDENCIES.json').read_text()):
             for name in ['emscripten-4.0.18/LICENSE', 'emscripten-4.0.18/system/lib/libc/musl/COPYRIGHT']:
                 notices.append(t.extractfile(name).read().decode())
     print('Verified corresponding dependency source:', dependency['file'])
+notices.append('\n===== Optional Crispy Doom renderer =====\n')
+notices.append((root / 'web/generated/CRISPY-COPYING.txt').read_text())
 notices.append('\n===== Vite build helper / module preload polyfill =====\n')
 notices.append((root / 'node_modules/vite/LICENSE.md').read_text())
 (root / 'web/generated/THIRD-PARTY-NOTICES.txt').write_text('\n'.join(notices))

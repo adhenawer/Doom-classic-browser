@@ -5,9 +5,10 @@ import { baseSettings as gameplayDefaults, sanitizeSettings as sanitizeGameplay,
 import { Presentation, sanitizePresentation, type PresentationSettings } from './presentation';
 import { validateWad, wadHash, MAX_WAD } from './wad';
 import { read, write, remove } from './storage';
+import { engineProfiles, backupProfiles, highConfig, sanitizeResolution, saveDirectory, validateSavePath, validateBackupProfiles, type Resolution } from './engine-profile';
 
 type Wad = { id: string; name: string; bytes: number };
-type Settings = GameplaySettings & PresentationSettings;
+type Settings = GameplaySettings & PresentationSettings & { resolution: Resolution };
 type FS = {
   mkdirTree(p: string): void; mount(type: unknown, options: object, p: string): void;
   filesystems: { IDBFS: unknown }; syncfs(populate: boolean, cb: (e?: Error) => void): void;
@@ -22,12 +23,13 @@ type Engine = { FS: FS; callMain(args: string[]): void; _web_key(k: number, d: n
 };
 declare global { interface Window {
   createDoom?: (options: object) => Promise<Engine>;
+  createDoomHigh?: (options: object) => Promise<Engine>;
   doom?: Engine; doomPresentation?: Presentation;
 } }
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const shell = el('shell'), game = el('game'), panel = el('panel'), home = el('home');
 const canvas = el<HTMLCanvasElement>('canvas'), status = el('status');
-const baseSettings: Settings = { ...gameplayDefaults, ...sanitizePresentation(undefined) };
+const baseSettings: Settings = { ...gameplayDefaults, ...sanitizePresentation(undefined), resolution: 'classic' };
 const presentation = new Presentation(canvas, game);
 window.doomPresentation = presentation;
 const actionLabels: Record<string, string> = {
@@ -41,6 +43,7 @@ const keyLabel = (key: string) => keyLabels[key] ?? key.replace(/^Key/, '');
 let settings = structuredClone(baseSettings), input = new InputState(), engine: Engine | undefined;
 let wads: Wad[] = [], selected = 'freedoom', running = false, suspended = false, starting = false;
 let queuedLoad = false;
+let activeResolution: Resolution | undefined;
 let remapping: string | undefined, previousMenu = false;
 let sent = new Set<number>(), activeSavePath = '', syncQueue = Promise.resolve();
 let swRegistration: ServiceWorkerRegistration | undefined;
@@ -48,14 +51,20 @@ let initialized = false;
 const say = (message: string) => { status.textContent = message; };
 const error = (e: unknown) => { say(`Erro: ${e instanceof Error ? e.message : String(e)}`); console.error(e); };
 function sanitizeSettings(raw: unknown): Settings {
-  return { ...sanitizeGameplay(raw), ...sanitizePresentation(raw) };
+  const resolution = raw && typeof raw === 'object' ? sanitizeResolution((raw as Record<string, unknown>).resolution) : 'classic';
+  return { ...sanitizeGameplay(raw), ...sanitizePresentation(raw), resolution };
 }
 function updateSummary() {
   const name = selected === 'freedoom' ? 'Freedoom Phase 1' : wads.find(w => w.id === selected)?.name ?? 'Conteúdo indisponível';
   shell.dataset.gameplayProfile = gameplayProfile(settings);
   if (el('selectedContent')) el('selectedContent').textContent = name;
   const runKeys = input.bindings.run.every(key => key.startsWith('Shift')) ? 'Shift' : input.bindings.run.map(keyLabel).join(' / ');
-  if (el('profileSummary')) el('profileSummary').textContent = settings.alwaysRun ? `Conforto · ${runKeys} para caminhar` : `Clássico · ${runKeys} para correr`;
+  const resolution = running ? activeResolution! : settings.resolution;
+  const profile = engineProfiles[resolution];
+  shell.dataset.resolution = resolution;
+  const response = settings.alwaysRun ? `Conforto · ${runKeys} para caminhar` : `Clássico · ${runKeys} para correr`;
+  const pending = running && settings.resolution !== activeResolution ? ' · mudança agendada' : '';
+  if (el('profileSummary')) el('profileSummary').textContent = `${response} · ${profile.width}×${profile.height}${pending}`;
 }
 function applyConfig(mix = false) {
   engine?._web_config(settings.initial, settings.acceleration, settings.maximum, settings.sensitivity, settings.deceleration);
@@ -130,9 +139,25 @@ function controls() {
   }
   button('Restaurar controles padrão', async () => { input = new InputState(); await saveSettings(); controls(); }); back();
 }
+function restartResolution() {
+  showPanel('Aplicar resolução');
+  const profile = engineProfiles[settings.resolution];
+  paragraph(`A próxima partida usará ${profile.width}×${profile.height} internos (${settings.resolution === 'high' ? 'Crispy Doom' : 'Chocolate Doom'}). O aplicativo será reiniciado. Progresso que você não salvou no menu do DOOM será perdido.`);
+  paragraph('Os saves são mantidos separadamente por motor. Na primeira entrada em Alta, os saves clássicos são copiados sem alterar os originais.');
+  const apply = button('Aplicar resolução e reiniciar', async () => {
+    if (apply.disabled) return;
+    apply.disabled = true;
+    try {
+      if (running) { suspend(); await sync(); }
+      await write('settings', settings); location.reload();
+    } catch (e) { apply.disabled = false; throw e; }
+  });
+  if (running) button('Retomar resolução atual', resume);
+  button('Voltar às configurações', configure); panel.querySelector<HTMLElement>('button')?.focus();
+}
 function configure() {
   showPanel('Configurações');
-  paragraph('Escolha a resposta do giro, a apresentação e o som. As alterações são reversíveis; seus saves continuam compatíveis.');
+  paragraph('Ajuste giro, imagem e som. A resolução escolhe o motor da próxima partida, com saves separados e preservação dos originais.');
   const presets = document.createElement('div'); presets.className = 'preset-grid'; panel.append(presets);
   for (const [name, preset] of Object.entries(turnPresets)) {
     const b = button(preset.label, async () => {
@@ -159,6 +184,19 @@ function configure() {
   const runKeys = input.bindings.run.every(key => key.startsWith('Shift')) ? 'Shift' : input.bindings.run.map(keyLabel).join(' / ');
   runLabel.append(run, ` Correr continuamente · ${runKeys} para caminhar`); panel.append(runLabel);
   paragraph('WASD move, setas giram, J atira e E abre portas. Auto-aim vertical e física clássica preservados.');
+  heading('Resolução interna');
+  const resolutionLabel = document.createElement('label'); resolutionLabel.textContent = 'Resolução do motor';
+  const resolution = document.createElement('select'); resolution.dataset.setting = 'resolution';
+  for (const [value,text] of [['classic','Clássica · 320×200 · Chocolate Doom'],['high','Alta · 640×400 · Crispy Doom · 4× pixels']]) {
+    const option = document.createElement('option'); option.value = value; option.textContent = text; resolution.append(option);
+  }
+  resolution.value = settings.resolution; resolutionLabel.append(resolution); panel.append(resolutionLabel);
+  paragraph('Alta renderiza mais detalhe na cena e pode consumir mais recursos. A exibição mantém 4:3. A troca de motor é aplicada ao reiniciar o aplicativo.');
+  if (running) {
+    const active = engineProfiles[activeResolution!];
+    paragraph(`Partida atual: ${active.width}×${active.height}. ${settings.resolution !== activeResolution ? 'Há uma mudança de resolução agendada.' : 'Resolução selecionada em uso.'}`);
+  }
+  if (running && settings.resolution !== activeResolution) button('Aplicar nova resolução', restartResolution);
   heading('Apresentação');
   const displayLabel = document.createElement('label'); displayLabel.textContent = 'Estilo da imagem';
   const display = document.createElement('select'); display.dataset.setting = 'presentation';
@@ -172,7 +210,7 @@ function configure() {
     field.value = `${settings[key]}`; field.dataset.setting = key; label.append(field); panel.append(label);
   };
   numberField('brightness','Brilho da apresentação', .75, 1.35, .05);
-  paragraph('A imagem mantém a proporção 4:3 e a resolução interna clássica. CRT é opcional e usa o modo nítido se o efeito estiver indisponível.');
+  paragraph('Nítido e Suave apresentam a resolução escolhida. CRT é opcional e usa o modo nítido se o efeito estiver indisponível.');
   heading('Áudio');
   numberField('sfxVolume','Efeitos sonoros · 0 silencia',0,15,1);
   numberField('musicVolume','Música · 0 silencia',0,15,1);
@@ -181,7 +219,10 @@ function configure() {
     const next = { ...settings };
     panel.querySelectorAll<HTMLInputElement|HTMLSelectElement>('[data-setting]').forEach(f => {
       const key = f.dataset.setting!;
-      if (f instanceof HTMLSelectElement) next.presentation = f.value as Settings['presentation'];
+      if (f instanceof HTMLSelectElement) {
+        if (key === 'resolution') next.resolution = sanitizeResolution(f.value);
+        else next.presentation = f.value as Settings['presentation'];
+      }
       else if (key === 'alwaysRun') next.alwaysRun = f.checked;
       else (next as unknown as Record<string, unknown>)[key] = f.valueAsNumber;
     });
@@ -212,20 +253,21 @@ function download(name: string, data: Blob) {
 }
 async function saves() {
   showPanel('Saves e backups');
-  paragraph('Saves originais: K salva e L carrega durante o jogo. Cópias persistidas ficam associadas ao SHA-256 do IWAD. Exporte backups: o navegador pode remover dados locais.');
+  paragraph('K salva e L carrega durante o jogo. Saves são separados por motor e SHA-256 do IWAD. Exporte backups: o navegador pode remover dados locais.');
   if (engine) {
-    for (const path of listFiles().filter(p => /\/doomsav[0-5]\.dsg$/.test(p))) {
-      paragraph(`${path.includes(activeSavePath + '/') ? 'Atual' : 'Outro IWAD'} · ${path.split('/').slice(-2).join('/')}`);
-      button(`Excluir ${path.split('/').slice(-2).join('/')}`, () => {
-        showPanel('Excluir save'); paragraph('Esta ação remove o save local. Exporte um backup antes, se precisar preservá-lo.');
+    for (const path of listFiles().filter(p => validateSavePath(p, 2))) {
+      const engineLabel = path.includes('/saves-hires/') ? 'Alta' : 'Clássica';
+      paragraph(`${engineLabel} · ${path.includes(activeSavePath + '/') ? 'Atual' : 'Outro perfil/IWAD'} · ${path.split('/').slice(-2).join('/')}`);
+      button(`Excluir ${engineLabel} · ${path.split('/').slice(-2).join('/')}`, () => {
+        showPanel('Excluir save'); paragraph(`Excluir o save ${engineLabel} · ${path.split('/').slice(-2).join('/')}? Exporte um backup antes, se precisar preservá-lo.`);
         button('Confirmar exclusão', async () => { engine!.FS.unlink(path); await sync(); say('Save excluído e remoção persistida.'); saves(); });
         button('Cancelar', saves); panel.querySelector<HTMLElement>('button')?.focus();
       });
     }
     button('Exportar backup de saves e configurações', async () => {
       await sync();
-      const files = listFiles().filter(p => /\/doomsav[0-5]\.dsg$/.test(p)).map(path => ({ path, data: btoa(Array.from(engine!.FS.readFile(path), b => String.fromCharCode(b)).join('')) }));
-      download('doom-backup.json', new Blob([JSON.stringify({ version: 1, settings, files })], { type: 'application/json' }));
+      const files = listFiles().filter(p => validateSavePath(p, 2)).map(path => ({ path, data: btoa(Array.from(engine!.FS.readFile(path), b => String.fromCharCode(b)).join('')) }));
+      download('doom-backup.json', new Blob([JSON.stringify({ version: 2, profiles: backupProfiles, settings, files })], { type: 'application/json' }));
     });
   } else paragraph('Inicie o motor para acessar e exportar saves.');
   button('Importar backup', () => { if (!engine) throw new Error('Inicie uma partida primeiro e volte com H.'); el<HTMLInputElement>('backupFile').click(); });
@@ -234,9 +276,9 @@ async function saves() {
 async function importBackup(file: File) {
   if (!engine || file.size > 16 * 1024 * 1024) throw new Error('Backup indisponível ou maior que 16 MiB.');
   const raw = JSON.parse(await file.text());
-  if (raw.version !== 1 || !Array.isArray(raw.files) || raw.files.length > 60) throw new Error('Formato de backup inválido.');
+  if (![1,2].includes(raw.version) || (raw.version === 2 && !validateBackupProfiles(raw.profiles)) || !Array.isArray(raw.files) || raw.files.length > 120) throw new Error('Formato de backup inválido.');
   const checked = raw.files.map((f: {path: string; data: string}) => {
-    if (!f || typeof f.path !== 'string' || !/^\/persist\/saves\/[a-f0-9]{64}\/doomsav[0-5]\.dsg$/.test(f.path) || typeof f.data !== 'string' || f.data.length > 2 * 1024 * 1024) throw new Error('Caminho ou tamanho de save inválido.');
+    if (!f || typeof f.path !== 'string' || !validateSavePath(f.path, raw.version) || typeof f.data !== 'string' || f.data.length > 2 * 1024 * 1024) throw new Error('Caminho ou tamanho de save inválido.');
     const bytes = Uint8Array.from(atob(f.data), c => c.charCodeAt(0));
     if (bytes.length < 50) throw new Error('Save incompleto.');
     return { path: f.path, bytes };
@@ -255,17 +297,38 @@ async function importWad(file: File) {
   await write('wad:' + id, data); await write('wads', next); wads = next; selected = id; await write('selected', selected);
   updateSummary(); say(`IWAD validado e armazenado: ${item.name}`); content();
 }
-async function loadScript() {
-  if (window.createDoom) return;
+async function loadScript(resolution: Resolution) {
+  const profile = engineProfiles[resolution];
+  if (window[profile.factory]) return;
   await new Promise<void>((resolve, reject) => {
-    const script = document.createElement('script'); script.src = new URL('doom.js', location.href).href;
-    script.onload = () => resolve(); script.onerror = () => { script.remove(); reject(new Error('Loader WASM ausente. Verifique a preparação offline.')); }; document.head.append(script);
+    const script = document.createElement('script'); script.src = new URL(profile.loader, location.href).href;
+    script.onload = () => resolve(); script.onerror = () => { script.remove(); reject(new Error('Loader WASM ausente. Verifique a preparação offline ou selecione Clássica.')); }; document.head.append(script);
   });
+}
+async function migrateClassicSaves(hash: string) {
+  if (!engine || activeResolution !== 'high') return;
+  const fs = engine.FS, target = saveDirectory('high',hash), marker = `${target}/.classic-migration-v1`;
+  if (fs.readdir(target).includes('.classic-migration-v1')) return;
+  const existing = new Set(fs.readdir(target));
+  const source = saveDirectory('classic',hash);
+  let names: string[] = [];
+  try { names = fs.readdir(source); } catch { /* No legacy profile for this IWAD. */ }
+  if (!names.length || ![...existing].some(name => /^doomsav[0-5]\.dsg$/.test(name))) {
+    for (const name of names.filter(name => /^doomsav[0-5]\.dsg$/.test(name))) {
+      if (!existing.has(name)) fs.writeFile(`${target}/${name}`, fs.readFile(`${source}/${name}`));
+    }
+  }
+  fs.writeFile(marker, engineProfiles.high.id); await sync();
 }
 async function start(load = false) {
   if (!initialized) { say('Aguarde a leitura do armazenamento local.'); return; }
-  if (running) { resume(); if (load) tap(189); return; }
+  if (running) {
+    if (settings.resolution !== activeResolution) { restartResolution(); return; }
+    resume(); if (load) tap(189); return;
+  }
   if (starting) return;
+  // A failed runtime must be replaced in a fresh document, never mounted twice.
+  if (engine) { restartResolution(); return; }
   starting = true; el<HTMLButtonElement>('play').disabled = true; say('Carregando o motor real…');
   try {
     const custom = wads.find(w => w.id === selected);
@@ -275,8 +338,9 @@ async function start(load = false) {
     if (!data) { const response = await fetch('./freedoom1.wad', { cache: 'no-store' }); if (!response.ok) throw new Error('Freedoom indisponível.'); data = await response.arrayBuffer(); }
     validateWad(data); const hash = await wadHash(data);
     if (hash !== (custom?.id ?? '7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d')) throw new Error('IWAD corrompido: SHA-256 divergente. Importe novamente.');
-    await loadScript();
-    engine = await window.createDoom!({ canvas, noInitialRun: true,
+    activeResolution = settings.resolution;
+    await loadScript(activeResolution);
+    engine = await window[engineProfiles[activeResolution].factory]!({ canvas, noInitialRun: true,
       onFrame: () => presentation.frame(),
       locateFile: (path: string) => new URL(path, location.href).href,
       print: (line: string) => console.info('[doom]', line), printErr: (line: string) => console.warn('[doom]', line),
@@ -286,10 +350,11 @@ async function start(load = false) {
     window.doom = engine;
     engine.FS.mkdirTree('/persist'); engine.FS.mount(engine.FS.filesystems.IDBFS, {}, '/persist');
     await sync(true);
-    activeSavePath = `/persist/saves/${hash}`; engine.FS.mkdirTree(activeSavePath);
+    activeSavePath = saveDirectory(activeResolution, hash); engine.FS.mkdirTree(activeSavePath);
+    await migrateClassicSaves(hash);
     engine.FS.writeFile('/game.wad', new Uint8Array(data));
-    engine.FS.writeFile('/default.cfg', `mouse_sensitivity 0\nsfx_volume ${settings.sfxVolume}\nmusic_volume ${settings.musicVolume}\nshow_messages 1\nscreenblocks 10\n`);
-    engine.FS.writeFile('/chocolate.cfg', 'fullscreen 0\nwindow_width 640\nwindow_height 480\naspect_ratio_correct 1\ninteger_scaling 0\nforce_software_renderer 0\nsnd_musicdevice 3\nsnd_sfxdevice 3\nsnd_samplerate 22050\nuse_mouse 0\ngrabmouse 0\nshow_endoom 0\nvanilla_savegame_limit 0\n');
+    engine.FS.writeFile('/default.cfg', `mouse_sensitivity 0\nsfx_volume ${settings.sfxVolume}\nmusic_volume ${settings.musicVolume}\nshow_messages 1\nscreenblocks 10\ndetaillevel 0\n`);
+    engine.FS.writeFile('/chocolate.cfg', 'fullscreen 0\nwindow_width 640\nwindow_height 480\naspect_ratio_correct 1\ninteger_scaling 0\nforce_software_renderer 0\nsnd_musicdevice 3\nsnd_sfxdevice 3\nsnd_samplerate 22050\nuse_mouse 0\ngrabmouse 0\nshow_endoom 0\nvanilla_savegame_limit 0\n' + (activeResolution === 'high' ? highConfig : ''));
     shell.hidden = true; game.hidden = false; presentation.apply(settings); presentation.setActive(true); canvas.focus();
     engine.callMain(['-iwad', '/game.wad', '-config', '/default.cfg', '-extraconfig', '/chocolate.cfg', '-savedir', activeSavePath + '/', '-nomouse', '-nojoystick', '-noautoload', '-warp', '1', '1', '-skill', '3']);
     await new Promise<void>((resolve, reject) => {

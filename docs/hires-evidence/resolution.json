@@ -1,0 +1,130 @@
+{
+  "commit": "52ba90715e2d73d2f5637229dc2d9f35c06e93ab",
+  "workingTree": "modified",
+  "browser": "141.0.7390.37",
+  "viewport": {
+    "width": 1180,
+    "height": 820
+  },
+  "iwadSHA256": "7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d",
+  "scene": "Freedoom 0.13 E1M1 spawn, skill3, sharp presentation; screenshots after renderer callback at tic>=35",
+  "artifact": "d4131058444e5623",
+  "runtimeBytes": 33901225,
+  "resources": 19,
+  "engineHashes": {
+    "classic": "16c7f69f7e90498aa0b7e8ff63d8b0df6de98fb24714bf6eeb5d09bcff72ff22",
+    "high": "c7bde9e6277a2dcfb2d91fbeb821b2f50fc50cf12980bcdda63ed381ed2144dd"
+  },
+  "results": [
+    {
+      "resolution": "classic",
+      "warmth": "cold",
+      "shellMs": 229.47587299999998,
+      "bootMs": 4130.51412,
+      "dimensions": {
+        "width": 320,
+        "height": 200,
+        "viewWidth": 320,
+        "viewHeight": 168,
+        "backend": 0,
+        "optionalRules": 0
+      },
+      "screenshotTic": 35,
+      "samples": 180,
+      "elapsedMs": 3450.699999999255,
+      "rafMedianMs": 16.699999999999818,
+      "rafP95Ms": 33.399999999999636,
+      "rafP99Ms": 50,
+      "sdlPresentCallbacks": 108,
+      "sdlIntervalP95Ms": 60.600000001490116,
+      "logicalTics": 120,
+      "longTasks": 1,
+      "longestTaskMs": 54,
+      "errors": []
+    },
+    {
+      "resolution": "classic",
+      "warmth": "warm",
+      "shellMs": 57.840353000001414,
+      "bootMs": 2099.1669330000004,
+      "dimensions": {
+        "width": 320,
+        "height": 200,
+        "viewWidth": 320,
+        "viewHeight": 168,
+        "backend": 0,
+        "optionalRules": 0
+      },
+      "screenshotTic": 35,
+      "samples": 180,
+      "elapsedMs": 3314.699999999255,
+      "rafMedianMs": 16.699999999999818,
+      "rafP95Ms": 33.30000000000018,
+      "rafP99Ms": 33.400000000000546,
+      "sdlPresentCallbacks": 109,
+      "sdlIntervalP95Ms": 57.80000000074506,
+      "logicalTics": 116,
+      "longTasks": 0,
+      "longestTaskMs": 0,
+      "errors": []
+    },
+    {
+      "resolution": "high",
+      "warmth": "cold",
+      "shellMs": 169.69131600000037,
+      "bootMs": 4072.0340620000025,
+      "dimensions": {
+        "width": 640,
+        "height": 400,
+        "viewWidth": 640,
+        "viewHeight": 336,
+        "backend": 1,
+        "optionalRules": 0
+      },
+      "screenshotTic": 35,
+      "samples": 180,
+      "elapsedMs": 3655.9000000003725,
+      "rafMedianMs": 16.699999999999818,
+      "rafP95Ms": 33.399999999999636,
+      "rafP99Ms": 100,
+      "sdlPresentCallbacks": 111,
+      "sdlIntervalP95Ms": 70.09999999962747,
+      "logicalTics": 123,
+      "longTasks": 5,
+      "longestTaskMs": 236,
+      "errors": []
+    },
+    {
+      "resolution": "high",
+      "warmth": "warm",
+      "shellMs": 59.12514999999985,
+      "bootMs": 2070.141836999999,
+      "dimensions": {
+        "width": 640,
+        "height": 400,
+        "viewWidth": 640,
+        "viewHeight": 336,
+        "backend": 1,
+        "optionalRules": 0
+      },
+      "screenshotTic": 35,
+      "samples": 180,
+      "elapsedMs": 2996,
+      "rafMedianMs": 16.699999999999818,
+      "rafP95Ms": 16.700000000000728,
+      "rafP99Ms": 16.800000000000182,
+      "sdlPresentCallbacks": 104,
+      "sdlIntervalP95Ms": 38.09999999962747,
+      "logicalTics": 105,
+      "longTasks": 0,
+      "longestTaskMs": 0,
+      "errors": []
+    }
+  ],
+  "limitations": [
+    "Two samples per mode in headless Linux, not device performance certification",
+    "rAF cadence and SDL submission intervals are scheduling observations, not GPU timing or physical display FPS",
+    "Logical tics are observed over this short window; physical input/Bluetooth latency, RAM total and energy not measured",
+    "Classic-to-high source and physics are related but not asserted bit-identical; profiles and saves stay separate"
+  ]
+}

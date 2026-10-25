@@ -24,7 +24,7 @@ test('keyboard shell, settings persistence, remapping, reserved modifier fallbac
   await expect(page.locator('[data-setting="acceleration"]')).toBeFocused();
   for (let n=0;n<4;n++) await page.keyboard.press('Enter');
   await expect(page.locator('[data-setting="alwaysRun"]')).toBeFocused();
-  for (let n=0;n<5;n++) await page.keyboard.press('Tab');
+  for (let n=0;n<6;n++) await page.keyboard.press('Tab');
   await expect(page.getByRole('button',{name:'Salvar configurações'})).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('#status')).toHaveText('Configurações armazenadas neste navegador.');

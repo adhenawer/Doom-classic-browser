@@ -1,0 +1,11 @@
+{
+  "repository": "https://github.com/fabiangreffrath/crispy-doom",
+  "commit": "fdeabe4c23a833534b70aa84a22f1685aae7125d",
+  "version": "7.2.0",
+  "url": "https://codeload.github.com/fabiangreffrath/crispy-doom/tar.gz/fdeabe4c23a833534b70aa84a22f1685aae7125d",
+  "sha256": "1ae97a51e522006d35e6e333f4d3fb1edf377e7305f088775a9d968dd8ed66ea",
+  "bytes": 2657694,
+  "file": "crispy-doom-fdeabe4c23a833534b70aa84a22f1685aae7125d.tar.gz",
+  "license": "GPL-2.0-or-later",
+  "note": "Optional 640x400 renderer. Source archive is verified before extraction and included in source.tar.gz; Chocolate Doom remains the classic backend."
+}

@@ -57,3 +57,11 @@ Limitações conhecidas: quotas e remoção de dados dependem do iPadOS. Eventos
 - [ ] Ouvir música/efeitos separadamente, zero, níveis intermediários e retorno de outra aplicação; conferir que o áudio para ao suspender.
 - [ ] Reabrir offline com CRT/Conforto e preferências salvas; carregar save criado em Classic.
 - [ ] Restaurar experiência clássica sem perder remapeamentos, IWADs e saves.
+
+## Alta resolução 0.3.0 — validação física pendente
+
+- [ ] Comparar Clássica 320×200 e Alta 640×400 na mesma cena; conferir legibilidade, HUD e proporção.
+- [ ] Conferir teclado, áudio e menus em Alta, inclusive teclas simultâneas e retorno de suspensão.
+- [ ] Trocar de resolução com partida salva e conferir os dois perfis de saves e o backup v2.
+- [ ] Preparar somente Clássica online; reabrir, trocar para Alta e carregar o save sem rede.
+- [ ] Observar estabilidade, aquecimento e consumo com Alta durante sessão prolongada; comparar Nítido e CRT separadamente.

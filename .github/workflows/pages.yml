@@ -21,7 +21,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm audit --audit-level=high
-      - name: Compile pinned engine in pinned toolchain
+      - name: Compile pinned Classic and High engines
         run: |
           docker run --rm --user "$(id -u):$(id -g)" \
             -e EM_CACHE=/src/build/emscripten-cache -v "$PWD:/src" -w /src \

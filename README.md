@@ -1,6 +1,6 @@
 # DOOM Classic Browser — porte de DOOM para browsers
 
-Porte jogável do **Chocolate Doom em C/WebAssembly para execução no navegador**, com teclado físico, dados locais e modo offline após a preparação inicial. O projeto atende browsers em computadores, notebooks e tablets. O Chrome de um iPad é um dos ambientes de uso previstos.
+Porte jogável de **Chocolate Doom (Clássica) e Crispy Doom (Alta) em C/WebAssembly para execução no navegador**, com teclado físico, dados locais e modo offline após a preparação inicial. O projeto atende browsers em computadores, notebooks e tablets. O Chrome de um iPad é um dos ambientes de uso previstos.
 
 **[Jogar no browser](https://adhenawer.github.io/Doom-classic-browser/)** · [Builds e testes](https://github.com/adhenawer/Doom-classic-browser/actions) · [Validação](docs/VALIDATION.md)
 
@@ -9,7 +9,7 @@ O motor executa mapas reais e preserva as mecânicas clássicas. A distribuiçã
 ## Jogar no navegador
 
 1. Abra a URL HTTPS com conexão e teclado físico. Em tablets, paisagem é recomendada; a orientação é livre.
-2. Aguarde a preparação offline terminar (aproximadamente 30 MiB de recursos de execução).
+2. Aguarde a preparação offline terminar (aproximadamente 33 MiB de recursos de execução).
 3. Selecione **Jogar** com Enter. Quando aparecer a partida suspensa, pressione Enter novamente para retomar e tentar liberar o áudio.
 4. Para o conteúdo original, use **Importar WAD** e o seletor de arquivos do browser. A seleção inicial pode usar a interface nativa do sistema; a partida e os menus funcionam pelo teclado.
 
@@ -33,13 +33,21 @@ Menus nativos: setas, Enter e Backspace. Perguntas do DOOM podem exigir Y/N. Dur
 
 Configurações permitem velocidade inicial, aceleração, velocidade máxima, sensibilidade e parada imediata ou desaceleração. A rotação é calculada no motor a 35 Hz. Auto-aim vertical e mecânicas clássicas são preservados. Nos campos numéricos, Enter avança e V retorna.
 
+## Alta resolução 0.3.0
+
+Em **Configurações → Resolução do motor**, escolha **Alta · 640×400 · Crispy Doom** e salve. Se já há uma partida, use **Aplicar nova resolução → Aplicar resolução e reiniciar**; salve o progresso no menu do DOOM antes, pois reiniciar não cria um save. Depois entre em Jogar/Carregar jogo. Preferências antigas continuam em Clássica (320×200).
+
+Alta rasteriza **quatro vezes mais pixels**, mantendo o aspecto de exibição 4:3. Isso melhora o detalhe geométrico sem criar texturas novas; não é zoom/CSS, Full HD ou filtro. O menu permite voltar a Clássica. Cada motor tem saves próprios: a primeira entrada em Alta copia os slots clássicos para o perfil novo, sem sobrescrever os originais. Backups novos incluem ambos; backups antigos continuam aceitos. O cache prepara os dois motores para a troca offline.
+
+Crispy permanece com auto-aim vertical, 35 tics/s e extensões de pulo/mira livre desativadas. Sua simulação não é declarada idêntica à do Chocolate; Clássica mantém a base anterior. O custo da alta resolução precisa ser avaliado em cada dispositivo. Veja [arquitetura, medições e validação](docs/HIRES.md) e [revisão independente](docs/HIRES-QA.md).
+
 ## Modernização 0.2.0
 
 O launcher e as configurações foram redesenhados, com orientação de teclado antes de entrar na partida. Em **Configurações**:
 
 - **Clássico, Precisão e Ágil:** presets de resposta do giro, com ajustes numéricos preservados.
 - **Correr continuamente:** opcional; Shift passa a caminhar. Desativado por padrão, sem alterar velocidades, física ou compatibilidade dos saves.
-- **Nítido, Suave e CRT:** apresentação opcional do framebuffer; CRT experimental usa um passe WebGL próprio com fallback Nítido e custo adicional medido; Nítido é o padrão. Brilho afeta também o HUD. A resolução interna continua 320×200, em 4:3.
+- **Nítido, Suave e CRT:** apresentação opcional do framebuffer; CRT experimental usa um passe WebGL próprio com fallback Nítido e custo adicional medido; Nítido é o padrão. Brilho afeta também o HUD. A resolução interna depende da seleção Clássica/Alta; os filtros preservam esse framebuffer.
 - **Música e efeitos independentes:** valores 0–15; zero silencia a respectiva contribuição. Suspender a partida também suspende o áudio; Enter tenta retomá-lo.
 
 **Restaurar experiência clássica** desfaz esses ajustes e preserva o remapeamento. Todas as mudanças continuam locais e disponíveis offline após preparar a nova versão. Veja [execução do roadmap e evidências](docs/modernization/RELEASE.md), [direção visual](docs/modernization/DESIGN.md) e [estudo de renderização](docs/modernization/RENDERING.md). Não há novo renderer de geometria, mira vertical ou assets comerciais adicionados.
@@ -75,7 +83,7 @@ Abra a mesma URL no Chrome do iPad e use o teclado físico. Quando disponível, 
 
 O GitHub Actions compila e publica automaticamente após alterações em `main`. Pelo site do GitHub: **Actions → Build, test and publish DOOM**; use **Run workflow** para repetir. Em **Settings → Pages**, a fonte é **GitHub Actions**. Esse fluxo pode ser acompanhado pelo browser de qualquer dispositivo, inclusive um iPad, sem terminal ou compilação no dispositivo de jogo.
 
-Toolchain: Emscripten 4.0.18 em imagem fixada por digest; Chocolate Doom vendorizado em revisão fixada (`engine/UPSTREAM.json`). SDL e SDL_mixer vêm dos ports dessa toolchain. Freedoom 0.13.0 e as fontes das dependências são verificados por SHA-256.
+Toolchain: Emscripten 4.0.18 em imagem fixada por digest; Chocolate Doom vendorizado em revisão fixada (`engine/UPSTREAM.json`) e Crispy Doom obtido de archive com revisão/SHA-256 fixados (`engine/CRISPY.json`). SDL e SDL_mixer vêm dos ports dessa toolchain. Freedoom 0.13.0 e as fontes das dependências são verificados por SHA-256.
 
 ```sh
 npm ci
@@ -94,7 +102,7 @@ Esses comandos são para o executor de desenvolvimento na nuvem. A imagem de too
 
 A [equipe de agentes](agents/README.md) reúne nove especialidades para evoluir design, gráficos e jogabilidade do porte para browsers. Há perfis de trabalho, pesquisa de competências publicadas por estúdios, referências de especialistas, plano incremental e configuração nativa para clientes Codex compatíveis. Veja também [AGENTS.md](AGENTS.md).
 
-A equipe executou a primeira release do [roadmap de modernização](agents/ROADMAP.md), com responsabilidades, evidências e revisão independente. A base Classic continua disponível; regras de simulação novas e um renderer de geometria diferente permanecem propostas documentadas.
+A equipe executou a primeira release do [roadmap de modernização](agents/ROADMAP.md), com responsabilidades, evidências e revisão independente. A base Classic continua disponível. A release 0.3.0 adiciona alta resolução com Crispy; novas regras de combate permanecem propostas documentadas.
 
 ## Repositório, URL e dados existentes
 
@@ -104,6 +112,6 @@ O produto e a PWA se chamam **DOOM Classic Browser**, e o pacote é `doom-classi
 
 ## Licenças e privacidade
 
-Código do port: GPL-2.0-or-later; motor e componentes têm seus avisos preservados em `engine/upstream`. Veja [LICENSE](LICENSE) e [engine/upstream/COPYING.md](engine/upstream/COPYING.md). Freedoom: BSD de 3 cláusulas, com licença e créditos incluídos na publicação. Não distribuímos IWADs comerciais.
+Código do port: GPL-2.0-or-later; motores e componentes têm seus avisos preservados em `engine/upstream`, `engine/CRISPY.json` e `CRISPY-COPYING.txt` na publicação. Veja [LICENSE](LICENSE) e [engine/upstream/COPYING.md](engine/upstream/COPYING.md). Freedoom: BSD de 3 cláusulas, com licença e créditos incluídos na publicação. Não distribuímos IWADs comerciais.
 
 A publicação inclui `source.tar.gz` com código correspondente, adaptações e scripts de build. Não inclui IWADs importados, saves ou credenciais. Não há dependências de rede durante a partida preparada para offline. O provedor de hospedagem recebe as requisições normais de download enquanto online.

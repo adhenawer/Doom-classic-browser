@@ -55,3 +55,7 @@ DOOM.WAD/DOOM1.WAD comerciais devem ser testados com arquivos autorizados; nenhu
 ## Modernização 0.2.0
 
 A release adiciona cobertura de preferências, conforto, áudio e apresentação. Veja [resultados, medições e limites](modernization/RELEASE.md) e [revisão independente](modernization/QA.md). Os registros anteriores deste arquivo permanecem como histórico do MVP.
+
+## Alta resolução 0.3.0
+
+Veja [provas de buffer interno, saves e offline](HIRES.md) e [revisão independente](HIRES-QA.md). Os relatórios 0.1/0.2 permanecem como histórico; alta resolução usa outro backend explicitamente selecionado.

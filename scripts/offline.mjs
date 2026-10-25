@@ -6,7 +6,7 @@ for (const name of ['icon.svg', 'manifest.webmanifest']) await copyFile(`web/${n
 let html = await readFile('dist/index.html', 'utf8');
 html = html.replace(/href="[^"]*\.webmanifest"/, 'href="./manifest.webmanifest"').replace(/href="[^"]*\.svg"/, 'href="./icon.svg"');
 await writeFile('dist/index.html', html);
-execFileSync('tar', ['--sort=name', '--mtime=@0', '--owner=0', '--group=0', '--numeric-owner', '--exclude=./.git', '--exclude=./node_modules', '--exclude=./build', '--exclude=./dist', '--exclude=./web/generated', '--exclude=./test-results', '--exclude=./playwright-report', '-czf', 'dist/source.tar.gz', '.', '-C', 'build', 'dependency-sources']);
+execFileSync('tar', ['--sort=name', '--mtime=@0', '--owner=0', '--group=0', '--numeric-owner', '--exclude=./.git', '--exclude=__pycache__', '--exclude=./node_modules', '--exclude=./build', '--exclude=./dist', '--exclude=./web/generated', '--exclude=./test-results', '--exclude=./playwright-report', '-czf', 'dist/source.tar.gz', '.', '-C', 'build', 'dependency-sources']);
 async function walk(path) {
   const names = await readdir(path);
   return (await Promise.all(names.sort().map(async name => {
@@ -14,7 +14,7 @@ async function walk(path) {
     return (await stat(p)).isDirectory() ? walk(p) : [p];
   }))).flat();
 }
-for (const required of ['doom.js', 'chocolate-doom.wasm', 'freedoom1.wad', 'FREEDOOM-COPYING.txt', 'source.tar.gz']) {
+for (const required of ['doom.js', 'chocolate-doom.wasm', 'freedoom1.wad', 'FREEDOOM-COPYING.txt', 'doom-high.js', 'crispy-doom.wasm', 'CRISPY-COPYING.txt', 'source.tar.gz']) {
   if (!(await stat(`dist/${required}`)).size) throw new Error(`Missing artifact: ${required}`);
 }
 const files = (await walk('dist')).filter(p => !p.endsWith('/sw.js') && !p.endsWith('/offline-index.json'));

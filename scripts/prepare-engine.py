@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Make deterministic browser changes to a copy of the pinned upstream tree."""
 from pathlib import Path
-import shutil
+import shutil, sys
 root = Path(__file__).resolve().parent.parent
-target = root / 'build/engine'
+high = '--high' in sys.argv
+target = root / ('build/engine-high' if high else 'build/engine')
 if target.exists(): shutil.rmtree(target)
-shutil.copytree(root / 'engine/upstream', target)
+shutil.copytree(root / ('build/crispy-upstream' if high else 'engine/upstream'), target)
 def replace(path, old, new):
     p = target / path
     s = p.read_text()
@@ -74,5 +75,14 @@ replace('src/i_video.c', 'static void UpdateGrab(void)\n{', 'static void UpdateG
 # Upstream exports runtime symbols through EXPORTED_FUNCTIONS; current emcc uses a separate option.
 p = target / 'src/CMakeLists.txt'
 p.write_text(p.read_text().replace('-s EXPORTED_FUNCTIONS=_main,ccall,cwrap,FS,ENV,PATH,ERRNO_CODES',
-    '-s MODULARIZE=1 -s EXPORT_NAME=createDoom -s EXPORTED_FUNCTIONS=_main -s EXPORTED_RUNTIME_METHODS=callMain,FS,ccall -s FORCE_FILESYSTEM=1 -lidbfs.js -s ENVIRONMENT=web -s SDL2_MIXER_FORMATS=[] -s MAXIMUM_MEMORY=268435456 -s INITIAL_MEMORY=33554432'))
-print('Prepared pinned Chocolate Doom browser build')
+    f'-s MODULARIZE=1 -s EXPORT_NAME={"createDoomHigh" if high else "createDoom"} -s EXPORTED_FUNCTIONS=_main -s EXPORTED_RUNTIME_METHODS=callMain,FS,ccall -s FORCE_FILESYSTEM=1 -lidbfs.js -s ENVIRONMENT=web -s SDL2_MIXER_FORMATS=[] -s MAXIMUM_MEMORY=268435456 -s INITIAL_MEMORY=33554432'))
+if high:
+    # Expose six vanilla slots, one page, without new gameplay toggle menus.
+    replace('src/doom/m_menu.c', 'static const int savepage_max = 7;', 'static const int savepage_max = 0;')
+    replace('src/doom/m_menu.c', '    load7, // [crispy] up to 8 savegames\n    load8, // [crispy] up to 8 savegames\n', '')
+    for action in ['M_LoadSelect', 'M_SaveSelect']:
+        replace('src/doom/m_menu.c', f'    {{1,"", {action},\'7\'}}, // [crispy] up to 8 savegames\n    {{1,"", {action},\'8\'}}  // [crispy] up to 8 savegames\n', '')
+    replace('src/doom/m_menu.c', '    {1,"M_CRISPY",\tM_CrispnessCur,\'c\', "Crispness"} // [crispy] Crispness menu',
+        '    {-1,"",NULL,\'\\0\',NULL} // Browser owns renderer configuration.')
+    replace('src/doom/m_menu.c', '    detailLevel = 1 - detailLevel;', '    detailLevel = 0;')
+print('Prepared pinned', 'Crispy 640x400' if high else 'Chocolate Classic', 'browser build')
