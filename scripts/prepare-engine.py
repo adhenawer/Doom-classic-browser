@@ -12,6 +12,11 @@ def replace(path, old, new):
     s = p.read_text()
     if s.count(old) != 1: raise RuntimeError(f'Patch context changed: {path}: {old[:60]}')
     p.write_text(s.replace(old, new))
+# DOM keydown/keyup pairs can arrive as one burst between the 35 Hz tics.
+# The upstream 64-slot ring aliases full with empty after exactly 64 events
+# (e.g. clearing a save name, typing CLASSIC and Enter). Keep its FIFO behavior
+# but accommodate browser/menu bursts without losing the final key releases.
+replace('src/d_event.c', '#define MAXEVENTS 64\n', '#define MAXEVENTS 1024\n')
 replace('src/doom/g_game.c', '#include "doomdef.h"', '#include "doomdef.h"\n#include "turn.h"\n#include <emscripten.h>\n#include "d_ticcmd.h"\nextern int web_suspended;\nstatic void web_apply(ticcmd_t *cmd);')
 p = target / 'src/doom/g_game.c'
 p.write_text(p.read_text() + '\n#include "bridge.c"\nstatic void web_apply(ticcmd_t *cmd) {\n'

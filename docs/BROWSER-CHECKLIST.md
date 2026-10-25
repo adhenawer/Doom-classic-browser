@@ -59,3 +59,17 @@ Cada browser controla quotas, persistência, instalação, atalhos e ativação 
 - [ ] Suspensão interrompe tics e áudio; Enter retoma, inclusive em alternância rápida de foco.
 - [ ] Atualização preserva dados existentes e ativa somente após fechar os clientes.
 - [ ] Reabertura offline mantém as preferências modernas, IWAD e save; avaliar custo gráfico no hardware usado.
+
+## Moderno HD 0.4.0 — validação por dispositivo
+
+- [ ] Registrar browser/sistema, dispositivo, GPU quando conhecida, teclado e contexto (aba/PWA).
+- [ ] Em instalação existente, selecionar Moderno HD, salvar e aplicar o reinício. Preferências anteriores não mudam automaticamente.
+- [ ] Comparar as quatro resoluções, inclusive 3840×2880, mantendo proporção 4:3 e todos os cards do HUD visíveis.
+- [ ] Conferir HD ligado/desligado no Freedoom compatível; o pacote não altera a arte de IWADs com outro hash.
+- [ ] Conferir movimento/giro/tiro simultâneos, áudio por Enter e retorno do launcher às configurações após carregar um save.
+- [ ] Trocar HUD, resolução e HD com partida salva; carregar novamente após cada reinício.
+- [ ] Preparar todo o cache, encerrar o browser, desligar a conexão e iniciar Moderno pela primeira vez; salvar, encerrar e carregar offline.
+- [ ] Exportar/restaurar backup v3 e conferir os perfis Moderno/Alta/Clássica separadamente.
+- [ ] Observar uma sessão prolongada e vários reinícios; registrar travamentos, encerramentos de aba, atraso, áudio e aquecimento. Qualidade máxima não tem desempenho universal certificado.
+
+Use uma única aba de jogo por contexto. O relatório automatizado distingue Chromium com perfil em disco de WebKit com contexto isolado; nenhum deles substitui os testes físicos acima.

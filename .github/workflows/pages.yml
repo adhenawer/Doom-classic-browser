@@ -31,10 +31,14 @@ jobs:
       - run: python3 scripts/fetch-content.py
       - run: python3 scripts/fetch-modern-content.py
       - run: python3 scripts/fetch-dependency-sources.py
-      - name: Native rotation tests
+      - name: Native rotation and event queue tests
         run: |
           cc -std=c99 -Wall -Wextra -Werror tests/turn_test.c engine/turn.c -lm -o /tmp/turn-test
           /tmp/turn-test
+          cc -std=c99 -Wall -Wextra -Werror -Ibuild/engine/src -Ibuild/wasm tests/event_queue_test.c build/engine/src/d_event.c -o /tmp/event-queue-classic
+          /tmp/event-queue-classic Classic
+          cc -std=c99 -Wall -Wextra -Werror -Ibuild/engine-high/src -Ibuild/wasm-high tests/event_queue_test.c build/engine-high/src/d_event.c -o /tmp/event-queue-high
+          /tmp/event-queue-high High
       - run: npm test
       - run: npm run build
       - run: npx playwright install --with-deps chromium webkit

@@ -41,3 +41,5 @@ Exemplos de tarefas:
 - [Proposta](templates/proposal.md) e [revisão](templates/review.md): contratos de entrega.
 
 A equipe já executou a primeira release do roadmap, documentada em [RELEASE.md](../docs/modernization/RELEASE.md). Os perfis seguem disponíveis para novas tarefas; não significam agentes permanentemente em execução.
+
+A evolução **0.4.0 Moderno HD** acrescenta EDGE-Classic/WebGL2, resolução até 3840×2880, materiais HD/4K e HUD nativo, coordenados entre rendering, plataforma, arte/UX e QA. A preferência por qualidade visual sem orçamento artificial substitui os limites propostos no discovery. Veja [entrega e evidências](../docs/modern-hd/RELEASE.md) e [revisão independente](../docs/modern-hd/QA.md). As limitações do hardware/browser continuam sendo registradas com evidência.

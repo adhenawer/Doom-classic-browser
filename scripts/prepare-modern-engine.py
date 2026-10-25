@@ -10,6 +10,12 @@ def replace(path,old,new):
  p=target/path;s=p.read_text()
  if s.count(old)!=1: raise RuntimeError(f'Patch context changed: {path}: {old[:80]}')
  p.write_text(s.replace(old,new))
+# Identify the pinned source without embedding the wall-clock compilation time.
+# Application name/version remain upstream-owned; no build date is fabricated.
+pin=json.loads((root/'engine/EDGE.json').read_text())
+replace('source_files/edge/e_main.cc',
+ '    LogPrint("%s v%s compiled on " __DATE__ " at " __TIME__ "\\n", application_name.c_str(), edge_version.c_str());',
+ f'    LogPrint("%s v%s | upstream {pin["commit"]} | browser WebGL2\\n", application_name.c_str(), edge_version.c_str());')
 # Use the upstream one-thread WebGL2 backend, exporting the shared browser ABI.
 p=target/'cmake/Emscripten.cmake';s=p.read_text().replace('-sEXPORT_ES6=1','-sEXPORT_ES6=0').replace('createEdgeModule','createDoomModern').replace('-sINITIAL_MEMORY=512Mb','-sINITIAL_MEMORY=512Mb -sMAXIMUM_MEMORY=2147483648').replace('-gsource-map --source-map-base=/','')
 s += '\nadd_link_options("SHELL: -sEXPORTED_RUNTIME_METHODS=callMain,FS,ccall -sEXPORTED_FUNCTIONS=_main -sFORCE_FILESYSTEM=1")\n'

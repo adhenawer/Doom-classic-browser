@@ -1,0 +1,118 @@
+[
+  {
+    "browser": "chromium",
+    "viewport": {
+      "width": 1180,
+      "height": 820
+    },
+    "home": {
+      "viewport": 1180,
+      "scroll": 1180,
+      "fontSize": "129.8px",
+      "focus": "play"
+    },
+    "settings": {
+      "scroll": 1180,
+      "heading": "Configurações",
+      "outline": "3px"
+    }
+  },
+  {
+    "browser": "chromium",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "home": {
+      "viewport": 1024,
+      "scroll": 1024,
+      "fontSize": "112.64px",
+      "focus": "play"
+    },
+    "settings": {
+      "scroll": 1024,
+      "heading": "Configurações",
+      "outline": "3px"
+    }
+  },
+  {
+    "browser": "chromium",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "home": {
+      "viewport": 390,
+      "scroll": 390,
+      "fontSize": "112px",
+      "focus": "play"
+    },
+    "settings": {
+      "scroll": 390,
+      "heading": "Configurações",
+      "outline": "3px"
+    }
+  },
+  {
+    "browser": "webkit",
+    "before": {
+      "scroll": 397,
+      "headingWidth": 375,
+      "fontSize": "112px"
+    }
+  },
+  {
+    "browser": "webkit",
+    "viewport": {
+      "width": 1180,
+      "height": 820
+    },
+    "home": {
+      "viewport": 1180,
+      "scroll": 1180,
+      "fontSize": "129.800003px",
+      "focus": "play"
+    },
+    "settings": {
+      "scroll": 1180,
+      "heading": "Configurações",
+      "outline": "3px"
+    }
+  },
+  {
+    "browser": "webkit",
+    "viewport": {
+      "width": 1024,
+      "height": 768
+    },
+    "home": {
+      "viewport": 1024,
+      "scroll": 1024,
+      "fontSize": "112.639999px",
+      "focus": "play"
+    },
+    "settings": {
+      "scroll": 1024,
+      "heading": "Configurações",
+      "outline": "3px"
+    }
+  },
+  {
+    "browser": "webkit",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "home": {
+      "viewport": 390,
+      "scroll": 390,
+      "fontSize": "112px",
+      "focus": "play"
+    },
+    "settings": {
+      "scroll": 390,
+      "heading": "Configurações",
+      "outline": "3px"
+    }
+  }
+]

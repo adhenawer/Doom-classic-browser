@@ -1,0 +1,195 @@
+{
+  "commit": "55dec9dcfe7557d8e91fedcbc48b9707087a1d26",
+  "workingTree": "modified",
+  "browser": "141.0.7390.37",
+  "context": "Normal persistent profile; fresh per experiment",
+  "viewport": {
+    "width": 1180,
+    "height": 820
+  },
+  "scene": "Freedoom 0.13 E1M1 spawn, skill3, modern overlay HUD, HQ2x2, smoothing1, mipmapping2; no input; frozen on present at tic>=105",
+  "engineSHA256": "1b9f6e3eb39e5ef870f4a59890448f3c4edb51ff4b42da2ad27995dd45ea1b8c",
+  "artifact": "16f3315a5e696112",
+  "runtimeBytes": 444164710,
+  "resources": 38,
+  "results": [
+    {
+      "name": "modern-original-materials",
+      "size": "1920",
+      "hd": false,
+      "bootMs": 18092.503811,
+      "tic": 108,
+      "position": [
+        -27262976,
+        16777216,
+        0
+      ],
+      "width": 1920,
+      "height": 1440,
+      "backend": 2,
+      "view": [
+        1920,
+        1440
+      ],
+      "optionalRules": 0,
+      "hdRegistered": 0,
+      "hdUploads": 0,
+      "hdDecodedMaxWidth": 0,
+      "drawingBuffer": [
+        1920,
+        1440
+      ],
+      "glVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "rearPose": {
+        "tic": 156,
+        "position": [
+          -27262976,
+          16777216,
+          2685665280
+        ]
+      },
+      "cadence": {
+        "collectionStop": "5 second observation window",
+        "elapsedMs": 5792.89999999851,
+        "rafMs": {
+          "samples": 11,
+          "p50": 466.59999999999854,
+          "p95": 733.2999999999993,
+          "p99": 733.2999999999993
+        },
+        "presentMs": {
+          "samples": 10,
+          "p50": 456.80000000074506,
+          "p95": 722.0999999977648,
+          "p99": 722.0999999977648
+        },
+        "logicalTics": 120,
+        "longTasks": 10,
+        "longestTaskMs": 716
+      },
+      "errors": []
+    },
+    {
+      "name": "modern-hd-materials",
+      "size": "1920",
+      "hd": true,
+      "bootMs": 28628.146915000005,
+      "tic": 114,
+      "position": [
+        -27262976,
+        16777216,
+        0
+      ],
+      "width": 1920,
+      "height": 1440,
+      "backend": 2,
+      "view": [
+        1920,
+        1440
+      ],
+      "optionalRules": 0,
+      "hdRegistered": 1115,
+      "hdUploads": 151,
+      "hdDecodedMaxWidth": 4096,
+      "drawingBuffer": [
+        1920,
+        1440
+      ],
+      "glVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "rearPose": {
+        "tic": 167,
+        "position": [
+          -27262976,
+          16777216,
+          2256142336
+        ]
+      },
+      "cadence": {
+        "collectionStop": "5 second observation window",
+        "elapsedMs": 5900.5,
+        "rafMs": {
+          "samples": 9,
+          "p50": 583.3000000000029,
+          "p95": 1050,
+          "p99": 1050
+        },
+        "presentMs": {
+          "samples": 8,
+          "p50": 606.1999999992549,
+          "p95": 1078.800000000745,
+          "p99": 1078.800000000745
+        },
+        "logicalTics": 97,
+        "longTasks": 8,
+        "longestTaskMs": 1035
+      },
+      "errors": []
+    },
+    {
+      "name": "modern-3840",
+      "size": "3840",
+      "hd": true,
+      "bootMs": 48895.897996,
+      "tic": 109,
+      "position": [
+        -27262976,
+        16777216,
+        0
+      ],
+      "width": 3840,
+      "height": 2880,
+      "backend": 2,
+      "view": [
+        3840,
+        2880
+      ],
+      "optionalRules": 0,
+      "hdRegistered": 1115,
+      "hdUploads": 151,
+      "hdDecodedMaxWidth": 4096,
+      "drawingBuffer": [
+        3840,
+        2880
+      ],
+      "glVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "rearPose": {
+        "tic": 157,
+        "position": [
+          -27262976,
+          16777216,
+          2685665280
+        ]
+      },
+      "cadence": {
+        "collectionStop": "5 second observation window",
+        "elapsedMs": 8525.699999999255,
+        "rafMs": {
+          "samples": 4,
+          "p50": 1850,
+          "p95": 1866.6000000000058,
+          "p99": 1866.6000000000058
+        },
+        "presentMs": {
+          "samples": 3,
+          "p50": 1858.7000000029802,
+          "p95": 1867.699999999255,
+          "p99": 1867.699999999255
+        },
+        "logicalTics": 36,
+        "longTasks": 4,
+        "longestTaskMs": 2933
+      },
+      "errors": []
+    }
+  ],
+  "limitations": [
+    "Headless Chromium on shared cloud Linux; not an iPad measurement",
+    "rAF and present callbacks are scheduling/submission observations, not GPU duration or physical FPS",
+    "Observation window stops at 120 rAF observations or a 5 second timer; timer delivery may itself be delayed by rendering; small samples do not support stable tail estimates",
+    "Cold launches have distinct browser contexts and cache conditions; no statistical performance comparison claimed",
+    "Configured WASM heap is not total memory; CPU/GPU memory, physical latency, energy and subjective audio quality not measured"
+  ]
+}

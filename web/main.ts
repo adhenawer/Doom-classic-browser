@@ -57,6 +57,7 @@ const needsRestart = () => running && (settings.resolution !== activeResolution 
 function dimensions(r: Resolution): readonly number[] { return r === 'modern' ? modernSizes[settings.modernSize] : [engineProfiles[r].width,engineProfiles[r].height]; }
 let remapping: string | undefined, previousMenu = false;
 let sent = new Set<number>(), activeSavePath = '', syncQueue = Promise.resolve();
+let settingsSaveGeneration = 0;
 let swRegistration: ServiceWorkerRegistration | undefined;
 let offlineFailure='';
 function offlineFailed(name='') {
@@ -89,7 +90,7 @@ const touch = new TouchControls(game, (source, actions) => {
       if (generation !== saveGeneration || suspended || !engine?._web_text()) return;
       const tic = engine._web_state(0);
       for (const [key, character] of keys.slice(offset, offset + 8)) tap(key, character);
-      // DOOM has a 64-event ring. Wait for the engine to consume each small batch.
+      // Keep touch name entry responsive by yielding between bounded event batches.
       do { await new Promise(resolve => setTimeout(resolve, 35)); }
       while (generation === saveGeneration && !suspended && engine._web_state(0) === tic);
     }
@@ -104,7 +105,7 @@ function updateControlExperience() {
   controlExperienceState = state;
   el('rotatePrompt').hidden = !(mobile && !game.hidden && matchMedia('(orientation: portrait)').matches);
   document.documentElement.dataset.controls = mobile ? 'mobile' : 'desktop';
-  el('deviceExperience').textContent = mobile ? 'Mobile · paisagem · touch + teclado' : 'Desktop · teclado';
+  el('deviceExperience').textContent = mobile ? 'Touch + teclado · paisagem' : 'Teclado · sem controles na tela';
   el('resumeInstruction').textContent = mobile ? 'Toque em Retomar para entrar e ativar o áudio.' : 'Pressione Enter para entrar e ativar o áudio.';
   el('resumeButton').textContent = mobile ? 'Retomar partida' : 'Enter para retomar ↵';
   el('resumeGuide').textContent = mobile ? 'Jogue na horizontal. Esquerda: mover. Direita: mantenha deslocado para girar. Use os botões para atirar e interagir. Teclado também funciona.' : 'WASD mover · ← → girar · J atirar · E interagir · P menu · H interface. Seus remapeamentos continuam ativos.';
@@ -142,10 +143,11 @@ function applyConfig(mix = false) {
   presentation.apply(settings); updateSummary();
 }
 async function saveSettings() {
-  say('Armazenando configurações…');
+  const generation = ++settingsSaveGeneration;
   settings.bindings = structuredClone(input.bindings);
-  await write('settings', settings); applyConfig(true);
-  say('Configurações armazenadas neste navegador.');
+  say('Armazenando configurações…');
+  await write('settings', structuredClone(settings)); applyConfig(true);
+  if (generation === settingsSaveGeneration) say('Configurações armazenadas neste navegador.');
 }
 function reset() {
   saveGeneration++; touch.clear();
@@ -241,7 +243,7 @@ function controls() {
   paragraph('Touch: joystick esquerdo move e desloca lateralmente; mantenha o controle direito deslocado para girar. Tiro, usar e correr podem ser segurados junto do movimento. O giro tem zona morta e usa a resposta configurada do teclado. Sem mira vertical, pulo ou recarga manual.');
   const label = document.createElement('label'); label.textContent = 'Experiência de controles';
   const mode = document.createElement('select'); mode.id = 'controlMode';
-  for (const [value, text] of [['auto', 'Automática · detectar dispositivo'], ['mobile', 'Mobile · touch e teclado'], ['desktop', 'Desktop · teclado']]) {
+  for (const [value, text] of [['auto', 'Automática · detectar dispositivo'], ['mobile', 'Mobile · touch e teclado'], ['desktop', 'Teclado · sem controles na tela']]) {
     const option = document.createElement('option'); option.value = value; option.textContent = text; mode.append(option);
   }
   mode.value = controlMode; mode.onchange = () => {
@@ -319,7 +321,7 @@ function configure() {
   const hud=document.createElement('select'); hud.dataset.setting='modernHUD';
   for(const [value,text] of [['overlay','Contemporâneo · integrado à cena'],['classic','Barra clássica do DOOM']]){const option=document.createElement('option'); option.value=value; option.textContent=text; hud.append(option);}
   hud.value=settings.modernHUD; hudLabel.append(hud); panel.append(hudLabel);
-  paragraph('Qualidade visual é a prioridade: não há orçamento artificial de tamanho, CPU ou memória. O limite efetivo depende das capacidades do navegador e da GPU. O pacote HD é associado somente ao Freedoom compatível.');
+  paragraph('Selecione a nitidez e o tamanho de imagem desejados. As opções mais altas exigem mais memória e processamento. As texturas HD são aplicadas ao Freedoom compatível.');
   if (running) {
     const active = [engine!._web_state(17),engine!._web_state(18)];
     paragraph(`Partida atual: ${active[0]}×${active[1]}. ${needsRestart() ? 'Há uma mudança de resolução agendada.' : 'Resolução selecionada em uso.'}`);
@@ -580,6 +582,9 @@ function updateInput() {
 const menuCodes: Record<string, number> = { ArrowUp: 173, ArrowDown: 175, ArrowLeft: 172, ArrowRight: 174, Enter: 13, NumpadEnter: 13, Escape: 27, Backspace: 127 };
 window.addEventListener('keydown', event => {
   const code = event.code;
+  // Observe a native menu transition before accepting fresh physical input.
+  // A later rAF reset must not erase a key pressed just after the menu closed.
+  reconcileMenuState();
   if ((event.target as HTMLElement).closest?.('.touch-name')) {
     if (engine) event.stopImmediatePropagation();
     if (code === 'Escape') { event.preventDefault(); tap(27); canvas.focus(); }
@@ -596,7 +601,6 @@ window.addEventListener('keydown', event => {
     return;
   }
   if (running && !game.hidden) {
-    reconcileMenuState();
     if (event.cancelable) event.preventDefault(); event.stopImmediatePropagation();
     if (input.action(code) === 'shell' && !engine!._web_menu()) { showShell(); return; }
     if (suspended) { if (code === 'Enter' && !event.repeat) resume(); return; }
@@ -634,6 +638,7 @@ window.addEventListener('keydown', event => {
   } else if (!panel.hidden && ['Escape', 'Backspace', 'KeyV'].includes(code)) { event.preventDefault(); showHome(); }
 }, true);
 window.addEventListener('keyup', event => {
+  reconcileMenuState();
   input.release(event.code);
   if (engine) event.stopImmediatePropagation();
   if (running && !game.hidden) { if (event.cancelable) event.preventDefault(); event.stopImmediatePropagation(); updateInput(); }

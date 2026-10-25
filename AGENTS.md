@@ -15,7 +15,7 @@ O produto é um porte real de DOOM para browsers. O iPad é um perfil de uso, n�
 ## Base técnica e limites
 
 - Preserve um caminho Classic jogável com mapas reais, simulação de 35 Hz, auto-aim vertical e controle completo por teclado. Novas regras devem ser identificadas como variante e ter compatibilidade de dados documentada.
-- O Canvas/WebGL atual apresenta o framebuffer clássico. Escalonamento ou pós-processamento não equivalem a aumentar resolução interna, revelar geometria ou adicionar iluminação dinâmica.
+- Nos perfis Clássica/Alta, Canvas/WebGL apresenta o framebuffer rasterizado em software. Moderno HD usa EDGE-Classic para renderizar geometria na GPU/WebGL2, com buffer interno próprio. Escalonamento ou pós-processamento, isoladamente, não equivalem a aumentar resolução interna ou adicionar iluminação dinâmica.
 - Não substitua o motor por um clone JavaScript nem troque de port silenciosamente. Mudança de renderer/motor exige comparação técnica e protótipo dentro do escopo autorizado. A mira vertical segue a decisão explícita do usuário; não a atribua ao DOOM original.
 - Mantenha funcionamento offline após preparação, sem CDN/backend durante o jogo, e sem dependência de mouse, Pointer Lock, gamepad ou controles de toque.
 - Não renomeie/apague bancos, IWADs, saves, IDs de PWA ou namespaces para organizar a marca. Mudanças de simulação precisam de identificação de engine/perfil e estratégia de saves antes de serem habilitadas.

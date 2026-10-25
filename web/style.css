@@ -33,7 +33,7 @@ a { color: var(--accent-soft); text-underline-offset: 4px; }
 .intro { grid-column: 1; min-width: 0; }
 .eyebrow, .menu-caption { font: 10px/1.5 var(--mono); font-weight: 600; letter-spacing: .14em; color: var(--accent-soft); margin: 0 0 18px; }
 .signal { display: inline-block; width: 6px; height: 6px; margin: 0 7px 1px 0; background: var(--accent); box-shadow: 0 0 14px #ff784f66; }
-h1 { font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Black", sans-serif; font-size: clamp(100px, 13.5vw, 192px); font-weight: 900; letter-spacing: -.045em; line-height: .82; margin: 24px 0 21px; color: var(--ink); }
+h1 { font-family: Impact, Haettenschweiler, "Arial Narrow Bold", "Liberation Sans", Arial, sans-serif; font-size: clamp(100px, 13.5vw, 192px); font-weight: 900; letter-spacing: -.045em; line-height: .82; margin: 24px 0 21px; color: var(--ink); }
 h1 span { display: block; font: 600 11px/1.4 var(--mono); letter-spacing: .32em; color: #c0c6cf; margin: 19px 0 0 5px; }
 h1 i { font-style: normal; color: var(--accent); margin: 0 12px; }
 .intro-copy { color: #e8e5e0; font-size: 19px; font-weight: 500; line-height: 1.55; margin: 0 0 24px; letter-spacing: -.02em; }

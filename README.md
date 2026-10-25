@@ -13,6 +13,8 @@ O motor executa mapas reais e preserva as mecânicas clássicas. A distribuiçã
 3. Selecione **Jogar** por toque ou Enter. Quando aparecer a partida suspensa, toque em **Retomar partida** ou pressione Enter para retomar e tentar liberar o áudio.
 4. Para o conteúdo original, use **Importar WAD** e o seletor de arquivos do browser. A seleção inicial pode usar a interface nativa do sistema; a partida e os menus funcionam pelo teclado.
 
+Para jogar exclusivamente com teclado em um tablet, selecione **Controles → Experiência de controles → Teclado · sem controles na tela**. A escolha é persistente e remove os overlays touch durante a partida.
+
 Nenhum IWAD ou save é enviado ao servidor. O MVP aceita IWADs de DOOM 1 / Freedoom Phase 1; PWADs e DOOM II ficam fora do escopo.
 
 | Ação | Teclas padrão |
@@ -78,7 +80,7 @@ O launcher e as configurações foram redesenhados, com orientação de teclado 
 
 ## Recursos e compatibilidade
 
-O browser precisa oferecer WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Service Worker em contexto seguro. A jogabilidade aceita teclado físico ou controles touch. A detecção usa ponteiro primário grosseiro e capacidade de toque (pontos de contato ou Touch Events), sem depender apenas da largura da tela. Em **Controles → Experiência de controles**, escolha Automática, Mobile ou Desktop; a seleção fica neste navegador. Teclado continua disponível no modo mobile.
+O browser precisa oferecer WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Service Worker em contexto seguro. A jogabilidade aceita teclado físico ou controles touch. A detecção usa ponteiro primário grosseiro e capacidade de toque (pontos de contato ou Touch Events), sem depender apenas da largura da tela. Em **Controles → Experiência de controles**, escolha Automática, Mobile ou Teclado; a seleção fica neste navegador. Teclado continua disponível no modo mobile.
 
 | Ambiente | Evidência disponível |
 |---|---|

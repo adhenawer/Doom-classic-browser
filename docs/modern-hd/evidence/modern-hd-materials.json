@@ -1,0 +1,57 @@
+{
+  "name": "modern-hd-materials",
+  "size": "1920",
+  "hd": true,
+  "bootMs": 28628.146915000005,
+  "tic": 114,
+  "position": [
+    -27262976,
+    16777216,
+    0
+  ],
+  "width": 1920,
+  "height": 1440,
+  "backend": 2,
+  "view": [
+    1920,
+    1440
+  ],
+  "optionalRules": 0,
+  "hdRegistered": 1115,
+  "hdUploads": 151,
+  "hdDecodedMaxWidth": 4096,
+  "drawingBuffer": [
+    1920,
+    1440
+  ],
+  "glVersion": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "rearPose": {
+    "tic": 167,
+    "position": [
+      -27262976,
+      16777216,
+      2256142336
+    ]
+  },
+  "cadence": {
+    "collectionStop": "5 second observation window",
+    "elapsedMs": 5900.5,
+    "rafMs": {
+      "samples": 9,
+      "p50": 583.3000000000029,
+      "p95": 1050,
+      "p99": 1050
+    },
+    "presentMs": {
+      "samples": 8,
+      "p50": 606.1999999992549,
+      "p95": 1078.800000000745,
+      "p99": 1078.800000000745
+    },
+    "logicalTics": 97,
+    "longTasks": 8,
+    "longestTaskMs": 1035
+  },
+  "errors": []
+}

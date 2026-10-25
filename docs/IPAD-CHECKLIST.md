@@ -10,6 +10,7 @@ Registre modelo do iPad, versão do iPadOS, versão do Chrome, modelo/layout do 
 
 - [ ] Abrir a URL HTTPS no Chrome, fora de navegação privada.
 - [ ] Navegar por toda a interface com setas e Enter, sem mouse/trackpad.
+- [ ] Selecionar **Controles → Experiência de controles → Teclado · sem controles na tela** e conferir ausência de overlays touch durante a partida.
 - [ ] Iniciar Freedoom E1M1 e retomar com Enter.
 - [ ] Confirmar som e música sem toque para desbloqueio. Se Enter não desbloquear, registrar como falha desse requisito.
 - [ ] Importar DOOM.WAD ou DOOM1.WAD autorizado pelo app Arquivos; selecionar e reabrir o motor.

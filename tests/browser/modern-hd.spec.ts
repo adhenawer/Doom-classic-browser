@@ -14,22 +14,28 @@ const digest=(page:Page,path:string)=>page.evaluate(async path=>{
  const bytes=new Uint8Array((window as any).doom.FS.readFile(path));
  return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),n=>n.toString(16).padStart(2,'0')).join('');
 },path);
-async function boot(page:Page,load=false) {
- await page.locator(load?'#load':'#play').press('Enter');
+// Share one deadline across startup, first HD frame and deferred native loading.
+// A software WebGL frame can block WebKit beyond the default assertion timeout.
+function startupBudget() {
+ const deadline=Date.now()+120000;
+ return ()=>{const left=deadline-Date.now();if(left<=0)throw new Error('Modern startup exceeded the shared 120 s budget');return left;};
+}
+async function boot(page:Page,load=false,ammo?:number) {
+ const remaining=startupBudget();
+ await page.locator(load?'#load':'#play').press('Enter',{timeout:remaining()});
  try {
-  await page.waitForFunction(()=>!document.querySelector<HTMLElement>('#resume')!.hidden || document.querySelector('#status')?.textContent?.startsWith('Erro:'),undefined,{timeout:120000,polling:2000});
+  await page.waitForFunction(()=>!document.querySelector<HTMLElement>('#resume')!.hidden || document.querySelector('#status')?.textContent?.startsWith('Erro:'),undefined,{timeout:remaining(),polling:2000});
   const status=await page.locator('#status').innerText();if(status.startsWith('Erro:'))throw new Error(status);
-  await expect(page.locator('#resume')).toBeVisible();
+  await expect(page.locator('#resume')).toBeVisible({timeout:remaining()});
  } catch(e) {
   console.log('MODERN_BOOT_FAILURE',await page.evaluate(()=>({status:document.querySelector('#status')?.textContent,gameHidden:(document.querySelector('#game')as HTMLElement)?.hidden,engine:!!(window as any).doom,canvas:document.querySelector('canvas')?.getAttribute('width'),state:(window as any).doom?[0,1,17,18,23,24,25].map(n=>(window as any).doom._web_state(n)):null})));
   throw e;
  }
  await page.keyboard.press('Enter');
- // A first HD frame may block WebKit's main thread beyond the 5 s assertion default.
- // Use the existing startup budget for consuming the queued load command.
- if(load){await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu()),{timeout:120000}).toBe(1);await page.keyboard.press('Enter');}
- await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(0);
- await expect.poll(()=>state(page,1)).toBe(0);
+ if(load){await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu()),{timeout:remaining()}).toBe(1);await page.keyboard.press('Enter');}
+ await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu()),{timeout:remaining()}).toBe(0);
+ await expect.poll(()=>state(page,1),{timeout:remaining()}).toBe(0);
+ if(ammo!==undefined)await expect.poll(()=>state(page,11),{timeout:remaining()}).toBe(ammo);
 }
 async function save(page:Page,name:string) {
  await page.keyboard.press('KeyK');
@@ -136,7 +142,8 @@ test('Modern default renders real GPU geometry with HD, keyboard, audio, isolate
  await expect(page.getByRole('button',{name:/^Excluir Moderno HD/})).toHaveCount(0);
  await page.locator('#backupFile').setInputFiles({name:'restore-modern.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(parsed))});
  await expect(page.locator('#status')).toHaveText('Backup importado e persistido.');expect(await digest(page,slot+'head.esg')).toBe(nativeSave);
- await page.reload();await expect(page.locator('#play')).toBeEnabled();await boot(page,true);await expect.poll(()=>state(page,11),{timeout:120000}).toBe(savedAmmo);
+ await page.reload();await expect(page.locator('#play')).toBeEnabled();await boot(page,true,savedAmmo);
+ console.log('MODERN_SAVE_RESTORED',JSON.stringify({phase:'HD-reload',expected:savedAmmo,actual:await state(page,11)}));
  expect(await digest(page,slot+'head.esg')).toBe(nativeSave);
  // A resolution/quality change is pending until restart; it cannot replace a live runtime.
  await page.keyboard.press('KeyH');await configure(page,'modern','1280',false,'classic');
@@ -145,8 +152,10 @@ test('Modern default renders real GPU geometry with HD, keyboard, audio, isolate
  expect([await state(page,17),await state(page,18),await state(page,19)]).toEqual([1280,960,2]);
  expect(await page.evaluate(()=>{try{(window as any).doom.FS.stat('/modern-hd.epk');return true;}catch{return false;}})).toBe(false);
  expect(await digest(page,slot+'head.esg')).toBe(nativeSave);
- await page.keyboard.press('KeyL');await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(1);await page.keyboard.press('Enter');
- await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(0);await expect.poll(()=>state(page,11),{timeout:120000}).toBe(savedAmmo);
+ const loadRemaining=startupBudget();
+ await page.keyboard.press('KeyL');await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu()),{timeout:loadRemaining()}).toBe(1);await page.keyboard.press('Enter');
+ await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu()),{timeout:loadRemaining()}).toBe(0);await expect.poll(()=>state(page,11),{timeout:loadRemaining()}).toBe(savedAmmo);
+ console.log('MODERN_SAVE_RESTORED',JSON.stringify({phase:'HD-disabled',expected:savedAmmo,actual:await state(page,11)}));
  await page.keyboard.press('KeyH');await page.locator('#settings').press('Enter');await expect(page.locator('[data-setting="modernHUD"]')).toHaveValue('classic');
  expect(errors).toEqual([]);expect(scriptErrors).toEqual([]);
 });
