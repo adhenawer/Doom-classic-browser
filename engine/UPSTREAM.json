@@ -1,0 +1,7 @@
+{
+  "repository": "https://github.com/chocolate-doom/chocolate-doom",
+  "commit": "a2dfd51fcc00d272dc8a17a97ccd6683333ff4ea",
+  "emscripten": "4.0.18",
+  "image": "emscripten/emsdk@sha256:bbe90e2b00acbd1a9596087d88305029f383de1eb71c0cdb20f4e19647265450",
+  "note": "Unmodified upstream tree is vendored in engine/upstream; scripts/prepare-engine.py applies the browser adapter to a build copy."
+}
