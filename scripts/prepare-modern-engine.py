@@ -31,7 +31,20 @@ s=s[:a]+'        WebMain(argc, const_cast<const char **>(argv));\n'+s[b:]
 s=s.replace('    // We always do this once here, although the engine may', '    extern int web_suspended;\n    if (web_suspended) return;\n\n    // We always do this once here, although the engine may')
 s=s.replace('        emscripten_set_main_loop(WebTick, 0, 0);', '')
 s=s.replace('        EdgeMain(argc, argv);', '        EdgeMain(argc, argv);\n        emscripten_set_main_loop(WebTick, 0, 0);')
+# A frame callback before SDL's Asyncify yield does not prove a completed tick.
+# Signal only after EdgeTicker (display, input and simulation) has returned.
+s=s.replace('    if (app_state & kApplicationActive)\n        EdgeTicker();',
+ '''    if (app_state & kApplicationActive) {
+        EdgeTicker();
+        EM_ASM({ Module["onTickComplete"]?.(); });
+    }''')
 p.write_text(s)
+# Busy-spin is inappropriate on the single browser/UI thread, especially while
+# the host has frozen logical time during an Asyncify yield. Preserve 35 Hz,
+# but cooperate with browser timers/input while waiting for the next tic.
+replace('source_files/edge/n_network.cc',
+ 'EDGE_DEFINE_CONSOLE_VARIABLE(busy_wait, "1",',
+ 'EDGE_DEFINE_CONSOLE_VARIABLE(busy_wait, "0",')
 # Ignore duplicate SDL keyboard events: DOM owns the input queue.
 replace('source_files/edge/i_ctrl.cc','void HandleKeyEvent(SDL_Event *ev)\n{','void HandleKeyEvent(SDL_Event *ev)\n{\n    return; // Browser host dispatches the authoritative physical-key state.\n')
 # SDL queues focus events independently from the DOM host. A queued blur can

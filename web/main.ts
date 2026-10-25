@@ -172,7 +172,7 @@ function resume() {
   reset(); applyConfig(); engine._web_audio(); engine._web_suspend(0);
   suspended = false; el('resume').hidden = true;
   shell.hidden = true; game.hidden = false; presentation.setActive(true); canvas.focus(); updateControlExperience();
-  if (queuedLoad) { queuedLoad = false; tap(189); }
+  if (queuedLoad) { queuedLoad = false; console.info('[doom-host] queued load resumed', activeResolution, engine._web_state(0)); tap(189); }
 }
 function showShell() {
   suspend(); game.hidden = true; shell.hidden = false;
@@ -497,6 +497,7 @@ async function start(load = false) {
   if (starting) return;
   // A failed runtime must be replaced in a fresh document, never mounted twice.
   if (engine) { restartResolution(); return; }
+  let completedModernTicks = 0, preparedModernPause = false;
   starting = true; el<HTMLButtonElement>('play').disabled = true; say('Carregando o motor real…');
   try {
     const custom = wads.find(w => w.id === selected);
@@ -510,6 +511,14 @@ async function start(load = false) {
     await loadScript(activeResolution);
     engine = await window[engineProfiles[activeResolution].factory]!({ canvas, noInitialRun: true,
       onFrame: () => presentation.frame(),
+      onTickComplete: () => {
+        if (activeResolution !== 'modern' || running || preparedModernPause || !engine) return;
+        if (engine._web_state(0) <= 2 || engine._web_state(1) !== 0) { completedModernTicks = 0; return; }
+        if (++completedModernTicks < 2) return;
+        // Pause at the native tick boundary, never inside a partially unwound HD frame.
+        engine._web_suspend(1); preparedModernPause = true;
+        console.info('[doom-host] Modern ready at completed tick', engine._web_state(0));
+      },
       locateFile: (path: string) => new URL(path, location.href).href,
       print: (line: string) => console.info('[doom]', line), printErr: (line: string) => console.warn('[doom]', line),
       onAbort: (reason: string) => { showShell(); error(new Error(`Motor abortado: ${reason}. Recarregue para tentar novamente.`)); },
@@ -558,7 +567,7 @@ async function start(load = false) {
       const timeout=activeResolution === 'modern' ? 90000 : 45000;
       const until = performance.now() + timeout;
       const timer = setInterval(() => {
-        if (engine!._web_state(0) > 2 && engine!._web_state(1) === 0) { clearInterval(timer); resolve(); }
+        if (engine!._web_state(0) > 2 && engine!._web_state(1) === 0 && (activeResolution !== 'modern' || preparedModernPause)) { clearInterval(timer); resolve(); }
         else if (performance.now() > until) { clearInterval(timer); reject(new Error('Motor não chegou à fase no tempo de preparação. Reabra o aplicativo e tente uma resolução menor.')); }
       }, 50);
     });

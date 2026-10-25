@@ -64,7 +64,7 @@ async function restart(page:Page) {
 test('Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3',async({page},info)=>{
  test.setTimeout(600000);
  const errors:string[]=[],scriptErrors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
- page.on('console',message=>{const text=message.text();if(text.includes('[doom]')&&/initialisation complete|Building XGL|Entering |Initializ|Parsing|StartupSound/i.test(text))console.log('MODERN_STAGE',new Date().toISOString(),text);});
+ page.on('console',message=>{const text=message.text();if(text.includes('[doom-host]')) console.log('HOST_STAGE',new Date().toISOString(),text);if(text.includes('[doom]')&&/initialisation complete|Building XGL|Entering |Initializ|Parsing|StartupSound/i.test(text))console.log('MODERN_STAGE',new Date().toISOString(),text);});
  page.on('console',message=>{const text=message.text();if(text.includes('[doom]')&&(/\b(?:lua|script)\b.*\b(?:error|failed|panic)\b/i.test(text)||/\b(?:error|failed|panic)\b.*\b(?:lua|script)\b/i.test(text)))scriptErrors.push(text);});
  await page.addInitScript(()=>{Element.prototype.requestPointerLock=()=>{throw new Error('Pointer Lock must not be requested');};});
  await page.goto('/');await expect(page.locator('#play')).toBeEnabled();

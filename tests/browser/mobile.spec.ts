@@ -94,12 +94,36 @@ test.describe('Modern mobile integration', () => {
     await page.locator('[data-setting="modernSize"]').selectOption('1280');
     await page.locator('[data-setting="modernHD"]').setChecked(false);
     await page.getByRole('button',{name:'Salvar configurações',exact:true}).tap();
+    await expect(page.locator('#status')).toHaveText('Configurações armazenadas neste navegador.');
     await page.getByRole('button',{name:'Voltar',exact:true}).tap();
     await page.locator('#play').tap();
     await expect(page.locator('#resumeButton')).toBeVisible({timeout:120000});
     await page.locator('#resumeButton').tap();
     await expect(page.locator('#touchControls')).toBeVisible();
     await expect.poll(()=>state(page,19)).toBe(2);
+    // Freeze logical time from inside the native pre-swap callback. Browser
+    // timers must still run while a partially completed native frame is paused.
+    await page.evaluate(() => {
+      const runtime = (window as any).doom, previous = runtime.onFrame;
+      runtime.onFrame = () => {
+        previous?.(); runtime.onFrame = previous;
+        const probe = (window as any).__pauseProbe = { first: -1, second: -2, resumed: false, tic: -1 };
+        runtime._web_suspend(1);
+        setTimeout(() => {
+          probe.first = runtime._web_state(0);
+          setTimeout(() => {
+            probe.second = runtime._web_state(0);
+            runtime._web_audio(); runtime._web_suspend(0);
+            probe.tic = runtime._web_state(0); probe.resumed = true;
+          }, 50);
+        }, 100);
+      };
+    });
+    await expect.poll(()=>page.evaluate(()=>(window as any).__pauseProbe?.resumed),{timeout:15000}).toBe(true);
+    const pause = await page.evaluate(()=>(window as any).__pauseProbe);
+    expect(pause.first).toBe(pause.second);
+    await expect.poll(()=>state(page,0)).toBeGreaterThan(pause.tic);
+
     const box=await page.locator('.move-stick').boundingBox();
     await page.mouse.move(box!.x+box!.width/2,box!.y+10); await page.mouse.down();
     await expect.poll(()=>state(page,6)).toBeGreaterThan(0);
