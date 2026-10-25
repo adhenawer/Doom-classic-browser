@@ -156,3 +156,9 @@ Em **Selecionar conteúdo → Estação Aurora · mapa original**, o browser ver
 Documentação detalhada: [análise estrutural do WAD](docs/maps/WAD-ANALYSIS.md), [inventário completo de metadados](docs/maps/wad-inventory.json), [brief passado ao criador](docs/maps/ORIGINAL-MAP-BRIEF.md), [design e procedência de Aurora](docs/maps/AURORA.md) e [revisão independente](docs/maps/QA.md) e [validação funcional](docs/maps/VALIDATION.md). A análise comercial não é um mapa reconstruível nem fornece assets ao gerador.
 
 Último commit remoto consultado: `55dec9dcfe7557d8e91fedcbc48b9707087a1d26`, Modern HD/WebGL2. O checkout desta entrega permanece em `073b980` com as alterações locais; o importador remoto tem o mesmo contrato, mas esta entrega não foi testada no Modern HD nem aplica automaticamente seu pacote de materiais a um IWAD de hash diferente.
+
+## Build independente do mapa
+
+Execute `npm run build:map` após preparar a base livre com `python3 scripts/fetch-content.py`. A saída `build/aurora/Estacao-Aurora.zip` contém os dois WADs, manifesto, checksums e licenças/créditos. O workflow **Build Aurora map** gera o mesmo pacote no GitHub Actions e disponibiliza o artifact **Estacao-Aurora**, independentemente da compilação dos motores e materiais HD.
+
+A entrega Aurora foi posteriormente integrada ao commit Modern HD `55dec9d`, preservando os perfis gráficos existentes. As evidências anteriores em `docs/maps` identificam a revisão em que cada teste foi executado; não devem ser interpretadas como validação do renderer Modern HD com Aurora.

@@ -1,0 +1,34 @@
+name: Build Aurora map
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'maps/aurora/**'
+      - 'scripts/*original-map.py'
+      - 'scripts/tests/test_original_map.py'
+      - 'scripts/fetch-content.py'
+      - 'docs/maps/AURORA-CREDITS.txt'
+      - '.github/workflows/map.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  map:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Prepare verified freely licensed base
+        run: python3 scripts/fetch-content.py
+      - name: Generate and test original map
+        run: |
+          python3 scripts/build-original-map.py
+          python3 -m unittest discover -s scripts/tests -p 'test_original_map.py'
+      - name: Package map and credits
+        run: python3 scripts/package-original-map.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Estacao-Aurora
+          path: build/aurora/Estacao-Aurora.zip
+          if-no-files-found: error
+          retention-days: 90

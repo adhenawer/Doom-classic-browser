@@ -38,3 +38,7 @@ Uma primeira execução do botão encontrou `ERR_CACHE_WRITE_FAILURE` em uma req
 ## Limites
 
 Somente E1M1 é geometria nova. Os outros 35 mapas e os assets são Freedoom BSD; a análise comercial não é input do gerador. O teste de saída não exige visitar a alcova secreta e não certifica equilíbrio de todas as dificuldades, todas as rotas, ausência de qualquer artefato visual, Crispy High, Modern HD ou hardware móvel. Não houve deploy, push ou substituição de dados do usuário. A compatibilidade com o importador do commit Modern HD foi conferida no código; o pacote HD remoto está associado ao hash exato de sua base, portanto não se declara automaticamente compatível com o IWAD composto.
+
+## Integração para envio ao GitHub
+
+As alterações foram reaplicadas sobre Modern HD `55dec9d`, preservando `graphicsLost`, a configuração de Modern HD e seus recursos obrigatórios do cache. TypeScript foi verificado após a integração. O teste unitário de entrega HD requer os chunks não existentes neste executor; essa dependência passa à CI completa, não à build independente do mapa. `npm run build:map` executa os sete testes e gera o ZIP distribuível sem compilar os motores nem usar assets comerciais. O workflow `map.yml` executa preparação de base pinada, geração, testes e upload do pacote.
