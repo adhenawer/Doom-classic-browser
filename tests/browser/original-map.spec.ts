@@ -1,8 +1,10 @@
 import { test, expect } from './normal-browser';
+import { selectClassic } from './legacy-profile';
 
 test('original map selection persists, allows combat/traversal, and activates its exit', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#play')).toBeEnabled();
+  await selectClassic(page);
   await page.locator('#content').click();
   await page.getByRole('button', { name: 'Estação Aurora · mapa original', exact: true }).click();
   await expect(page.locator('#panel')).toContainText('✓ Estação Aurora.wad');
