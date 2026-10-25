@@ -79,6 +79,12 @@ npm run test:e2e
 
 Esses comandos são para o executor de desenvolvimento na nuvem. A imagem de toolchain inclui Python e CMake. Asyncify permite ceder ao browser durante esperas, transições e o loop original. A versão atual usa uma thread e não requer COOP/COEP.
 
+## Equipe de modernização
+
+A [equipe de agentes](agents/README.md) reúne nove especialidades para evoluir design, gráficos e jogabilidade do porte para browsers. Há perfis de trabalho, pesquisa de competências publicadas por estúdios, referências de especialistas, plano incremental e configuração nativa para clientes Codex compatíveis. Veja também [AGENTS.md](AGENTS.md).
+
+A criação da equipe não muda o jogo publicado nem implementa automaticamente o [roadmap proposto](agents/ROADMAP.md). Cada melhoria precisa de uma tarefa concreta, evidência e validação adequada; a base Classic continua disponível.
+
 ## Repositório, URL e dados existentes
 
 O repositório passa a se chamar `adhenawer/Doom-classic-browser`, e a URL de publicação passa a ser `https://adhenawer.github.io/Doom-classic-browser/`. Veja o [procedimento de mudança de endereço](docs/REPOSITORY-MIGRATION.md).
