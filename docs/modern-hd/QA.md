@@ -2,7 +2,36 @@
 
 Revisão de integração em 25/10/2026, especialidade `doom_qa`, sobre a base 0.3.0 (`d73fac9537469c64ad7186cde456f58a9481b3ef`). O escopo inclui motor GPU real, controles, apresentação, áudio, saves, importação e offline, preservando Classic/Alta. Não houve teste físico no iPad, teclado Bluetooth, escuta humana ou medição de energia.
 
-## Estado da validação
+## Estado atual — fonte final 9bde476
+
+O [CI da fonte 9bde476](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40242060865) terminou com **41/42 aprovados**, zero skips: Chromium 21/21, WebKit 20/21. Os três motores compilaram e os testes C/Node passaram; publicação bloqueada. A única falha foi o cenário Moderno WebKit no segundo boot para carregar: o poll do menu consumiu os 42.143 ms restantes do orçamento compartilhado de 120 s, sem retornar valor ou snapshot de falha. Não há evidência suficiente para atribuir esse sintoma à perda de F3.
+
+A correção de prontidão abaixo é candidata ao novo gate integral, ainda pendente; os resultados históricos não equivalem a uma aprovação desse código inteiro. A confirmação de configurações por geração passou nos dois browsers do CI.
+
+- Integração local anterior, artefato `ea850db4fedd2174`, 42 recursos, EDGE WASM `d62adb907732032152ddf52a63d558f4232f00262fff030f1b19a3d4013d3e73`: **Chromium HOST 20/20 em 4,8 min; WebKit Docker 17/20 em 24,3 min**.
+- Falhas WebKit nessa integração: preferência alwaysRun 0 após reabertura, esperada 1; RPC Enter no último boot Classic do cenário Alta Offline excedeu 360 s; RPC Enter no botão Configurações após o load Moderno sem HD excedeu 600 s. No último, munição 48/48 e load já haviam passado; o Node confirmou a operação pendente em `locator('#settings').press('Enter')`. Não atribuir os dois timeouts ao parser de saves, a uma tecla perdida ou ao GC sem prova.
+- Novo artefato `845138da0060e96b`, com a correção da confirmação: **regressão de configurações Chromium HOST aprovada em 2,8 s; regressão de configurações e ClassicOffline WebKit aprovados, juntos, em 54,6 s**. Não foi repetida a integração inteira localmente nesse artefato; o CI 42 faz esse gate.
+- A regressão `tests/browser/storage.spec.ts` falhou na versão ea: havia uma gravação enfileirada e não committed, mas a mensagem Stored antiga continuava visível. Após o fix, dois gates IndexedDB intercalam write1/write2: a primeira conclusão não anuncia sucesso da segunda; depois de liberar a segunda transação, reload conserva initial 135, música 11 e alwaysRun true. Nenhum motor é inicializado nesse teste.
+- O primeiro save/backup do perfil Alta, o cenário de conforto/teclas após menu e o layout estreito passaram em ambos os browsers na rodada integrada; os sintomas anteriores de fila e transição não reapareceram nesses casos. Isso não resolve os timeouts de RPC registrados nos outros fluxos.
+- Permanecem em investigação os timeouts RPC observados no WPE. Uma consulta estática ao especialista do motor não encontrou loop síncrono ilimitado no caminho H→showShell→suspend→configure; as operações examinadas são limitadas e o áudio é assíncrono. Pressão, JSC/IPC, retenção após reload e áudio/foco são hipóteses, **não causas confirmadas ou vazamentos declarados resolvidos**.
+- O harness Moderno compartilha 120 s entre asserções de startup/menu/estado/munição, sem renovar o prazo a cada assert. RPCs como `keyboard.press` ainda dependem do limite externo do teste; não se afirma um teto rígido de 120 s para toda operação possível.
+
+Logs atuais: `/tmp/doom-integrated-qa-chromium-final.log`, `/tmp/doom-integrated-qa-webkit-final.log`, `/tmp/doom-integrated-qa-webkit-stage.log`, `/tmp/doom-storage-qa-before-fix.log`, `/tmp/doom-storage-qa-after-fix-chromium.log` e `/tmp/doom-settings-focused-qa-webkit.log`. Capturas/JSON em `build/integrated-qa-chromium-final/`, `build/integrated-qa-webkit-final/`, `build/storage-qa-before-fix/`, `build/storage-qa-after-fix-chromium/` e `build/settings-focused-qa-webkit/`.
+
+**Chrome no iPad, teclado Bluetooth, durabilidade entre processos e escuta humana permanecem sem validação física.** Não houve redução de texturas, resolução, valores esperados ou cobertura para obter os resultados registrados.
+
+
+### Diagnóstico da prontidão e correção candidata
+
+No artefato A `169cded09a042367`, o cenário Moderno WebKit completo passou em 3,2 min com os mesmos recursos, resolução e prazos. Entretanto, os três anúncios de pronto ocorreram com phase 8 (swap pendente), zero ticks concluídos, zero swaps em estado Level e latch 33 igual a zero. No primeiro: 23:31:29.301 UTC, `make_tic=12`. Isso comprova que os contadores antigos não asseguravam retorno do quadro/tick. Não comprova a causa de todos os bloqueios intermitentes.
+
+Nesse ensaio o F3 do segundo boot foi enviado às 23:33:18.908, retirado da fila às 23:33:19.036 e iniciou o menu às 23:33:19.037. A prévia PNG levou cerca de 79 ms para decodificar e 16 ms para upload; menu observado às 23:33:19.359, munição restaurada 47/47. Não há justificativa nesse resultado para reescrever a prévia, reduzir imagens ou aumentar o prazo. Log `/tmp/doom-modern-diag-a-webkit.log`; capturas em `build/modern-diag-a-webkit/`. A não inclui o refinamento de fase 10; sua fase 8 engloba o swap/SDL. Os contadores A em estado Level não são chamados de prova de RenderView real.
+
+Na candidata B, o motor marca o retorno real de RenderView, consome essa marca após o swap e fixa o latch 33 somente após terminar um WebTick com esse quadro e `make_tic>2`. O callback nativo de tick completo exige esse latch e phase 0 (idle); após dois ticks qualificados, o host suspende dentro desse callback, antes de confirmar a preparação. O polling somente observa a pausa já feita, sem congelar um terceiro tick. Os testes exigem ticks e swaps reais positivos, latch 1 e fase 0 ao retomar. Não foram alterados os orçamentos de teste 120/600 s, as imagens, a resolução, o SDL hint ou as regras35Hz.
+
+A instrumentação é local ao runtime, somente leitura; logs detalhados exigem a flag explícita de teste `doomTraceModern` e ficam desligados no uso normal. Não há transmissão de diagnósticos. A integração preserva também a correção paralela 704c7ea/2c3c87f: busy_wait=0 mantém as esperas nativas cooperativas com o browser quando o relógio lógico está pausado, e um teste Mobile pausa explicitamente dentro do callback pré-swap e exige heartbeat, tics estáveis e retomada. Isso corrige uma possibilidade concreta de starvation; a falha CI não foi atribuída exclusivamente a ela. Candidata integrada aguarda compilação e testes.
+
+## Histórico — base 16f3 e integrações anteriores
 
 **Na base `16f3315a5e696112`, oito cenários Moderno locais foram aprovados; a rodada adicional das 20 regressões legadas terminou com 18 aprovadas e duas falhas de cache no Chromium do container.** Os controles com o mesmo servidor/assets passaram no host, sem modificar os testes para esconder essas falhas. A descrição completa está no fechamento adicional abaixo.
 

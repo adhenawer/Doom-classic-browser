@@ -21,18 +21,26 @@ function startupBudget() {
  return ()=>{const left=deadline-Date.now();if(left<=0)throw new Error('Modern startup exceeded the shared 120 s budget');return left;};
 }
 async function boot(page:Page,load=false,ammo?:number) {
- const remaining=startupBudget();
+ const remaining=startupBudget(),began=Date.now();
+ const step=(phase:string)=>console.log('MODERN_BOOT_STEP',new Date().toISOString(),JSON.stringify({phase,load,elapsed:Date.now()-began}));
+ step('play-before');
  await page.locator(load?'#load':'#play').press('Enter',{timeout:remaining()});
+ step('play-return');
  try {
   await page.waitForFunction(()=>!document.querySelector<HTMLElement>('#resume')!.hidden || document.querySelector('#status')?.textContent?.startsWith('Erro:'),undefined,{timeout:remaining(),polling:2000});
   const status=await page.locator('#status').innerText();if(status.startsWith('Erro:'))throw new Error(status);
-  await expect(page.locator('#resume')).toBeVisible({timeout:remaining()});
+  await expect(page.locator('#resume')).toBeVisible({timeout:remaining()});step('resume-visible');
+  if(await page.locator('#game').getAttribute('data-renderer')==='modern'){
+   const ready=await page.evaluate(()=>{const d=(window as any).doom;return {phase:d._web_state(26),ticks:d._web_state(27),worldSwaps:d._web_state(28),ready:d._web_state(33)};});
+   console.log('MODERN_READY_INVARIANT',JSON.stringify(ready));
+   expect(ready.phase).toBe(0);expect(ready.ready).toBe(1);expect(ready.ticks).toBeGreaterThan(0);expect(ready.worldSwaps).toBeGreaterThan(0);
+  }
  } catch(e) {
   console.log('MODERN_BOOT_FAILURE',await page.evaluate(()=>({status:document.querySelector('#status')?.textContent,gameHidden:(document.querySelector('#game')as HTMLElement)?.hidden,engine:!!(window as any).doom,canvas:document.querySelector('canvas')?.getAttribute('width'),state:(window as any).doom?[0,1,17,18,23,24,25].map(n=>(window as any).doom._web_state(n)):null})));
   throw e;
  }
- await page.keyboard.press('Enter');
- if(load){await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu()),{timeout:remaining()}).toBe(1);await page.keyboard.press('Enter');}
+ step('resume-before');await page.keyboard.press('Enter');step('resume-return');
+ if(load){step('load-menu-before');await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu()),{timeout:remaining()}).toBe(1);step('load-menu-visible');await page.keyboard.press('Enter');step('load-confirm-return');}
  await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu()),{timeout:remaining()}).toBe(0);
  await expect.poll(()=>state(page,1),{timeout:remaining()}).toBe(0);
  if(ammo!==undefined)await expect.poll(()=>state(page,11),{timeout:remaining()}).toBe(ammo);
@@ -65,8 +73,10 @@ test('Modern default renders real GPU geometry with HD, keyboard, audio, isolate
  test.setTimeout(600000);
  const errors:string[]=[],scriptErrors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  page.on('console',message=>{const text=message.text();if(text.includes('[doom-host]')) console.log('HOST_STAGE',new Date().toISOString(),text);if(text.includes('[doom]')&&/initialisation complete|Building XGL|Entering |Initializ|Parsing|StartupSound/i.test(text))console.log('MODERN_STAGE',new Date().toISOString(),text);});
+ page.on('console',message=>{const text=message.text();if(text.includes('[modern-host]')||text.includes('MODERN_NATIVE'))console.log('MODERN_DIAGNOSTIC',new Date().toISOString(),text);});
+
  page.on('console',message=>{const text=message.text();if(text.includes('[doom]')&&(/\b(?:lua|script)\b.*\b(?:error|failed|panic)\b/i.test(text)||/\b(?:error|failed|panic)\b.*\b(?:lua|script)\b/i.test(text)))scriptErrors.push(text);});
- await page.addInitScript(()=>{Element.prototype.requestPointerLock=()=>{throw new Error('Pointer Lock must not be requested');};});
+ await page.addInitScript(()=>{(window as any).doomTraceModern=true;Element.prototype.requestPointerLock=()=>{throw new Error('Pointer Lock must not be requested');};});
  await page.goto('/');await expect(page.locator('#play')).toBeEnabled();
  await expect(page.locator('#profileSummary')).toContainText('1920×1440');
  await expect(page.locator('#shell')).toHaveAttribute('data-resolution','modern');

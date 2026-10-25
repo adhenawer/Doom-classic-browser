@@ -31,13 +31,6 @@ s=s[:a]+'        WebMain(argc, const_cast<const char **>(argv));\n'+s[b:]
 s=s.replace('    // We always do this once here, although the engine may', '    extern int web_suspended;\n    if (web_suspended) return;\n\n    // We always do this once here, although the engine may')
 s=s.replace('        emscripten_set_main_loop(WebTick, 0, 0);', '')
 s=s.replace('        EdgeMain(argc, argv);', '        EdgeMain(argc, argv);\n        emscripten_set_main_loop(WebTick, 0, 0);')
-# A frame callback before SDL's Asyncify yield does not prove a completed tick.
-# Signal only after EdgeTicker (display, input and simulation) has returned.
-s=s.replace('    if (app_state & kApplicationActive)\n        EdgeTicker();',
- '''    if (app_state & kApplicationActive) {
-        EdgeTicker();
-        EM_ASM({ Module["onTickComplete"]?.(); });
-    }''')
 p.write_text(s)
 # Busy-spin is inappropriate on the single browser/UI thread, especially while
 # the host has frozen logical time during an Asyncify yield. Preserve 35 Hz,
@@ -101,6 +94,46 @@ replace('source_files/edge/r_image.cc', '        return (1 << 22);', '        re
 replace('source_files/edge/r_image.cc', '#include "r_image.h"', '#include "r_image.h"\nint web_hd_registered=0, web_hd_uploaded=0, web_hd_maxwidth=0;')
 replace('source_files/edge/r_image.cc', '    rim->source_graphic_.packfile_name = (char *)calloc(pn_len + 1, 1);', '    rim->source_graphic_.packfile_name = (char *)calloc(pn_len + 1, 1);\n    if (type == kImageSourceTXHI && replaces) web_hd_registered++;')
 replace('source_files/edge/r_image.cc', '    GLuint tex_id =\n        UploadTexture(tmp_img,', '    if (rim->source_type_ == kImageSourceTXHI && rim->source_graphic_.packfile_name) {\n        web_hd_uploaded++;\n        if (tmp_img->width_ > web_hd_maxwidth) web_hd_maxwidth=tmp_img->width_;\n    }\n    GLuint tex_id =\n        UploadTexture(tmp_img,')
+# Read-only lifecycle diagnostics. Keep the SDL swap/yield and startup policy
+# with cooperative waits so a trace can distinguish rendering, Asyncify and native input.
+replace('source_files/edge/i_web.cc', 'void WebTick(void)\n{',
+ 'extern void web_diag_set_phase(int);\nextern void web_diag_tick_finished();\nvoid WebTick(void)\n{\n    web_diag_set_phase(1);')
+replace('source_files/edge/i_web.cc', '    if (web_suspended) return;',
+ '    if (web_suspended) { web_diag_set_phase(0); return; }')
+replace('source_files/edge/i_web.cc', '    if (app_state & kApplicationActive)\n        EdgeTicker();',
+ '    if (app_state & kApplicationActive) {\n        EdgeTicker();\n        web_diag_tick_finished();\n        EM_ASM({ Module["onTickComplete"]?.(); });\n    } else web_diag_set_phase(0);')
+replace('source_files/edge/e_main.cc', 'void EdgeTicker(void)\n{\n    DoBigGameStuff();',
+ 'extern void web_diag_set_phase(int);\nvoid EdgeTicker(void)\n{\n    web_diag_set_phase(2);\n    DoBigGameStuff();')
+replace('source_files/edge/e_main.cc', '    // Update display, next frame, with current state.\n    EdgeDisplay();',
+ '    // Update display, next frame, with current state.\n    web_diag_set_phase(3);\n    EdgeDisplay();\n    web_diag_set_phase(4);')
+replace('source_files/edge/e_main.cc', '    int counts = TryRunTicCommands();',
+ '    web_diag_set_phase(5);\n    int counts = TryRunTicCommands();\n    web_diag_set_phase(6);')
+replace('source_files/edge/i_video.cc', 'void FinishFrame(void)\n{\n    render_backend->FinishFrame();',
+ 'extern void web_diag_swap_finished();\nvoid FinishFrame(void)\n{\n    web_diag_set_phase(7);\n    render_backend->FinishFrame();')
+replace('source_files/edge/i_video.cc', 'static void SwapBuffers(void)\n{\n    render_backend->SwapBuffers();',
+ 'extern void web_diag_set_phase(int);\nstatic void SwapBuffers(void)\n{\n    render_backend->SwapBuffers();\n    web_diag_set_phase(10);')
+replace('source_files/edge/i_video.cc', '    EM_ASM({ Module["onFrame"]?.(); });\n    SwapBuffers();',
+ '    EM_ASM({ Module["onFrame"]?.(); });\n    web_diag_set_phase(8);\n    SwapBuffers();\n    web_diag_swap_finished();')
+# Loading/progress screens also finish frames. Only a returned real BSP render
+# in this very frame can qualify a completed swap as a world presentation.
+replace('source_files/edge/i_video.cc', 'void StartFrame(void)\n{\n    ec_frame_stats.Clear();',
+ 'extern void web_diag_frame_started();\nvoid StartFrame(void)\n{\n    web_diag_frame_started();\n    ec_frame_stats.Clear();')
+replace('source_files/edge/r_render.cc', 'void RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height, float expand_w)\n{',
+ 'extern void web_diag_world_drawn();\nvoid RenderView(int x, int y, int w, int h, MapObject *camera, bool full_height, float expand_w)\n{')
+replace('source_files/edge/r_render.cc', '    render_world_index++;\n}',
+ '    render_world_index++;\n    web_diag_world_drawn();\n}')
+replace('source_files/edge/e_input.cc', 'void ProcessInputEvents(void)\n{',
+ 'extern void web_diag_f3_dequeue();\nvoid ProcessInputEvents(void)\n{')
+replace('source_files/edge/e_input.cc', '        ev = &events[event_tail];',
+ '        ev = &events[event_tail];\n        if (ev->type == kInputEventKeyDown && ev->value.key.sym == kFunction3) web_diag_f3_dequeue();')
+replace('source_files/edge/m_menu.cc', 'void MenuReadSaveStrings(void)\n{',
+ 'extern void web_diag_preview(int);\nvoid MenuReadSaveStrings(void)\n{\n    web_diag_preview(1);')
+replace('source_files/edge/m_menu.cc', '                save_extended_information_slots[i].save_image_data = LoadImageData(svimg_file);',
+ '                web_diag_preview(2);\n                save_extended_information_slots[i].save_image_data = LoadImageData(svimg_file);\n                web_diag_preview(3);')
+replace('source_files/edge/m_menu.cc', '                    save_extended_information_slots[i].save_texture_id =\n                        UploadTexture(save_extended_information_slots[i].save_image_data, kUploadClamp, (1 << 30));',
+ '                    web_diag_preview(4);\n                    save_extended_information_slots[i].save_texture_id =\n                        UploadTexture(save_extended_information_slots[i].save_image_data, kUploadClamp, (1 << 30));\n                    web_diag_preview(5);')
+replace('source_files/edge/m_menu.cc', '    // fix up descriptions\n',
+ '    web_diag_preview(6);\n    // fix up descriptions\n')
 # Minimal support trees: no bundled unrelated game packs or downloaded IWADs.
 support=target/'browser-support';support.mkdir()
 shutil.copytree(source/'edge_defs',support/'edge_defs')

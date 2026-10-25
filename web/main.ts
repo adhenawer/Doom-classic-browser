@@ -28,7 +28,7 @@ declare global { interface Window {
   createDoom?: (options: object) => Promise<Engine>;
   createDoomHigh?: (options: object) => Promise<Engine>;
   createDoomModern?: (options: object) => Promise<Engine>;
-  doom?: Engine; doomPresentation?: Presentation;
+  doom?: Engine; doomPresentation?: Presentation; doomTraceModern?: boolean;
 } }
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const shell = el('shell'), game = el('game'), panel = el('panel'), home = el('home');
@@ -156,10 +156,14 @@ function reset() {
   for (const key of sent) engine?._web_key(key,0,key);
   input.clear(); sent.clear(); engine?._web_reset();
 }
+function traceModern(event: string) {
+  if (!window.doomTraceModern || activeResolution !== 'modern') return;
+  console.info('[modern-host]', event, JSON.stringify({at:performance.now(),suspended,starting,queuedLoad,gameHidden:game.hidden,state:engine?[0,1,26,27,28,29,30,31,32,33].map(n=>engine!._web_state(n)):null}));
+}
 function suspend() {
   if (!engine || !running) return;
   reset(); engine._web_suspend(1); suspended = true; presentation.setActive(false);
-  el('resume').hidden = false; updateControlExperience();
+  el('resume').hidden = false; updateControlExperience(); traceModern('suspended');
   if (!document.hidden && !game.hidden) el('resumeButton').focus();
 }
 function resume() {
@@ -169,10 +173,12 @@ function resume() {
     orientation?.lock?.('landscape').catch(() => { /* Browser may require installed PWA/fullscreen. */ });
   }
   if (graphicsLost) { game.hidden=true; shell.hidden=false; restartResolution(); return; }
+  traceModern('resume-before');
   reset(); applyConfig(); engine._web_audio(); engine._web_suspend(0);
   suspended = false; el('resume').hidden = true;
   shell.hidden = true; game.hidden = false; presentation.setActive(true); canvas.focus(); updateControlExperience();
-  if (queuedLoad) { queuedLoad = false; console.info('[doom-host] queued load resumed', activeResolution, engine._web_state(0)); tap(189); }
+  if (queuedLoad) { queuedLoad = false; console.info('[doom-host] queued load resumed', activeResolution, engine._web_state(0)); traceModern('load-key-before'); tap(189); traceModern('load-key-posted'); }
+  traceModern('resume-return');
 }
 function showShell() {
   suspend(); game.hidden = true; shell.hidden = false;
@@ -509,15 +515,18 @@ async function start(load = false) {
     if (hash !== (custom?.id ?? '7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d')) throw new Error('IWAD corrompido: SHA-256 divergente. Importe novamente.');
     activeResolution = settings.resolution; game.dataset.renderer=activeResolution; activeModernSize=settings.modernSize; activeModernHD=settings.modernHD; activeModernHUD=settings.modernHUD;
     await loadScript(activeResolution);
+    let tracedFrames=0;
     engine = await window[engineProfiles[activeResolution].factory]!({ canvas, noInitialRun: true,
-      onFrame: () => presentation.frame(),
+      traceModern:!!window.doomTraceModern,
+      onFrame: () => { presentation.frame(); if (++tracedFrames<=8) traceModern('frame-before-swap'); },
       onTickComplete: () => {
         if (activeResolution !== 'modern' || running || preparedModernPause || !engine) return;
-        if (engine._web_state(0) <= 2 || engine._web_state(1) !== 0) { completedModernTicks = 0; return; }
+        if (engine._web_state(0) <= 2 || engine._web_state(1) !== 0 || engine._web_state(33) !== 1 || engine._web_state(26) !== 0) { completedModernTicks = 0; return; }
         if (++completedModernTicks < 2) return;
-        // Pause at the native tick boundary, never inside a partially unwound HD frame.
+        // Pause inside the completed-tick callback; polling must not freeze a later tick.
         engine._web_suspend(1); preparedModernPause = true;
         console.info('[doom-host] Modern ready at completed tick', engine._web_state(0));
+        traceModern('prepared-tick-complete');
       },
       locateFile: (path: string) => new URL(path, location.href).href,
       print: (line: string) => console.info('[doom]', line), printErr: (line: string) => console.warn('[doom]', line),
@@ -525,6 +534,7 @@ async function start(load = false) {
       onSaveWritten: () => { say('Persistindo save…'); sync().then(() => say('Save persistido em IndexedDB.')).catch(error); }
     });
     window.doom = engine;
+    if(window.doomTraceModern&&activeResolution==='modern'){let samples=0;const probe=setInterval(()=>{traceModern('heartbeat');if(++samples>=180)clearInterval(probe);},1000);}
     engine.FS.mkdirTree('/persist'); engine.FS.mount(engine.FS.filesystems.IDBFS, {}, '/persist');
     await sync(true);
     activeSavePath = saveDirectory(activeResolution, hash); engine.FS.mkdirTree(activeSavePath);
@@ -567,10 +577,13 @@ async function start(load = false) {
       const timeout=activeResolution === 'modern' ? 90000 : 45000;
       const until = performance.now() + timeout;
       const timer = setInterval(() => {
-        if (engine!._web_state(0) > 2 && engine!._web_state(1) === 0 && (activeResolution !== 'modern' || preparedModernPause)) { clearInterval(timer); resolve(); }
+        const levelReady = engine!._web_state(0) > 2 && engine!._web_state(1) === 0;
+        const frameReady = activeResolution !== 'modern' || (preparedModernPause && engine!._web_state(33) === 1 && engine!._web_state(26) === 0);
+        if (levelReady && frameReady) { clearInterval(timer); resolve(); }
         else if (performance.now() > until) { clearInterval(timer); reject(new Error('Motor não chegou à fase no tempo de preparação. Reabra o aplicativo e tente uma resolução menor.')); }
       }, 50);
     });
+    traceModern('ready-before-suspend');
     running = true; queuedLoad = load; applyConfig(true); suspend();
     say('Motor pronto. Enter retoma a partida e tenta desbloquear o áudio.');
   } catch (e) { shell.hidden = false; game.hidden = true; error(e); }

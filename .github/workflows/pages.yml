@@ -41,7 +41,14 @@ jobs:
           /tmp/event-queue-high High
       - run: npm test
       - run: npm run build
-      - run: npx playwright install --with-deps chromium webkit
+      - name: Install browser runtimes
+        run: |
+          # The Azure Ubuntu mirror downloaded 119 MB at 172 kB/s in CI.
+          # Keep Ubuntu's signed packages and use its official HTTPS archive.
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            sudo sed -i 's|http[s]\?://azure.archive.ubuntu.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' /etc/apt/apt-mirrors.txt
+          fi
+          npx playwright install --with-deps chromium webkit
       - name: Browser integration tests
         run: npm run test:e2e -- --reporter=line,json
         env:

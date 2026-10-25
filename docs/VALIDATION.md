@@ -2,6 +2,10 @@
 
 Data: 2026-10-25. Executor Linux de nuvem, com Chromium e WebKit desktop. A validação é organizada por browser, sistema, dispositivo e teclado; o Chrome no iPad é um perfil de uso pendente de teste físico.
 
+## Registro histórico do MVP
+
+Os hashes, contagens e `docs/test-results.json` abaixo pertencem à validação inicial do MVP. A evolução posterior para três motores, materiais HD e o gate atual está em [Moderno HD — validação e evidências](modern-hd/RELEASE.md) e [QA independente](modern-hd/QA.md). Esses resultados históricos não certificam o build atual.
+
 ## Build
 
 - Chocolate Doom real compilado em C para WASM com Emscripten 4.0.18, SDL2 2.32.8 e SDL2_mixer 2.8.0.
@@ -14,7 +18,7 @@ Data: 2026-10-25. Executor Linux de nuvem, com Chromium e WebKit desktop. A vali
 
 ## Testes automatizados
 
-Os testes são executados por `npm test`, compilação/execução de `tests/turn_test.c` e `npm run test:e2e`. Resultados da última rodada ficam em `docs/test-results.json`.
+Os testes são executados por `npm test`, compilação/execução de `tests/turn_test.c` e `npm run test:e2e`. Resultados dessa rodada histórica ficam em `docs/test-results.json`.
 
 | Grupo | Cobertura |
 |---|---|

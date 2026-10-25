@@ -23,6 +23,47 @@ static web_turn_t web_turn = {60,360,180,1,0,0,0,0};
 static int web_left, web_right, web_always_run;
 static int web_last_forward, web_last_side, web_last_angle, web_last_buttons;
 int web_suspended = 0;
+// Observation only: phases never gate input, clocks, rendering or suspension.
+// 0 idle, 1 WebTick, 2 game actions, 3 display, 4 display returned,
+// 5 TryRunTicCommands, 6 commands returned, 7 GPU finish, 8 backend swap,
+// 9 swap returned, 10 SDL_GL_SwapWindow (including its Asyncify yield).
+static int web_diag_phase, web_diag_ticks, web_diag_world_frames, web_diag_swaps, web_diag_started;
+static int web_diag_f3_posted, web_diag_f3_dequeued, web_diag_f3_tick;
+static int web_diag_preview_phase, web_diag_first_world_tick;
+static bool web_diag_pending_world, web_diag_tick_world_swap;
+EM_JS(void, web_diag_log, (int phase, int ticks, int frames, int posted, int dequeued, int tic, int menu), {
+ if (!Module['traceModern']) return;
+ const count = Module['modernTraceCount'] || 0;
+ if (count >= 96) return;
+ Module['modernTraceCount'] = count + 1;
+ console.info('MODERN_NATIVE', performance.now(), phase, ticks, frames, posted, dequeued, tic, menu);
+});
+static void web_diag_milestone(int phase) {
+ // Only initial ticks and three completed ticks following F3 can emit logs.
+ if (web_diag_started && (web_diag_ticks < 2 || (web_diag_f3_posted && web_diag_ticks < web_diag_f3_tick + 3)))
+  web_diag_log(phase,web_diag_ticks,web_diag_world_frames,web_diag_f3_posted,web_diag_f3_dequeued,make_tic,menu_active);
+}
+void web_diag_set_phase(int phase) {
+ if (phase == 1) { web_diag_started=1; web_diag_tick_world_swap=false; }
+ web_diag_phase=phase; web_diag_milestone(phase);
+}
+void web_diag_frame_started() { web_diag_pending_world=false; }
+void web_diag_world_drawn() { web_diag_pending_world=true; }
+void web_diag_swap_finished() {
+ ++web_diag_swaps;
+ if (web_diag_pending_world && game_state == kGameStateLevel) {
+  ++web_diag_world_frames; web_diag_tick_world_swap=true;
+ }
+ web_diag_pending_world=false;
+ web_diag_set_phase(9);
+}
+void web_diag_tick_finished() {
+ ++web_diag_ticks;
+ if (game_state == kGameStateLevel && make_tic > 2 && web_diag_tick_world_swap) web_diag_first_world_tick=1;
+ web_diag_set_phase(0);
+}
+void web_diag_preview(int phase) { web_diag_preview_phase=phase; web_diag_milestone(100+phase); }
+void web_diag_f3_dequeue() { ++web_diag_f3_dequeued; web_diag_milestone(202); }
 EM_JS(int, web_audio_request, (int running), {
  const context = Module['modernAudioContext'];
  if (!context || context.state === 'closed') return -1;
@@ -44,6 +85,9 @@ EMSCRIPTEN_KEEPALIVE void web_key(int key, int down, int character) {
  InputEvent event{}; event.type = down ? kInputEventKeyDown : kInputEventKeyUp;
  event.value.key.sym = key;
  PostEvent(&event);
+ if (key == kFunction3 && down) {
+  ++web_diag_f3_posted; web_diag_f3_tick=web_diag_ticks; web_diag_milestone(201);
+ }
 }
 EMSCRIPTEN_KEEPALIVE void web_rotate(int left, int right) { web_left = !!left; web_right = !!right; }
 EMSCRIPTEN_KEEPALIVE void web_reset() {
@@ -115,6 +159,14 @@ EMSCRIPTEN_KEEPALIVE double web_state(int selector) {
  case 23:return web_hd_registered;
  case 24:return web_hd_uploaded;
  case 25:return web_hd_maxwidth;
+ case 26:return web_diag_phase;
+ case 27:return web_diag_ticks;
+ case 28:return web_diag_world_frames;
+ case 29:return web_diag_f3_posted;
+ case 30:return web_diag_f3_dequeued;
+ case 31:return web_diag_preview_phase;
+ case 32:return web_diag_swaps;
+ case 33:return web_diag_first_world_tick;
  default:return -1;
  }
 }
