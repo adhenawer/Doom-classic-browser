@@ -46,6 +46,8 @@ O precache de uma atualização usa requisições com `cache: reload`, evitando 
 
 Fontes upstream vendorizadas, toolchain fixada por digest, dependências npm exatas com lockfile, Actions fixadas por SHA e conteúdo livre verificado por hash. O objetivo comprovável é recompilar a partir das entradas fixadas. Identidade byte a byte entre executores só pode ser afirmada após comparação específica; não é presumida.
 
-## Identificadores legados
+## Endereço e armazenamento
 
-O caminho publicado `/Doom-classic-ipad/` e o banco IndexedDB `doom-ipad-v1` são mantidos por compatibilidade com links, caches, instalações e dados existentes. Não representam uma restrição ao iPad. O nome público da aplicação é **DOOM Classic Browser** e o pacote é `doom-classic-browser`. O ID e o escopo da PWA permanecem estáveis; a orientação é livre.
+O repositório é `adhenawer/Doom-classic-browser`, publicado sob `/Doom-classic-browser/`. O código usa caminhos relativos e o Service Worker usa o escopo da instalação, portanto o build não depende do nome anterior do repositório.
+
+O banco IndexedDB legado `doom-ipad-v1` e o IDBFS `/persist` são mantidos para acesso aos dados já existentes. O novo caminho continua sob a origem `https://adhenawer.github.io`; o acesso aos dados pressupõe o mesmo browser, perfil e contexto. Uma PWA instalada pode usar contexto próprio, conforme o browser. O namespace dos caches inclui o caminho, então a nova URL precisa de sua própria preparação offline. A identidade e o escopo relativos da PWA passam a resolver no novo caminho. Veja [migração do repositório](REPOSITORY-MIGRATION.md).

@@ -2,7 +2,7 @@
 
 Porte jogável do **Chocolate Doom em C/WebAssembly para execução no navegador**, com teclado físico, dados locais e modo offline após a preparação inicial. O projeto atende browsers em computadores, notebooks e tablets. O Chrome de um iPad é um dos ambientes de uso previstos.
 
-**[Jogar no browser](https://adhenawer.github.io/Doom-classic-ipad/)** · [Builds e testes](https://github.com/adhenawer/Doom-classic-ipad/actions) · [Validação](docs/VALIDATION.md)
+**[Jogar no browser](https://adhenawer.github.io/Doom-classic-browser/)** · [Builds e testes](https://github.com/adhenawer/Doom-classic-browser/actions) · [Validação](docs/VALIDATION.md)
 
 O motor executa mapas reais e preserva as mecânicas clássicas. A distribuição inclui Freedoom Phase 1, com conteúdo livre próprio. Os mapas originais exigem um `DOOM.WAD` ou `DOOM1.WAD` autorizado, importado pelo usuário. Não há telemetria, servidor de jogo ou Pointer Lock.
 
@@ -79,9 +79,11 @@ npm run test:e2e
 
 Esses comandos são para o executor de desenvolvimento na nuvem. A imagem de toolchain inclui Python e CMake. Asyncify permite ceder ao browser durante esperas, transições e o loop original. A versão atual usa uma thread e não requer COOP/COEP.
 
-## Nomes legados e dados existentes
+## Repositório, URL e dados existentes
 
-O produto e a PWA se chamam **DOOM Classic Browser**, e o pacote é `doom-classic-browser`. O nome histórico do repositório e o endereço `/Doom-classic-ipad/` foram preservados para manter os links e as instalações existentes. O banco `doom-ipad-v1` conserva os IWADs e as preferências já salvos. Esses identificadores não restringem o browser nem o dispositivo. Veja [arquitetura](docs/ARCHITECTURE.md).
+O repositório passa a se chamar `adhenawer/Doom-classic-browser`, e a URL de publicação passa a ser `https://adhenawer.github.io/Doom-classic-browser/`. Veja o [procedimento de mudança de endereço](docs/REPOSITORY-MIGRATION.md).
+
+O produto e a PWA se chamam **DOOM Classic Browser**, e o pacote é `doom-classic-browser`. O banco legado `doom-ipad-v1` continua preservado para acesso aos IWADs e às preferências existentes; saves continuam no mesmo IDBFS. Os dados são associados à origem e ao contexto do browser, não ao nome do repositório. O novo caminho requer preparar novamente o cache offline e, quando aplicável, a instalação de PWA. Veja [arquitetura](docs/ARCHITECTURE.md).
 
 ## Licenças e privacidade
 

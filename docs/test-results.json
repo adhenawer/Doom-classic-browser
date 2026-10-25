@@ -66,6 +66,6 @@
   "native_rotation_suite": "passed",
   "npm_audit_known_vulnerabilities": 0,
   "engine_rebuild_same_environment": "matching SHA-256 for WASM and loader",
-  "github_actions": "See https://github.com/adhenawer/Doom-classic-ipad/actions for the run associated with the commit",
+  "github_actions": "See https://github.com/adhenawer/Doom-classic-browser/actions for the run associated with the commit",
   "hardware_validation": "Manual validation is tracked per browser/device profile; Chrome on iPad remains pending"
 }

@@ -37,11 +37,11 @@ Atalhos reservados: testes verificam a suspensão defensiva ao receber modificad
 
 ## Entrega externa
 
-- Repositório de destino: https://github.com/adhenawer/Doom-classic-ipad
+- Repositório de destino: https://github.com/adhenawer/Doom-classic-browser
 - GitHub Pages confirmado com fonte `workflow`.
 - A autorização de escrita da integração foi confirmada por um envio simulado sem erro 403.
-- Builds e publicação são executados no [GitHub Actions](https://github.com/adhenawer/Doom-classic-ipad/actions). O resultado da execução associada ao commit é a evidência de compilação/teste no GitHub.
-- URL de produção: https://adhenawer.github.io/Doom-classic-ipad/
+- Builds e publicação são executados no [GitHub Actions](https://github.com/adhenawer/Doom-classic-browser/actions). O resultado da execução associada ao commit é a evidência de compilação/teste no GitHub.
+- URL de produção: https://adhenawer.github.io/Doom-classic-browser/
 - Os resultados detalhados acima foram medidos no executor desta sessão; a execução do Actions repete a suíte antes da publicação.
 
 ## Compatibilidade e validação manual
