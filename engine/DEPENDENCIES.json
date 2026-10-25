@@ -1,0 +1,20 @@
+[
+  {
+    "file": "SDL2-2.32.8.zip",
+    "url": "https://github.com/libsdl-org/SDL/archive/release-2.32.8.zip",
+    "sha256": "80193a6ec899ba00b5914adefecdd669e32a14b067500ad063c80156611f9366",
+    "bytes": 9104435
+  },
+  {
+    "file": "SDL2_mixer-2.8.0.zip",
+    "url": "https://github.com/libsdl-org/SDL_mixer/archive/release-2.8.0.zip",
+    "sha256": "3aa9b3abd7cefb3e7952ec2d0acf38c70947f04be14d74ed45f57155c7457386",
+    "bytes": 11176840
+  },
+  {
+    "file": "emscripten-4.0.18.tar.gz",
+    "url": "https://codeload.github.com/emscripten-core/emscripten/tar.gz/refs/tags/4.0.18",
+    "sha256": "a35d47135c19e244110c42129c99acdfe7313e2d212cfa513ac13212664948e4",
+    "bytes": 34278842
+  }
+]

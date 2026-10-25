@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-25",
+  "environment": "Cloud Linux; desktop Chromium and WebKit; no physical iPad",
+  "stats": {
+    "startTime": "2026-10-25T15:05:56.831Z",
+    "duration": 57186.157,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "keyboard shell, settings persistence, remapping, reserved modifier fallback",
+      "project": "chromium",
+      "status": "passed",
+      "duration_ms": 661
+    },
+    {
+      "title": "real IWAD, rendered level, simultaneous input, ramp, shooting, menu, focus, save/load",
+      "project": "chromium",
+      "status": "passed",
+      "duration_ms": 7735
+    },
+    {
+      "title": "IWAD import persists metadata and blob; invalid file is rejected without replacement",
+      "project": "chromium",
+      "status": "passed",
+      "duration_ms": 3120
+    },
+    {
+      "title": "complete offline cache, re-open engine without network, persisted save",
+      "project": "chromium",
+      "status": "passed",
+      "duration_ms": 5355
+    },
+    {
+      "title": "keyboard shell, settings persistence, remapping, reserved modifier fallback",
+      "project": "webkit",
+      "status": "passed",
+      "duration_ms": 1260
+    },
+    {
+      "title": "real IWAD, rendered level, simultaneous input, ramp, shooting, menu, focus, save/load",
+      "project": "webkit",
+      "status": "passed",
+      "duration_ms": 15272
+    },
+    {
+      "title": "IWAD import persists metadata and blob; invalid file is rejected without replacement",
+      "project": "webkit",
+      "status": "passed",
+      "duration_ms": 8416
+    },
+    {
+      "title": "complete offline cache, re-open engine without network, persisted save",
+      "project": "webkit",
+      "status": "passed",
+      "duration_ms": 12804
+    }
+  ],
+  "node_unit_tests": {
+    "passed": 4,
+    "failed": 0
+  },
+  "native_rotation_suite": "passed",
+  "npm_audit_known_vulnerabilities": 0,
+  "engine_rebuild_same_environment": "matching SHA-256 for WASM and loader",
+  "github_actions": "not run: integration write permission denied",
+  "hardware_validation": "pending"
+}

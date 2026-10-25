@@ -2,7 +2,7 @@
 
 Port real do **Chocolate Doom em C / WebAssembly**, com Freedoom Phase 1 livre. Sem clone JavaScript, telemetria, servidor de jogo ou Pointer Lock. O IWAD original de DOOM deve ser importado pelo proprietário.
 
-Estado: MVP em desenvolvimento e validação. **Nenhum teste em iPad físico foi realizado pelo desenvolvedor.** Os resultados reais ficam em [docs/VALIDATION.md](docs/VALIDATION.md).
+Estado: MVP compilado no executor de nuvem e testado em Chromium e WebKit desktop automatizados. **Nenhum teste em iPad físico foi realizado pelo desenvolvedor.** Publicação e GitHub Actions dependem do acesso de escrita da integração ao repositório. Os resultados reais ficam em [docs/VALIDATION.md](docs/VALIDATION.md).
 
 ## Jogar pelo iPad
 
@@ -50,6 +50,7 @@ Toolchain: Emscripten 4.0.18 em imagem fixada por digest; Chocolate Doom vendori
 npm ci
 docker run --rm -v "$PWD:/src" -w /src emscripten/emsdk@sha256:bbe90e2b00acbd1a9596087d88305029f383de1eb71c0cdb20f4e19647265450 bash scripts/build-engine.sh
 python3 scripts/fetch-content.py
+python3 scripts/fetch-dependency-sources.py
 npm test
 npm run build
 npx playwright install --with-deps chromium webkit

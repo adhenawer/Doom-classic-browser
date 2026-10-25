@@ -7,6 +7,7 @@
 #include "m_controls.h"
 #include "turn.h"
 extern boolean menuactive;
+extern int saveStringEnter;
 extern void web_clock_pause(int paused);
 int web_suspended = 0;
 static int web_left = 0, web_right = 0;
@@ -25,7 +26,6 @@ EMSCRIPTEN_KEEPALIVE void web_rotate(int left, int right) {
     web_left = !!left; web_right = !!right;
 }
 EMSCRIPTEN_KEEPALIVE void web_reset(void) {
-    while (D_PopEvent() != NULL) {}
     memset(gamekeydown, 0, sizeof(gamekeydown));
     memset(mousearray, 0, sizeof(mousearray));
     memset(joyarray, 0, sizeof(joyarray));
@@ -35,16 +35,19 @@ EMSCRIPTEN_KEEPALIVE void web_reset(void) {
     web_turn_reset(&web_turn);
 }
 EMSCRIPTEN_KEEPALIVE void web_suspend(int value) {
+    while (D_PopEvent() != NULL) {}
     web_reset();
     web_suspended = !!value;
     web_clock_pause(web_suspended);
 }
 EMSCRIPTEN_KEEPALIVE int web_menu(void) { return menuactive; }
+EMSCRIPTEN_KEEPALIVE int web_text(void) { return saveStringEnter; }
 EMSCRIPTEN_KEEPALIVE int web_audio(void) {
     return EM_ASM_INT({
-        if (typeof SDL2 === 'undefined' || !SDL2.audioContext) return -1;
-        if (SDL2.audioContext.state !== 'running') SDL2.audioContext.resume().catch(() => {});
-        return SDL2.audioContext.state === 'running' ? 1 : 0;
+        var context = Module['SDL2']?.audioContext;
+        if (!context) return -1;
+        if (context.state !== 'running') context.resume().catch(() => {});
+        return context.state === 'running' ? 1 : 0;
     });
 }
 static double bounded(double v, double low, double high, double fallback) {

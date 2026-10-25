@@ -21,6 +21,10 @@ p.write_text(p.read_text() + '\n#include "bridge.c"\nstatic void web_apply(ticcm
 replace('src/doom/g_game.c', '    // low-res turning', '    web_apply(cmd);\n\n    // low-res turning')
 replace('src/doom/g_game.c', '    M_rename(temp_savegame_file, savegame_file);',
     '    M_rename(temp_savegame_file, savegame_file);\n    EM_ASM({ Module["onSaveWritten"]?.(); });')
+# Browser back navigation also closes the root menu (DOS only backed out of submenus).
+replace('src/doom/m_menu.c',
+    '    else if (key == key_menu_back)\n    {\n        // Go back to previous menu',
+    '    else if (key == key_menu_back)\n    {\n        if (!currentMenu->prevMenu) { M_ClearMenus(); return true; }\n        // Go back to previous menu')
 for name in ['bridge.c', 'turn.h', 'turn.c']:
     shutil.copy(root / 'engine' / name, target / 'src/doom' / name)
 with (target / 'src/doom/CMakeLists.txt').open('a') as f:

@@ -1,0 +1,36 @@
+# Revisão técnica do MVP
+
+Data: 2026-10-25. Revisão realizada no código e executor de nuvem, sem iPad físico. A classificação descreve o impacto potencial observado no desenvolvimento; a coluna de correção registra o estado final.
+
+| Nível | Local / descrição | Impacto e evidência | Correção |
+|---|---|---|---|
+| Alto | `package.json`: Vite 7.1.12 | `npm audit` identificou avisos de leitura indevida e bypass de restrições no servidor de desenvolvimento. Embora o site de produção seja estático, a ferramenta não deveria permanecer vulnerável. | Atualizado e fixado em 7.3.7; lockfile atualizado; auditoria repetida. |
+| Alto | Persistência de saves | Finalizar a escrita em MEMFS não garante gravação em IndexedDB. Encerrar a aba pode perder o save. | Callback após renomear o save final, fila serializada de `syncfs`, confirmação somente após concluir, testes de reabertura/load com servidor desligado. Ainda há risco de encerramento forçado antes da conclusão; não é possível eliminar esse risco no browser. |
+| Alto | Estado de entrada ao suspender | Solturas podem ser perdidas quando o aplicativo perde foco; o relógio poderia tentar recuperar o tempo em segundo plano. | Limpeza de estados JS/C, suspensão explícita, desconto do tempo suspenso e nova confirmação por Enter. Teste mede que os tics ficam parados durante suspensão. Reconexão Bluetooth permanece pendente de hardware. |
+| Alto | `web/main.ts`: leitura de coleção de IWADs | Guardar todos os buffers numa coleção faz a inicialização carregar até oito arquivos de 64 MiB no JavaScript. Isso aumenta risco de encerramento no iPad. | Metadata separada; blobs armazenados por chave; somente o IWAD ativo é lido. Limites, validação e verificação de SHA-256 antes do motor. |
+| Alto | SDL e navegação da interface após jogar | O handler global de teclado instalado por SDL cancelava a ativação de botões HTML por Enter quando o Canvas estava oculto. O teste de exportação de backup detectou a falha. | Ponte captura a propagação dos eventos para SDL também na interface, mantendo os comportamentos padrão do HTML. Teste percorre voltar à interface, exportar, excluir e restaurar save pelo teclado. |
+| Médio | `engine/bridge.c`: contexto de áudio | O port SDL2 atual guarda AudioContext em `Module.SDL2`; procurar um global `SDL2` retorna indisponível. | Ponte passou a usar `Module.SDL2.audioContext`. Teste confirma contexto ativo e PCM não nulo em Chromium e WebKit desktop. Desbloqueio em iPad continua pendente. |
+| Médio | `web/main.ts`: cache HTTP de IWAD | Corrida entre download de jogo e precache produziu `net::ERR_CACHE_WRITE_FAILURE` em Chromium automatizado. | Download do IWAD usa `cache: no-store` para evitar disputa pelo cache HTTP; Cache Storage continua controlado pelo Service Worker. Testes repetidos com servidor efetivamente desligado. |
+| Médio | Foco inicial e inicialização assíncrona | WebKit podia receber navegação antes do foco inicial; foco tardio da inicialização também podia desviar a navegação em andamento. | Jogar fica desabilitado até a leitura local terminar; foco inicial explícito sem roubar o foco de outro controle. Testes aguardam a condição de foco real. |
+| Médio | Menus e digitação | Backspace no menu raiz original não fecha o menu; aliases P/V interfeririam na digitação de nomes de saves. Limpar a fila de eventos ao trocar menu podia descartar entradas rápidas. | Voltar fecha o menu raiz; estado `saveStringEnter` desativa aliases durante texto; transição limpa estados, preservando fila; suspensão descarta a fila explicitamente. |
+| Médio | Namespace de Cache Storage | Caches são compartilhados por origem, inclusive entre diferentes repositórios GitHub Pages. Apagar todo nome iniciado em `doom-` poderia afetar outro app. | Prefixo inclui o escopo do Service Worker; limpeza somente do escopo atual. |
+| Médio | Fontes e avisos dos componentes estáticos | Apenas o fonte do motor não descreve todas as bibliotecas e o runtime incluídos no WASM. | Pacote de fontes passa a incluir os arquivos de origem correspondentes de SDL2, SDL2_mixer e Emscripten, verificados por hash, além de avisos do runtime/libc e Vite. O pacote grande de fontes é um download separado, dispensável ao funcionamento offline. |
+| Médio | Teste offline em WebKit | A emulação `context.setOffline(true)` causou erro interno de navegação, não um diagnóstico conclusivo do aplicativo. | Teste passa a desligar o servidor HTTP real nos dois motores. Chromium adicionalmente usa emulação offline. O teste não usa uma resposta de fallback da rede. |
+| Baixo | Warnings C do upstream/adaptador | Avisos de declarações após comandos e funções de fullscreen sem uso. Não foram tratados como prova de falha de memória ou execução. | Compilação concluída. Limpeza cosmética fica fora do MVP para manter adaptação pequena. |
+
+Nenhum problema crítico foi identificado nesta revisão. Isso não equivale a auditoria formal de todo o motor upstream.
+
+## Limitações e riscos mantidos
+
+- **Alto / compatibilidade:** iPad real não testado. Rollover, teclas reservadas, foco de Chrome/standalone e liberação de áudio precisam de validação humana.
+- **Alto / dados:** IndexedDB e caches podem ser removidos pelo navegador. `persist()` não é promessa de retenção; backups são necessários.
+- **Médio / conteúdo:** DOOM.WAD e DOOM1.WAD comerciais não estão no executor. A compatibilidade é a do motor e da integração; falta testar os arquivos autorizados do usuário. Não foram testados todos os mapas de Freedoom.
+- **Médio / energia:** Asyncify e ScriptProcessorNode são escolhas do MVP. Há oportunidade futura de medir/adotar loop cooperativo mais específico e AudioWorklet; só após o produto jogável e medidas no iPad.
+- **Médio / arquivos hostis:** validação estrutural, limites e sandbox WASM reduzem exposição. O motor histórico não foi totalmente reescrito para processar conteúdo malicioso. Arquivos inválidos podem abortar a instância; a interface informa a necessidade de recarregar.
+- **Baixo / reprodução de demos:** o novo perfil de entrada produz comandos diferentes do teclado DOS; não foi certificada identidade de demos gravadas com esse perfil.
+
+## Bloqueio externo de entrega
+
+GitHub Pages está configurado com `build_type: workflow`. A credencial disponível consegue consultar a conta e os metadados, mas `git push` e a criação de arquivo pelo plugin foram recusados com HTTP 403. A lista de instalações acessíveis retornou somente a organização `tray-tecnologia`, sem instalação na conta pessoal `adhenawer`. A correção precisa ocorrer na instalação/autorização do app para o repositório pessoal. Não é falta de autorização conversacional do usuário.
+
+Enquanto esse acesso não for confirmado, não é correto declarar envio de código, execução do GitHub Actions ou publicação como concluídos. O repositório local contém o commit e os artefatos compilados na nuvem.

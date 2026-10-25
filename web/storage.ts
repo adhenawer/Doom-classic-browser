@@ -23,3 +23,10 @@ export async function write(key: string, value: unknown) {
     t.oncomplete = () => resolve(); t.onerror = () => reject(t.error); t.onabort = () => reject(t.error);
   });
 }
+export async function remove(key: string) {
+  const d = await db();
+  return new Promise<void>((resolve, reject) => {
+    const t = d.transaction('data', 'readwrite'); t.objectStore('data').delete(key);
+    t.oncomplete = () => resolve(); t.onerror = () => reject(t.error); t.onabort = () => reject(t.error);
+  });
+}

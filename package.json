@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "tsc --noEmit && vite build && node scripts/offline.mjs",
+    "build": "python3 scripts/create-icons.py && tsc --noEmit && vite build && node scripts/offline.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/unit.test.mjs",
     "test:e2e": "playwright test"
@@ -13,6 +13,6 @@
   "devDependencies": {
     "@playwright/test": "1.56.1",
     "typescript": "5.9.3",
-    "vite": "7.1.12"
+    "vite": "7.3.7"
   }
 }

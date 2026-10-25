@@ -2,9 +2,9 @@
 import './style.css';
 import { InputState, defaults, engineKeys, validateBindings } from './input';
 import { validateWad, wadHash, MAX_WAD } from './wad';
-import { read, write } from './storage';
+import { read, write, remove } from './storage';
 
-type Wad = { id: string; name: string; data: ArrayBuffer };
+type Wad = { id: string; name: string; bytes: number };
 type Settings = { initial: number; acceleration: number; maximum: number; sensitivity: number; deceleration: number; bindings: Record<string, string[]> };
 type FS = {
   mkdirTree(p: string): void; mount(type: unknown, options: object, p: string): void;
@@ -14,7 +14,7 @@ type FS = {
 };
 type Engine = { FS: FS; callMain(args: string[]): void; _web_key(k: number, d: number, c: number): void;
   _web_rotate(l: number, r: number): void; _web_reset(): void; _web_suspend(v: number): void;
-  _web_menu(): number; _web_audio(): number; _web_state(n: number): number;
+  _web_menu(): number; _web_text(): number; _web_audio(): number; _web_state(n: number): number;
   _web_config(a: number,b: number,c: number,d: number,e: number): void;
 };
 declare global { interface Window {
@@ -27,9 +27,11 @@ const canvas = el<HTMLCanvasElement>('canvas'), status = el('status');
 const baseSettings: Settings = { initial: 60, acceleration: 360, maximum: 180, sensitivity: 1, deceleration: 0, bindings: structuredClone(defaults) };
 let settings = structuredClone(baseSettings), input = new InputState(), engine: Engine | undefined;
 let wads: Wad[] = [], selected = 'freedoom', running = false, suspended = false, starting = false;
+let queuedLoad = false;
 let remapping: string | undefined, previousMenu = false;
 let sent = new Set<number>(), activeSavePath = '', syncQueue = Promise.resolve();
 let swRegistration: ServiceWorkerRegistration | undefined;
+let initialized = false;
 const say = (message: string) => { status.textContent = message; };
 const error = (e: unknown) => { say(`Erro: ${e instanceof Error ? e.message : String(e)}`); console.error(e); };
 function sanitizeSettings(raw: unknown): Settings {
@@ -56,6 +58,7 @@ function resume() {
   reset(); applyConfig(); engine._web_audio(); engine._web_suspend(0);
   suspended = false; el('resume').hidden = true;
   shell.hidden = true; game.hidden = false; canvas.focus();
+  if (queuedLoad) { queuedLoad = false; tap(189); }
 }
 function showShell() {
   suspend(); game.hidden = true; shell.hidden = false; showHome();
@@ -79,6 +82,14 @@ async function content() {
   for (const item of [{ id: 'freedoom', name: 'Freedoom Phase 1 · conteúdo livre' }, ...wads]) {
     button(`${selected === item.id ? '✓ ' : ''}${item.name}`, async () => { selected = item.id; await write('selected', selected); say(`Selecionado: ${item.name}`); content(); });
   }
+  for (const item of wads) button(`Remover conteúdo: ${item.name}`, () => {
+    showPanel('Remover IWAD'); paragraph(`Remover ${item.name} deste navegador? Preserve sua cópia no app Arquivos. Saves e a partida ativa serão mantidos.`);
+    button('Confirmar remoção', async () => {
+      wads = wads.filter(w => w.id !== item.id); await write('wads', wads); await remove('wad:' + item.id);
+      if (selected === item.id) { selected = 'freedoom'; await write('selected', selected); }
+      say('IWAD removido do armazenamento local.'); content();
+    }); button('Cancelar', content); panel.querySelector<HTMLElement>('button')?.focus();
+  });
   back();
 }
 function controls() {
@@ -134,6 +145,11 @@ async function saves() {
   if (engine) {
     for (const path of listFiles().filter(p => /\/doomsav[0-5]\.dsg$/.test(p))) {
       paragraph(`${path.includes(activeSavePath + '/') ? 'Atual' : 'Outro IWAD'} · ${path.split('/').slice(-2).join('/')}`);
+      button(`Excluir ${path.split('/').slice(-2).join('/')}`, () => {
+        showPanel('Excluir save'); paragraph('Esta ação remove o save local. Exporte um backup antes, se precisar preservá-lo.');
+        button('Confirmar exclusão', async () => { engine!.FS.unlink(path); await sync(); say('Save excluído e remoção persistida.'); saves(); });
+        button('Cancelar', saves); panel.querySelector<HTMLElement>('button')?.focus();
+      });
     }
     button('Exportar backup de saves e configurações', async () => {
       await sync();
@@ -162,10 +178,10 @@ async function importBackup(file: File) {
 async function importWad(file: File) {
   if (file.size > MAX_WAD) throw new Error('IWAD maior que 64 MiB.');
   const data = await file.arrayBuffer(); validateWad(data);
-  const id = await wadHash(data), item = { id, name: file.name.slice(0, 100), data };
+  const id = await wadHash(data), item = { id, name: file.name.slice(0, 100), bytes: data.byteLength };
   const next = [...wads.filter(w => w.id !== id), item];
   if (next.length > 8) throw new Error('Limite de 8 IWADs.');
-  await write('wads', next); wads = next; selected = id; await write('selected', selected);
+  await write('wad:' + id, data); await write('wads', next); wads = next; selected = id; await write('selected', selected);
   say(`IWAD validado e armazenado: ${item.name}`); content();
 }
 async function loadScript() {
@@ -176,15 +192,18 @@ async function loadScript() {
   });
 }
 async function start(load = false) {
+  if (!initialized) { say('Aguarde a leitura do armazenamento local.'); return; }
   if (running) { resume(); if (load) tap(189); return; }
   if (starting) return;
   starting = true; el<HTMLButtonElement>('play').disabled = true; say('Carregando o motor real…');
   try {
     const custom = wads.find(w => w.id === selected);
     if (selected !== 'freedoom' && !custom) throw new Error('IWAD selecionado não está armazenado.');
-    let data = custom?.data;
-    if (!data) { const response = await fetch('./freedoom1.wad'); if (!response.ok) throw new Error('Freedoom indisponível.'); data = await response.arrayBuffer(); }
+    let data = custom ? await read<ArrayBuffer>('wad:' + custom.id) : undefined;
+    if (custom && !data) throw new Error('Arquivo IWAD ausente. Importe-o novamente pelo Arquivos.');
+    if (!data) { const response = await fetch('./freedoom1.wad', { cache: 'no-store' }); if (!response.ok) throw new Error('Freedoom indisponível.'); data = await response.arrayBuffer(); }
     validateWad(data); const hash = await wadHash(data);
+    if (hash !== (custom?.id ?? '7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d')) throw new Error('IWAD corrompido: SHA-256 divergente. Importe novamente.');
     await loadScript();
     engine = await window.createDoom!({ canvas, noInitialRun: true,
       locateFile: (path: string) => new URL(path, location.href).href,
@@ -208,8 +227,7 @@ async function start(load = false) {
         else if (performance.now() > until) { clearInterval(timer); reject(new Error('Motor não chegou à fase em 45 segundos.')); }
       }, 50);
     });
-    running = true; applyConfig(); suspend();
-    if (load) tap(189);
+    running = true; queuedLoad = load; applyConfig(); suspend();
     say('Motor pronto. Enter retoma a partida e tenta desbloquear o áudio.');
   } catch (e) { shell.hidden = false; game.hidden = true; error(e); }
   finally { starting = false; el<HTMLButtonElement>('play').disabled = false; }
@@ -230,6 +248,9 @@ const menuCodes: Record<string, number> = { ArrowUp: 173, ArrowDown: 175, ArrowL
 window.addEventListener('keydown', event => {
   const code = event.code;
   if (event.metaKey || event.altKey || (event.ctrlKey && code !== 'ControlLeft' && code !== 'ControlRight')) { if (running) suspend(); return; }
+  // SDL installs window handlers that prevent browser defaults even while its
+  // canvas is hidden. Keep shell Enter, form fields and remapping usable.
+  if (engine) event.stopImmediatePropagation();
   if (remapping) {
     event.preventDefault(); event.stopImmediatePropagation();
     if (code === 'Escape') { remapping = undefined; controls(); return; }
@@ -243,7 +264,7 @@ window.addEventListener('keydown', event => {
     engine!._web_audio();
     if (engine!._web_menu()) {
       if (event.repeat) return;
-      const action = input.action(code);
+      const action = engine!._web_text() ? undefined : input.action(code);
       const key = menuCodes[code] ?? (action === 'menu' ? 27 : action === 'back' ? 127 : event.key.length === 1 ? event.key.toLowerCase().charCodeAt(0) : undefined);
       if (key !== undefined && key < 256) tap(key, event.key.length === 1 ? event.key.charCodeAt(0) : key);
       return;
@@ -264,8 +285,10 @@ window.addEventListener('keydown', event => {
 }, true);
 window.addEventListener('keyup', event => {
   input.release(event.code);
+  if (engine) event.stopImmediatePropagation();
   if (running && !game.hidden) { if (event.cancelable) event.preventDefault(); event.stopImmediatePropagation(); updateInput(); }
 }, true);
+window.addEventListener('keypress', event => { if (engine) event.stopImmediatePropagation(); }, true);
 window.addEventListener('blur', suspend);
 window.addEventListener('pagehide', () => { suspend(); sync().catch(error); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) suspend(); });
@@ -297,7 +320,7 @@ async function checkOffline() {
     const response = await fetch('./offline-index.json');
     if (!response.ok) throw new Error('Build offline indisponível');
     const { version, resources } = await response.json();
-    const cache = await caches.open(`doom-${version}`);
+    const cache = await caches.open(`doom-${encodeURIComponent(new URL('./', location.href).pathname)}-${version}`);
     const all = (await Promise.all((resources as string[]).map(path => cache.match(new URL(path, location.href).href)))).every(Boolean);
     el('offline').textContent = all && navigator.serviceWorker.controller ? 'Preparado para offline neste contexto · confirme reabrindo sem rede.' : 'Preparação offline incompleta. Mantenha esta página aberta com conexão.';
   } catch { el('offline').textContent = 'Preparação offline não confirmada. Reabra com conexão para preparar.'; }
@@ -308,6 +331,9 @@ async function init() {
     wads = await read<Wad[]>('wads') ?? []; selected = await read<string>('selected') ?? 'freedoom';
     if (selected !== 'freedoom' && !wads.some(w => w.id === selected)) { selected = 'freedoom'; say('IWAD anterior ausente; Freedoom selecionado.'); }
     else say('Pronto. Enter em Jogar inicia Freedoom ou o IWAD selecionado.');
+    initialized = true;
+    el<HTMLButtonElement>('play').disabled = false;
+    if (document.activeElement === document.body) el('play').focus();
     if (navigator.storage?.persist) await navigator.storage.persist();
   } catch (e) { error(e); }
   if ('serviceWorker' in navigator) {
@@ -319,6 +345,6 @@ async function init() {
       await checkOffline();
     } catch { el('offline').textContent = 'Service Worker não disponível; offline não confirmado.'; }
   }
-  el('play').focus();
+  if (!starting && !running && (document.activeElement === document.body || document.activeElement === el('play'))) el('play').focus();
 }
 init().catch(error);

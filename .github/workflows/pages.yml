@@ -20,12 +20,14 @@ jobs:
           node-version: '22.16.0'
           cache: npm
       - run: npm ci
+      - run: npm audit --audit-level=high
       - name: Compile pinned engine in pinned toolchain
         run: |
           docker run --rm -v "$PWD:/src" -w /src \
             emscripten/emsdk@sha256:bbe90e2b00acbd1a9596087d88305029f383de1eb71c0cdb20f4e19647265450 \
             bash scripts/build-engine.sh
       - run: python3 scripts/fetch-content.py
+      - run: python3 scripts/fetch-dependency-sources.py
       - name: Native rotation tests
         run: |
           cc -std=c99 -Wall -Wextra -Werror tests/turn_test.c engine/turn.c -lm -o /tmp/turn-test
