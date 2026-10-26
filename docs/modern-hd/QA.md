@@ -2,7 +2,9 @@
 
 Revisão de integração em 25/10/2026, especialidade `doom_qa`, sobre a base 0.3.0 (`d73fac9537469c64ad7186cde456f58a9481b3ef`). O escopo inclui motor GPU real, controles, apresentação, áudio, saves, importação e offline, preservando Classic/Alta. Não houve teste físico no iPad, teclado Bluetooth, escuta humana ou medição de energia.
 
-## Estado atual — fonte final 9bde476
+## Estado atual — correção de política de áudio em validação
+
+**Candidata atual: 32/32 testes Node aprovados e regressão de política de áudio aprovada em Chromium/WebKit; o novo gate integral terá 44 cenários e ainda está pendente.** O motor local é `67415a9d2222c5895b8dba11132f2bf0a238bea72803d696d2a6be3785f9b10c`, artefato `1cf64351aeed820c`, 42 recursos. Os resultados completos dos candidatos anteriores permanecem separados abaixo.
 
 O [CI da fonte 9bde476](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40242060865) terminou com **41/42 aprovados**, zero skips: Chromium 21/21, WebKit 20/21. Os três motores compilaram e os testes C/Node passaram; publicação bloqueada. A única falha foi o cenário Moderno WebKit no segundo boot para carregar: o poll do menu consumiu os 42.143 ms restantes do orçamento compartilhado de 120 s, sem retornar valor ou snapshot de falha. Não há evidência suficiente para atribuir esse sintoma à perda de F3.
 
@@ -30,6 +32,21 @@ Nesse ensaio o F3 do segundo boot foi enviado às 23:33:18.908, retirado da fila
 Na candidata B, o motor marca o retorno real de RenderView, consome essa marca após o swap e fixa o latch 33 somente após terminar um WebTick com esse quadro e `make_tic>2`. O callback nativo de tick completo exige esse latch e phase 0 (idle); após dois ticks qualificados, o host suspende dentro desse callback, antes de confirmar a preparação. O polling somente observa a pausa já feita, sem congelar um terceiro tick. Os testes exigem ticks e swaps reais positivos, latch 1 e fase 0 ao retomar. Não foram alterados os orçamentos de teste 120/600 s, as imagens, a resolução, o SDL hint ou as regras35Hz.
 
 A instrumentação é local ao runtime, somente leitura; logs detalhados exigem a flag explícita de teste `doomTraceModern` e ficam desligados no uso normal. Não há transmissão de diagnósticos. A integração preserva também a correção paralela 704c7ea/2c3c87f: busy_wait=0 mantém as esperas nativas cooperativas com o browser quando o relógio lógico está pausado, e um teste Mobile pausa explicitamente dentro do callback pré-swap e exige heartbeat, tics estáveis e retomada. Isso corrige uma possibilidade concreta de starvation; a falha CI não foi atribuída exclusivamente a ela. Candidata integrada aguarda compilação e testes.
+
+
+### Bloqueio de interface por desbloqueio de áudio não solicitado
+
+O [CI 17b8bcc](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40245749591) aprovou 41/42 cenários. A barreira real de prontidão, o menu de carga HD e a restauração 47/47 passaram. Restou um timeout de 600 s ao selecionar resolução após retornar à interface: o último registro mostrava phase 0/ticks 5/world swaps 5, motor suspenso, e não houve heartbeat. Não se atribui esse bloqueio ao parser de saves ou ao F3, que já haviam passado.
+
+Uma cópia diagnóstica do caso, sem alterar o runtime ou as asserções, instrumentou operações individuais. Ela mostrou uma chamada direta de `AudioContext.resume()` antes de `settings.onclick`, sem pedido `web_audio` do host. O miniaudio fixado registrava listeners de captura para click/touchend e retomava todo dispositivo marcado started, ignorando a pausa do host. Enter no botão da interface gera esse click. O bloqueio, portanto, ocorria antes da configuração executar; não era necessário o seletor estar errado. Reset, configuração nativa, apresentação e foco não tiveram custo comparável nesse ensaio.
+
+O probe passou 1/1 em cerca de três minutos; registrou chamadas síncronas de resume de 21,07 s pelo host e 21,88 s pelo clique em Configurações. Esses tempos são diagnósticos, não benchmark de hardware. Um ambiente adicional de depuração esgotou o disco local durante sua preparação e foi removido; o ensaio não certifica desempenho com armazenamento livre. A violação de política foi comprovada separadamente, sem depender desses tempos: a nova regressão nativa Chromium contra `e00c80f2` falhou exatamente em **esperado 0 chamadas de resume ao abrir Configurações / recebido 1**, com o contexto previamente suspenso. Logs `/tmp/doom-audio-policy-before-fix-chromium.log` e `/tmp/doom-modern-resume-substeps-webkit.log`; cópia do probe em `build/diag-resume/`.
+
+A correção remove somente o registro global de desbloqueio do backend, preservando a ativação explícita do host por Enter/toque. O contrato já retomava o contexto diretamente e a notificação unlocked do backend era apenas informativa para a configuração usada. A função de áudio agora evita API quando o estado já corresponde à intenção, agrupa pedidos iguais pendentes e mantém pedidos opostos no gesto atual. Tickets de operações antigas não apagam operações novas; conclusão tardia reconcilia a intenção quando não há uma transição mais recente pendente. Rejeições/autoplay/interrupted não geram loops de repetição: aguardam outro gesto. Nenhum fechamento de contexto ou hipótese de vazamento foi introduzido como correção sem prova.
+
+**Red→green:** no build corrigido `1cf64351`, o mesmo teste passou em Chromium HOST (16,0 s) e WebKit Docker (30,2 s). Ambos comprovaram zero retomadas na interface/contexto suspenso; uma retomada necessária por Enter; zero chamadas adicionais durante WASD/setas/tiro com contexto running; PCM real e comandos. O arquivo `tests/browser/audio-policy.spec.ts` acrescenta dois casos ao gate, sem remover cobertura anterior. `tests/modern-audio.test.mjs` executa o corpo EM_JS real com contextos controlados e cobre coalescência, intenções opostas, conclusões fora de ordem, troca/fechamento de contexto, rejeições e throw síncrono: **32/32 testes Node** no total, dos quais dez dessa política. Esses testes unitários não certificam APIs ou áudio em hardware.
+
+A candidata também preserva a integração paralela `a092485`: ativação explícita de controles HTML por Enter, foco direto do launcher e verificações de foco/painel antes da seleção. A correção atual ainda depende da nova rodada integral. A demora de retomadas realmente necessárias no WPE permanece uma limitação observada, sem promessa de baixa latência física no iPad.
 
 ## Histórico — base 16f3 e integrações anteriores
 

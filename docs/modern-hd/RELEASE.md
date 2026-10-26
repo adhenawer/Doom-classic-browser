@@ -35,6 +35,9 @@ O gerador do EPK reproduziu duas vezes o mesmo checksum. Não se presume identid
 
 ## Validação
 
+**Candidata de áudio em validação:** 32 testes Node aprovados; regressão real de política de áudio aprovada em Chromium e WebKit. O próximo gate terá 44 cenários. O [CI 17b8bcc](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40245749591) aprovou 41/42, incluindo a carga HD que falhava anteriormente, mas bloqueou a publicação por uma chamada de áudio não solicitada antes de abrir Configurações. A nova correção elimina esse listener global e agrupa transições repetidas, mantendo os gestos explícitos. Build local `1cf64351aeed820c`, WASM `67415a9d2222c5895b8dba11132f2bf0a238bea72803d696d2a6be3785f9b10c`, 42 recursos; gate integral pendente.
+
+
 **Integração final em validação:** o [CI 9bde476](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40242060865) aprovou 41/42 cenários e bloqueou a publicação por uma espera de menu no segundo boot Moderno WebKit. A análise confirmou um anúncio de pronto antes do retorno do primeiro quadro/tick. A nova candidata exige RenderView, swap e tick completos, observados/suspensos no mesmo turno JavaScript; o novo gate ainda está pendente.
 
  22 testes Node, sete testes Python do mapa e três executáveis C aprovados (rotação e filas reais Clássica/Alta). A suíte integrada passa a ter **42 cenários** após preservar Aurora/Mobile e adicionar a regressão de gravações concorrentes em IndexedDB. O artefato da primeira rodada integrada é `ea850db4fedd2174`, com 42 recursos e WASM Moderno `d62adb907732032152ddf52a63d558f4232f00262fff030f1b19a3d4013d3e73`.

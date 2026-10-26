@@ -65,16 +65,37 @@ void web_diag_tick_finished() {
 void web_diag_preview(int phase) { web_diag_preview_phase=phase; web_diag_milestone(100+phase); }
 void web_diag_f3_dequeue() { ++web_diag_f3_dequeued; web_diag_milestone(202); }
 EM_JS(int, web_audio_request, (int running), {
+ Module['webAudioWanted'] = !!running;
  const context = Module['modernAudioContext'];
  if (!context || context.state === 'closed') return -1;
- Module['webAudioWanted'] = !!running;
- const reconcile = () => {
-   const wanted = Module['webAudioWanted'];
-   (wanted ? context.resume() : context.suspend()).then(() => {
-     if (wanted !== Module['webAudioWanted']) reconcile();
-   }).catch(() => {});
+ // Repeated movement keys must not repeatedly enter WebKit's audio transition.
+ // An opposite request still starts in this gesture, preserving activation.
+ let pending = Module['webAudioPendingOp'];
+ if (pending && pending.context !== context) {
+   Module['webAudioPendingOp'] = undefined; pending = undefined;
+ }
+ const transition = (wanted) => {
+   if (!Module['webAudioPendingOp'] && context.state === (wanted ? 'running' : 'suspended')) return;
+   const operation = {context, wanted};
+   Module['webAudioPendingOp'] = operation;
+   const finished = () => {
+     if (Module['webAudioPendingOp'] === operation) Module['webAudioPendingOp'] = undefined;
+     else if (Module['webAudioPendingOp']) return;
+     if (context !== Module['modernAudioContext'] || context.state === 'closed') return;
+     // A denied/interrupted request with unchanged intent waits for a new gesture.
+     // An older opposite completion can still require correction after the
+     // latest ticket finished; it must never clear another pending operation.
+     if (wanted !== Module['webAudioWanted']) transition(Module['webAudioWanted']);
+   };
+   try {
+     const result = wanted ? context.resume() : context.suspend();
+     Promise.resolve(result).then(finished, finished);
+   } catch (_) { finished(); }
  };
- reconcile(); return context.state === 'running' ? 1 : 0;
+ const wanted = Module['webAudioWanted'];
+ if (!(pending && pending.wanted === wanted) &&
+     !(!pending && context.state === (wanted ? 'running' : 'suspended'))) transition(wanted);
+ return context.state === 'running' ? 1 : 0;
 });
 extern "C" {
 EMSCRIPTEN_KEEPALIVE void web_key(int key, int down, int character) {

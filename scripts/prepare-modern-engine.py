@@ -64,6 +64,11 @@ replace('source_files/edge/i_system.cc','#include "i_system.h"','#include "i_sys
 # DOM gestures resume this particular runtime's AudioContext.
 replace('libraries/miniaudio/miniaudio.h','            device.webaudio.suspend();  /* The AudioContext must be created in a suspended state. */','            Module["modernAudioContext"] = device.webaudio;\n            device.webaudio.suspend();  /* The AudioContext must be created in a suspended state. */')
 replace('libraries/miniaudio/miniaudio.h','            device.scriptNode = device.webaudio.createScriptProcessor(bufferSize, channelCountIn, channelCountOut);','            device.scriptNode = device.webaudio.createScriptProcessor(bufferSize, channelCountIn, channelCountOut);\n            Module["modernAudioNode"] = device.scriptNode;')
+# The host owns Enter/touch audio activation. The backend's global UI click
+# listener would otherwise resume audio even after the host suspended the game.
+replace('libraries/miniaudio/miniaudio.h',
+ '                document.addEventListener(event_type, miniaudio.unlock, true);',
+ '                // Browser host owns audio gestures; no global UI unlock listener.')
 # The host serializes IDBFS writes after completed slot copies; native syncs
 # would race the same mount and report success before the full save exists.
 p=target/'source_files/epi/epi_filesystem.cc';s=p.read_text();a=s.index('#ifdef EDGE_WEB\nvoid SyncFilesystem(bool populate)');b=s.index('#else\nvoid SyncFilesystem(bool populate)',a)
