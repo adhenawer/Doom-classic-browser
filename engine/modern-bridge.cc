@@ -198,7 +198,9 @@ static void web_apply(EventTicCommand* cmd) {
  global_flags.autoaim=level_flags.autoaim=kAutoAimVertical;
  if (menu_active || paused || web_suspended) {web_turn_reset(&web_turn);return;}
  cmd->mouselook_turn=0;cmd->upward_move=0;
- cmd->angle_turn=web_turn_tick(&web_turn,web_left,web_right);
+ // EDGE subtracts angle_turn from the world angle; Chocolate/Crispy add it.
+ // Keep the shared controller's positive-left convention at this boundary.
+ cmd->angle_turn=-web_turn_tick(&web_turn,web_left,web_right);
  web_last_forward=cmd->forward_move;web_last_side=cmd->side_move;
  web_last_angle=cmd->angle_turn;web_last_buttons=cmd->buttons;
 }

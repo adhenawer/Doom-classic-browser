@@ -79,6 +79,8 @@ A seleção automática exige `(pointer: coarse)` e capacidade de toque (`naviga
 
 O joystick é digital com zona morta; giro chama a mesma ponte `_web_rotate` e usa a rampa do teclado. A simulação, motores, física, saves e APIs exportadas C não mudam. Nomes de save são enviados em lotes de oito teclas (16 eventos), aguardando avanço do motor para manter a resposta durante a entrada de texto; reset invalida lotes pendentes. Nenhum novo asset externo ou dependência de runtime foi adicionado.
 
+O controlador compartilhado produz giro positivo para esquerda. Chocolate/Crispy somam o comando ao ângulo do jogador; EDGE subtrai. A ponte Moderno inverte somente o sinal do comando nativo, mantendo o mesmo sentido espacial de teclado e touch nos três perfis. O teste `turn-direction.spec.ts` verifica o primeiro deslocamento angular real no WASM, incluindo a volta de 32 bits, em vez de aceitar apenas movimento ou o sinal de um comando.
+
 
 ## Moderno HD 0.4.0
 

@@ -65,7 +65,7 @@ test('native audio stays suspended in shell menus and active gameplay avoids red
  for(const key of ['KeyS','KeyA','ArrowLeft'])await page.keyboard.down(key);
  await expect.poll(()=>native(page,6)).toBeLessThan(0);
  await expect.poll(()=>native(page,7)).toBeLessThan(0);
- await expect.poll(()=>native(page,8)).toBeGreaterThan(0);
+ await expect.poll(()=>native(page,8)).toBeLessThan(0); // EDGE subtracts this command: negative turns left.
  for(const key of ['KeyS','KeyA','ArrowLeft'])await page.keyboard.up(key);
  expect(await page.evaluate(()=>(window as any).__audioPolicyResumeCalls)).toBe(0);
  expect(await audioState(page)).toBe('running');
