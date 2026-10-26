@@ -55,8 +55,10 @@ async function save(page:Page,name:string) {
  await expect(page.locator('#status')).toHaveText('Save persistido em IndexedDB.',{timeout:20000});
 }
 async function configure(page:Page,resolution:'classic'|'high'|'modern',modernSize='1280',modernHD=true,modernHUD='overlay') {
- await page.locator('#settings').press('Enter');
- await page.locator('[data-setting="resolution"]').selectOption(resolution);
+ const settingsButton=page.locator('#settings');
+ await expect(settingsButton).toBeVisible({timeout:5000});await settingsButton.focus();await expect(settingsButton).toBeFocused();await settingsButton.press('Enter');
+ await expect(page.locator('#panel h2')).toHaveText('Configurações',{timeout:5000});
+ await page.locator('[data-setting="resolution"]').selectOption(resolution,{timeout:5000});
  await page.locator('[data-setting="modernSize"]').selectOption(modernSize);
  await page.locator('[data-setting="modernHD"]').setChecked(modernHD);
  await page.locator('[data-setting="modernHUD"]').selectOption(modernHUD);

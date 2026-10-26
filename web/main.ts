@@ -160,11 +160,11 @@ function traceModern(event: string) {
   if (!window.doomTraceModern || activeResolution !== 'modern') return;
   console.info('[modern-host]', event, JSON.stringify({at:performance.now(),suspended,starting,queuedLoad,gameHidden:game.hidden,state:engine?[0,1,26,27,28,29,30,31,32,33].map(n=>engine!._web_state(n)):null}));
 }
-function suspend() {
+function suspend(focusResume = true) {
   if (!engine || !running) return;
   reset(); engine._web_suspend(1); suspended = true; presentation.setActive(false);
   el('resume').hidden = false; updateControlExperience(); traceModern('suspended');
-  if (!document.hidden && !game.hidden) el('resumeButton').focus();
+  if (focusResume && !document.hidden && !game.hidden) { traceModern('suspend-before-focus'); el('resumeButton').focus(); traceModern('suspend-after-focus'); }
 }
 function resume() {
   if (!engine || !running || (mobileControls() && matchMedia('(orientation: portrait)').matches)) return;
@@ -181,12 +181,15 @@ function resume() {
   traceModern('resume-return');
 }
 function showShell() {
-  suspend(); game.hidden = true; shell.hidden = false;
+  traceModern('shell-before');
+  // This transition focuses the launcher, not the intermediate resume overlay.
+  suspend(false); traceModern('shell-after-suspend');
+  game.hidden = true; shell.hidden = false; traceModern('shell-visible');
   if (engine && running) {
     settings.sfxVolume = engine._web_state(15); settings.musicVolume = engine._web_state(16);
     write('settings', settings).catch(error);
   }
-  showHome();
+  traceModern('shell-volumes-read'); showHome(); traceModern('shell-home-focused');
   if (presentation.diagnostics().message) say(presentation.diagnostics().message);
 }
 function showHome() {
@@ -282,6 +285,7 @@ function restartResolution() {
   button('Voltar às configurações', configure); panel.querySelector<HTMLElement>('button')?.focus();
 }
 function configure() {
+  traceModern('configure-before');
   showPanel('Configurações');
   paragraph('Ajuste giro, imagem e som. A resolução escolhe o motor da próxima partida, com saves separados e preservação dos originais.');
   const presets = document.createElement('div'); presets.className = 'preset-grid'; panel.append(presets);
@@ -370,7 +374,7 @@ function configure() {
   button('Restaurar experiência clássica', async () => {
     settings = { ...structuredClone(baseSettings), bindings: structuredClone(input.bindings) };
     await saveSettings(); configure();
-  }); back();
+  }); traceModern('configure-built'); back(); traceModern('configure-focused');
 }
 function sync(populate = false) {
   const operation = () => new Promise<void>((resolve, reject) => {
@@ -650,6 +654,15 @@ window.addEventListener('keydown', event => {
   }
   if (!panel.hidden && (target instanceof HTMLSelectElement || (target instanceof HTMLInputElement && target.type === 'checkbox')) && ['Escape','Backspace','KeyV'].includes(code)) { event.preventDefault(); showHome(); return; }
   if (target instanceof HTMLInputElement && target.type === 'checkbox' && code === 'Enter') { event.preventDefault(); target.checked = !target.checked; return; }
+  if (code === 'Enter' && (target instanceof HTMLButtonElement || target instanceof HTMLAnchorElement)) {
+    // SDL's window handlers require capture interception. Activate HTML controls
+    // explicitly rather than depending on WebKit's interrupted default key path.
+    event.preventDefault();
+    if (!event.repeat && !(target instanceof HTMLButtonElement && target.disabled)) {
+      traceModern(`shell-enter:${target.id || target.tagName}`); target.click(); traceModern('shell-enter-dispatched');
+    }
+    return;
+  }
   if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return;
   if (code === 'ArrowDown' || code === 'ArrowUp') {
     event.preventDefault();
@@ -671,8 +684,8 @@ canvas.addEventListener('webglcontextlost', event => {
   event.preventDefault(); graphicsLost=true; suspend();
   say('Contexto WebGL2 perdido. O jogo foi suspenso; reabra o aplicativo para restaurar o renderer. Saves persistidos foram preservados.');
 });
-window.addEventListener('blur', suspend);
-window.addEventListener('pagehide', () => { suspend(); sync().catch(error); });
+window.addEventListener('blur', () => suspend());
+window.addEventListener('pagehide', () => { suspend(false); sync().catch(error); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) suspend(); });
 function reconcileMenuState() {
   if (engine && running) {

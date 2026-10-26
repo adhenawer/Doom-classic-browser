@@ -143,6 +143,14 @@ test.describe('Modern mobile integration', () => {
     await page.getByRole('button',{name:'Salvar nome',exact:true}).tap();
     await expect(page.locator('.touch-name')).toBeHidden({timeout:15000});
     await expect(page.locator('#status')).toHaveText('Save persistido em IndexedDB.',{timeout:20000});
+    await page.keyboard.press('KeyH');
+    await expect(page.locator('#shell')).toBeVisible();
+    await page.locator('#settings').focus(); await expect(page.locator('#settings')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#panel h2')).toHaveText('Configurações');
+    await expect(page.locator('[data-setting="resolution"]')).toHaveValue('modern');
+    await page.getByRole('button',{name:'Voltar',exact:true}).tap();
+    await page.locator('#play').tap(); await expect(page.locator('#touchControls')).toBeVisible();
     await page.setViewportSize({width:390,height:844});
     await expect(page.locator('#rotatePrompt')).toBeVisible();
     const tic=await state(page,0);await page.waitForTimeout(100);expect(await state(page,0)).toBe(tic);
