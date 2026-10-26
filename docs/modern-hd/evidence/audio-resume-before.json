@@ -1,0 +1,1436 @@
+[
+  {
+    "document": 1,
+    "operation": "presentation.apply",
+    "ms": 0,
+    "start": "2026-10-26T00:14:28.140Z"
+  },
+  {
+    "document": 1,
+    "operation": "settings.configure",
+    "ms": 10.0,
+    "start": "2026-10-26T00:14:28.320Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.apply",
+    "ms": 0,
+    "start": "2026-10-26T00:14:41.223Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:14:41.224Z"
+  },
+  {
+    "document": 1,
+    "operation": "canvas.focus",
+    "ms": 1,
+    "start": "2026-10-26T00:14:41.224Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.suspend",
+    "ms": 0,
+    "start": "2026-10-26T00:14:41.254Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 0,
+    "start": "2026-10-26T00:14:41.330Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.suspend",
+    "ms": 7,
+    "start": "2026-10-26T00:15:03.356Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_suspend",
+    "ms": 8,
+    "start": "2026-10-26T00:15:03.347Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_config",
+    "ms": 0,
+    "start": "2026-10-26T00:15:03.411Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_comfort",
+    "ms": 0,
+    "start": "2026-10-26T00:15:03.411Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.apply",
+    "ms": 0,
+    "start": "2026-10-26T00:15:03.412Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:15:03.421Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.suspend",
+    "ms": 0,
+    "start": "2026-10-26T00:15:03.421Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_suspend",
+    "ms": 1,
+    "start": "2026-10-26T00:15:03.421Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:15:03.422Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:15:05.562Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_config",
+    "ms": 0,
+    "start": "2026-10-26T00:15:06.205Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_comfort",
+    "ms": 0,
+    "start": "2026-10-26T00:15:06.206Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.apply",
+    "ms": 1,
+    "start": "2026-10-26T00:15:06.206Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 99,
+    "start": "2026-10-26T00:15:06.206Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 114,
+    "start": "2026-10-26T00:15:06.206Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_suspend",
+    "ms": 1,
+    "start": "2026-10-26T00:15:06.212Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.setActive",
+    "ms": 2.0,
+    "start": "2026-10-26T00:15:06.212Z"
+  },
+  {
+    "document": 1,
+    "operation": "canvas.focus",
+    "ms": 7.0,
+    "start": "2026-10-26T00:15:06.212Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 26,
+    "start": "2026-10-26T00:15:06.998Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 26,
+    "start": "2026-10-26T00:15:06.997Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 20,
+    "start": "2026-10-26T00:15:07.045Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 20,
+    "start": "2026-10-26T00:15:07.045Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 2,
+    "start": "2026-10-26T00:15:07.086Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 2,
+    "start": "2026-10-26T00:15:07.086Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 16,
+    "start": "2026-10-26T00:15:07.620Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 16,
+    "start": "2026-10-26T00:15:07.620Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 77,
+    "start": "2026-10-26T00:15:08.133Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 81,
+    "start": "2026-10-26T00:15:08.120Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 12.0,
+    "start": "2026-10-26T00:15:08.154Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 12.0,
+    "start": "2026-10-26T00:15:08.153Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 13,
+    "start": "2026-10-26T00:15:08.331Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 13,
+    "start": "2026-10-26T00:15:08.316Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 11.0,
+    "start": "2026-10-26T00:15:08.545Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 11.0,
+    "start": "2026-10-26T00:15:08.545Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 8.0,
+    "start": "2026-10-26T00:15:08.661Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 9,
+    "start": "2026-10-26T00:15:08.660Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 1,
+    "start": "2026-10-26T00:15:08.718Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 11,
+    "start": "2026-10-26T00:15:08.765Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 12,
+    "start": "2026-10-26T00:15:08.764Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 77.0,
+    "start": "2026-10-26T00:15:08.854Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 77.0,
+    "start": "2026-10-26T00:15:08.854Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 1.0,
+    "start": "2026-10-26T00:15:09.101Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 1.0,
+    "start": "2026-10-26T00:15:09.112Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 1.0,
+    "start": "2026-10-26T00:15:09.112Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:15:09.140Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.suspend",
+    "ms": 2,
+    "start": "2026-10-26T00:15:09.140Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_suspend",
+    "ms": 2,
+    "start": "2026-10-26T00:15:09.140Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:15:09.141Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 1,
+    "start": "2026-10-26T00:15:09.556Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_config",
+    "ms": 2,
+    "start": "2026-10-26T00:15:09.559Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_comfort",
+    "ms": 0,
+    "start": "2026-10-26T00:15:09.564Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.apply",
+    "ms": 0,
+    "start": "2026-10-26T00:15:09.572Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 3584,
+    "start": "2026-10-26T00:15:09.572Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 3585,
+    "start": "2026-10-26T00:15:09.572Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_suspend",
+    "ms": 1,
+    "start": "2026-10-26T00:15:13.154Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:15:13.154Z"
+  },
+  {
+    "document": 1,
+    "operation": "canvas.focus",
+    "ms": 9,
+    "start": "2026-10-26T00:15:13.155Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 35.0,
+    "start": "2026-10-26T00:15:13.322Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 39.0,
+    "start": "2026-10-26T00:15:13.322Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 4,
+    "start": "2026-10-26T00:15:13.437Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 6,
+    "start": "2026-10-26T00:15:13.436Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 39,
+    "start": "2026-10-26T00:15:14.804Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 39,
+    "start": "2026-10-26T00:15:14.803Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:15:14.916Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 150,
+    "start": "2026-10-26T00:15:14.959Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 160,
+    "start": "2026-10-26T00:15:14.958Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 377,
+    "start": "2026-10-26T00:15:18.343Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 390.0,
+    "start": "2026-10-26T00:15:18.341Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 115.0,
+    "start": "2026-10-26T00:15:18.513Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 115.0,
+    "start": "2026-10-26T00:15:18.512Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 224,
+    "start": "2026-10-26T00:15:18.738Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 224,
+    "start": "2026-10-26T00:15:18.738Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 296,
+    "start": "2026-10-26T00:15:19.067Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 299,
+    "start": "2026-10-26T00:15:19.066Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 275.0,
+    "start": "2026-10-26T00:15:19.540Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 276,
+    "start": "2026-10-26T00:15:19.540Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 107,
+    "start": "2026-10-26T00:15:19.867Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 109,
+    "start": "2026-10-26T00:15:19.867Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 111.0,
+    "start": "2026-10-26T00:15:20.006Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 112,
+    "start": "2026-10-26T00:15:20.006Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 110,
+    "start": "2026-10-26T00:15:20.136Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 110,
+    "start": "2026-10-26T00:15:20.135Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 88,
+    "start": "2026-10-26T00:15:20.362Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 94.0,
+    "start": "2026-10-26T00:15:20.315Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 238,
+    "start": "2026-10-26T00:15:20.463Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 241,
+    "start": "2026-10-26T00:15:20.461Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 103,
+    "start": "2026-10-26T00:15:20.731Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 108,
+    "start": "2026-10-26T00:15:20.731Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 104,
+    "start": "2026-10-26T00:15:20.916Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 107.0,
+    "start": "2026-10-26T00:15:20.910Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 30,
+    "start": "2026-10-26T00:15:21.030Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 32,
+    "start": "2026-10-26T00:15:21.029Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 129,
+    "start": "2026-10-26T00:15:21.145Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 129,
+    "start": "2026-10-26T00:15:21.145Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 107,
+    "start": "2026-10-26T00:15:21.318Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 110.0,
+    "start": "2026-10-26T00:15:21.317Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 66,
+    "start": "2026-10-26T00:15:21.442Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 66,
+    "start": "2026-10-26T00:15:21.441Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 39,
+    "start": "2026-10-26T00:15:21.524Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 39,
+    "start": "2026-10-26T00:15:21.524Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 106,
+    "start": "2026-10-26T00:15:21.626Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 106,
+    "start": "2026-10-26T00:15:21.625Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 3,
+    "start": "2026-10-26T00:15:21.849Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 8,
+    "start": "2026-10-26T00:15:21.845Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 5,
+    "start": "2026-10-26T00:15:21.900Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 5,
+    "start": "2026-10-26T00:15:21.900Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 94,
+    "start": "2026-10-26T00:15:21.927Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 95,
+    "start": "2026-10-26T00:15:21.926Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 71,
+    "start": "2026-10-26T00:15:22.061Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 72,
+    "start": "2026-10-26T00:15:22.061Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 175,
+    "start": "2026-10-26T00:15:22.172Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 183.0,
+    "start": "2026-10-26T00:15:22.172Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 264,
+    "start": "2026-10-26T00:15:22.460Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 265,
+    "start": "2026-10-26T00:15:22.454Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 92.0,
+    "start": "2026-10-26T00:15:22.930Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 102,
+    "start": "2026-10-26T00:15:22.930Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 167.0,
+    "start": "2026-10-26T00:15:23.110Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 168.0,
+    "start": "2026-10-26T00:15:23.110Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 12,
+    "start": "2026-10-26T00:15:23.314Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 12,
+    "start": "2026-10-26T00:15:23.314Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 183,
+    "start": "2026-10-26T00:15:23.373Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 192,
+    "start": "2026-10-26T00:15:23.373Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 43,
+    "start": "2026-10-26T00:15:23.655Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 44,
+    "start": "2026-10-26T00:15:23.655Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 103.0,
+    "start": "2026-10-26T00:15:23.746Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 103.0,
+    "start": "2026-10-26T00:15:23.745Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 220,
+    "start": "2026-10-26T00:15:24.152Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 252,
+    "start": "2026-10-26T00:15:24.148Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 10,
+    "start": "2026-10-26T00:15:24.516Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 49,
+    "start": "2026-10-26T00:15:27.324Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_audio",
+    "ms": 50,
+    "start": "2026-10-26T00:15:27.323Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 0.0,
+    "start": "2026-10-26T00:15:27.561Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.suspend",
+    "ms": 4.0,
+    "start": "2026-10-26T00:15:27.561Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_suspend",
+    "ms": 4.0,
+    "start": "2026-10-26T00:15:27.561Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:15:27.561Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.resume",
+    "ms": 18006,
+    "start": "2026-10-26T00:15:27.711Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_config",
+    "ms": 1,
+    "start": "2026-10-26T00:15:47.503Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_comfort",
+    "ms": 0,
+    "start": "2026-10-26T00:15:47.504Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.apply",
+    "ms": 4,
+    "start": "2026-10-26T00:15:47.504Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 1,
+    "start": "2026-10-26T00:15:47.592Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.suspend",
+    "ms": 1.0,
+    "start": "2026-10-26T00:15:47.593Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_suspend",
+    "ms": 2,
+    "start": "2026-10-26T00:15:47.593Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:15:47.595Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_reset",
+    "ms": 0.0,
+    "start": "2026-10-26T00:15:47.601Z"
+  },
+  {
+    "document": 1,
+    "operation": "audio-context.suspend",
+    "ms": 0.0,
+    "start": "2026-10-26T00:15:47.602Z"
+  },
+  {
+    "document": 1,
+    "operation": "native_web_suspend",
+    "ms": 1.0,
+    "start": "2026-10-26T00:15:47.602Z"
+  },
+  {
+    "document": 1,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:15:47.602Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.apply",
+    "ms": 0.0,
+    "start": "2026-10-26T00:15:47.706Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.apply",
+    "ms": 0,
+    "start": "2026-10-26T00:15:51.279Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.setActive",
+    "ms": 1,
+    "start": "2026-10-26T00:15:51.281Z"
+  },
+  {
+    "document": 2,
+    "operation": "canvas.focus",
+    "ms": 0,
+    "start": "2026-10-26T00:15:51.282Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.suspend",
+    "ms": 12,
+    "start": "2026-10-26T00:15:51.301Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.resume",
+    "ms": 1,
+    "start": "2026-10-26T00:15:51.325Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.suspend",
+    "ms": 1,
+    "start": "2026-10-26T00:16:12.396Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_suspend",
+    "ms": 2,
+    "start": "2026-10-26T00:16:12.396Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_config",
+    "ms": 0.0,
+    "start": "2026-10-26T00:16:12.417Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_comfort",
+    "ms": 0.0,
+    "start": "2026-10-26T00:16:12.419Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.apply",
+    "ms": 0.0,
+    "start": "2026-10-26T00:16:12.421Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:16:12.422Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.suspend",
+    "ms": 0,
+    "start": "2026-10-26T00:16:12.430Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_suspend",
+    "ms": 0,
+    "start": "2026-10-26T00:16:12.423Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:16:12.431Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:16:14.217Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_config",
+    "ms": 0,
+    "start": "2026-10-26T00:16:14.218Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_comfort",
+    "ms": 0,
+    "start": "2026-10-26T00:16:14.219Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.apply",
+    "ms": 0,
+    "start": "2026-10-26T00:16:14.220Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.resume",
+    "ms": 21070,
+    "start": "2026-10-26T00:16:14.220Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_audio",
+    "ms": 21075,
+    "start": "2026-10-26T00:16:14.220Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_suspend",
+    "ms": 1,
+    "start": "2026-10-26T00:16:35.322Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.setActive",
+    "ms": 1,
+    "start": "2026-10-26T00:16:35.330Z"
+  },
+  {
+    "document": 2,
+    "operation": "canvas.focus",
+    "ms": 15.0,
+    "start": "2026-10-26T00:16:35.330Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:16:35.578Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.resume",
+    "ms": 22,
+    "start": "2026-10-26T00:16:35.584Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_audio",
+    "ms": 27.0,
+    "start": "2026-10-26T00:16:35.584Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_reset",
+    "ms": 5,
+    "start": "2026-10-26T00:16:35.814Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_reset",
+    "ms": 1,
+    "start": "2026-10-26T00:16:36.074Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.suspend",
+    "ms": 28,
+    "start": "2026-10-26T00:16:36.074Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_suspend",
+    "ms": 28,
+    "start": "2026-10-26T00:16:36.074Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:16:36.104Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.resume",
+    "ms": 21882,
+    "start": "2026-10-26T00:16:36.230Z"
+  },
+  {
+    "document": 2,
+    "operation": "settings.configure",
+    "ms": 18,
+    "start": "2026-10-26T00:16:58.124Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_config",
+    "ms": 0,
+    "start": "2026-10-26T00:16:58.462Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_comfort",
+    "ms": 0,
+    "start": "2026-10-26T00:16:58.462Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.apply",
+    "ms": 0,
+    "start": "2026-10-26T00:16:58.463Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_reset",
+    "ms": 0.0,
+    "start": "2026-10-26T00:16:58.546Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.suspend",
+    "ms": 2.0,
+    "start": "2026-10-26T00:16:58.549Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_suspend",
+    "ms": 2.0,
+    "start": "2026-10-26T00:16:58.548Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:16:58.550Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:16:58.638Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.suspend",
+    "ms": 1,
+    "start": "2026-10-26T00:16:58.639Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_suspend",
+    "ms": 1,
+    "start": "2026-10-26T00:16:58.639Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:16:58.639Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:16:58.642Z"
+  },
+  {
+    "document": 2,
+    "operation": "audio-context.suspend",
+    "ms": 0,
+    "start": "2026-10-26T00:16:58.642Z"
+  },
+  {
+    "document": 2,
+    "operation": "native_web_suspend",
+    "ms": 1,
+    "start": "2026-10-26T00:16:58.642Z"
+  },
+  {
+    "document": 2,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:16:58.642Z"
+  },
+  {
+    "document": 3,
+    "operation": "presentation.apply",
+    "ms": 1,
+    "start": "2026-10-26T00:16:58.710Z"
+  },
+  {
+    "document": 3,
+    "operation": "presentation.apply",
+    "ms": 0.0,
+    "start": "2026-10-26T00:16:59.899Z"
+  },
+  {
+    "document": 3,
+    "operation": "presentation.setActive",
+    "ms": 0.0,
+    "start": "2026-10-26T00:16:59.901Z"
+  },
+  {
+    "document": 3,
+    "operation": "canvas.focus",
+    "ms": 0,
+    "start": "2026-10-26T00:16:59.903Z"
+  },
+  {
+    "document": 3,
+    "operation": "audio-context.suspend",
+    "ms": 20,
+    "start": "2026-10-26T00:16:59.927Z"
+  },
+  {
+    "document": 3,
+    "operation": "audio-context.resume",
+    "ms": 1,
+    "start": "2026-10-26T00:16:59.962Z"
+  },
+  {
+    "document": 3,
+    "operation": "audio-context.suspend",
+    "ms": 2,
+    "start": "2026-10-26T00:17:06.465Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_suspend",
+    "ms": 3,
+    "start": "2026-10-26T00:17:06.465Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_config",
+    "ms": 1.0,
+    "start": "2026-10-26T00:17:06.465Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_comfort",
+    "ms": 0,
+    "start": "2026-10-26T00:17:06.466Z"
+  },
+  {
+    "document": 3,
+    "operation": "presentation.apply",
+    "ms": 1,
+    "start": "2026-10-26T00:17:06.466Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:17:06.466Z"
+  },
+  {
+    "document": 3,
+    "operation": "audio-context.suspend",
+    "ms": 0,
+    "start": "2026-10-26T00:17:06.466Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_suspend",
+    "ms": 0,
+    "start": "2026-10-26T00:17:06.466Z"
+  },
+  {
+    "document": 3,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:17:06.467Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_reset",
+    "ms": 1,
+    "start": "2026-10-26T00:17:08.396Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_config",
+    "ms": 0,
+    "start": "2026-10-26T00:17:08.396Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_comfort",
+    "ms": 0,
+    "start": "2026-10-26T00:17:08.397Z"
+  },
+  {
+    "document": 3,
+    "operation": "presentation.apply",
+    "ms": 0,
+    "start": "2026-10-26T00:17:08.397Z"
+  },
+  {
+    "document": 3,
+    "operation": "audio-context.resume",
+    "ms": 6412.0,
+    "start": "2026-10-26T00:17:08.397Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_audio",
+    "ms": 6414.0,
+    "start": "2026-10-26T00:17:08.397Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_suspend",
+    "ms": 1.0,
+    "start": "2026-10-26T00:17:14.814Z"
+  },
+  {
+    "document": 3,
+    "operation": "presentation.setActive",
+    "ms": 1.0,
+    "start": "2026-10-26T00:17:14.814Z"
+  },
+  {
+    "document": 3,
+    "operation": "canvas.focus",
+    "ms": 3.0,
+    "start": "2026-10-26T00:17:14.817Z"
+  },
+  {
+    "document": 3,
+    "operation": "audio-context.resume",
+    "ms": 21,
+    "start": "2026-10-26T00:17:15.056Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_audio",
+    "ms": 25,
+    "start": "2026-10-26T00:17:15.056Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_reset",
+    "ms": 1,
+    "start": "2026-10-26T00:17:15.193Z"
+  },
+  {
+    "document": 3,
+    "operation": "audio-context.resume",
+    "ms": 10,
+    "start": "2026-10-26T00:17:15.311Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_audio",
+    "ms": 10,
+    "start": "2026-10-26T00:17:15.311Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_reset",
+    "ms": 0,
+    "start": "2026-10-26T00:17:15.469Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_reset",
+    "ms": 0.0,
+    "start": "2026-10-26T00:17:15.641Z"
+  },
+  {
+    "document": 3,
+    "operation": "audio-context.suspend",
+    "ms": 7.0,
+    "start": "2026-10-26T00:17:15.642Z"
+  },
+  {
+    "document": 3,
+    "operation": "native_web_suspend",
+    "ms": 7.0,
+    "start": "2026-10-26T00:17:15.641Z"
+  },
+  {
+    "document": 3,
+    "operation": "presentation.setActive",
+    "ms": 0,
+    "start": "2026-10-26T00:17:15.650Z"
+  },
+  {
+    "document": 3,
+    "operation": "audio-context.resume",
+    "ms": 7261.0,
+    "start": "2026-10-26T00:17:15.766Z"
+  },
+  {
+    "document": 3,
+    "operation": "settings.configure",
+    "ms": 12,
+    "start": "2026-10-26T00:17:23.040Z"
+  }
+]

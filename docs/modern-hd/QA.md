@@ -2,13 +2,32 @@
 
 Revisão de integração em 25/10/2026, especialidade `doom_qa`, sobre a base 0.3.0 (`d73fac9537469c64ad7186cde456f58a9481b3ef`). O escopo inclui motor GPU real, controles, apresentação, áudio, saves, importação e offline, preservando Classic/Alta. Não houve teste físico no iPad, teclado Bluetooth, escuta humana ou medição de energia.
 
-## Estado atual — correção de política de áudio em validação
+## Estado final — versão publicada 0.4.0
 
-**Candidata atual: 32/32 testes Node aprovados e regressão de política de áudio aprovada em Chromium/WebKit; o novo gate integral terá 44 cenários e ainda está pendente.** O motor local é `67415a9d2222c5895b8dba11132f2bf0a238bea72803d696d2a6be3785f9b10c`, artefato `1cf64351aeed820c`, 42 recursos. Os resultados completos dos candidatos anteriores permanecem separados abaixo.
+**Aprovados: 32/32 testes Node, três executáveis C e 44/44 cenários de navegador no [CI 1c3ee918](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40249846351).** Foram 22 Chromium e 22 WebKit, sem skips, retries, flaky, falhas ou erros globais. Build e deploy concluíram com sucesso. A [conferência independente do relatório](evidence/ci-validation.json) conserva os 44 resultados e as 12 verificações de prontidão. Os sete testes Python do mapa foram aprovados localmente; não se apresentam como teste físico.
+
+Publicação: [DOOM Classic Browser](https://adhenawer.github.io/Doom-classic-browser/), artefato `496f16345f9eab82`, 42 recursos de execução. O WASM Moderno `67415a9d2222c5895b8dba11132f2bf0a238bea72803d696d2a6be3785f9b10c` foi idêntico no build local e no cache efetivo da versão pública; essa comparação observada não certifica identidade universal de todos os arquivos/toolchains.
+
+A [prova pública](evidence/production.json) usou um perfil Chromium normal em disco e três processos independentes: preparação online completa sem iniciar o motor; encerramento; primeiro boot Moderno HD com rede do browser desabilitada; tiro e save; novo encerramento; carga desse save ainda offline. Buffer WebGL2 e viewport nativo foram **3840×2880**, com 1.115 substituições registradas, 151 uploads e maior imagem decodificada 4096. Canvas sem Pointer Lock/controles de toque. SHA do head.esg conservado `206c15a9082a0aa2f2b9f2286e19ef3abe2d52b4997f1b1eb29b7f07d327b055`; munição 48/48. Nenhum erro de página ou pedido do app a outras origens.
+
+A captura [nativa publicada](evidence/production-native.png) tem 3840×2880 pixels, com viewport CSS temporariamente no mesmo tamanho, sem alterar o buffer escolhido. O [launcher publicado](evidence/production-launcher.png) foi capturado em 1180×820. O executor foi ANGLE/SwiftShader em Linux de nuvem, com WebGL por CPU; isso não mede FPS ou GPU física no iPad. O [script de verificação](evidence/production-check.mjs) pode ser executado na nuvem, na raiz com npm ci/Chromium instalado; requer a versão exata publicada identificada no código.
+
+**Pendências reais:** Chrome no iPad, teclado Bluetooth, escuta humana, bateria, desempenho sustentado, políticas de armazenamento/evicção e durabilidade entre os contextos aba/PWA permanecem para validação física. Retomadas realmente necessárias do WebKit tiveram latência variável, incluindo 16,84 s no reteste local; não foi demonstrada uma causa única nem eliminação dessa limitação. A chamada indevida por clique na interface e as transições redundantes foram corrigidas e comprovadas por regressão red→green.
+
+| Achado desta entrega | Gravidade | Evidência/correção | Estado |
+|---|---|---|---|
+| Pronto anunciado com swap/tick pendente | Alta | A: phase8/ticks0/world0/latch0; pausa inicial agora exige RenderView, swap e tick reais, dentro do callback completo | Corrigido; 12 invariantes e gate 44 aprovados |
+| Desbloqueio global de áudio antes dos botões da interface | Alta | Spy real: menu0 esperado/1 recebido; registro global removido, ativação pelo host, transições coalescidas | Corrigido; dez testes unitários de áudio e regressão nativa nos dois browsers/gate 44 aprovados |
+| Espera ocupada com relógio lógico pausado | Alta | Laços nativos podiam impedir eventos JS; espera cooperativa sem mudar 35 Hz | Corrigido; pausa forçada/heartbeat/retomada nos dois browsers |
+| Latência síncrona em retomadas de áudio necessárias no WPE | Média | Retomadas medidas ainda variam; nenhuma API é chamada por UI pausada ou controles com áudio já ativo | Limitação observada; hardware/perfilamento específico pendentes |
+
+O histórico abaixo conserva as falhas anteriores e delimita cada artefato; não substitui nem contradiz o resultado final. Não foram removidas asserções ou reduzidos recursos para obter a aprovação. A evidência unitária de áudio executa o corpo EM_JS real com contextos controlados e não certifica áudio em hardware.
+
+## Histórico das integrações e diagnóstico
 
 O [CI da fonte 9bde476](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40242060865) terminou com **41/42 aprovados**, zero skips: Chromium 21/21, WebKit 20/21. Os três motores compilaram e os testes C/Node passaram; publicação bloqueada. A única falha foi o cenário Moderno WebKit no segundo boot para carregar: o poll do menu consumiu os 42.143 ms restantes do orçamento compartilhado de 120 s, sem retornar valor ou snapshot de falha. Não há evidência suficiente para atribuir esse sintoma à perda de F3.
 
-A correção de prontidão abaixo é candidata ao novo gate integral, ainda pendente; os resultados históricos não equivalem a uma aprovação desse código inteiro. A confirmação de configurações por geração passou nos dois browsers do CI.
+Nesse estágio, a correção de prontidão abaixo ainda aguardava o novo gate integral; os resultados históricos não equivaliam a uma aprovação desse código inteiro. A confirmação de configurações por geração passou nos dois browsers do CI.
 
 - Integração local anterior, artefato `ea850db4fedd2174`, 42 recursos, EDGE WASM `d62adb907732032152ddf52a63d558f4232f00262fff030f1b19a3d4013d3e73`: **Chromium HOST 20/20 em 4,8 min; WebKit Docker 17/20 em 24,3 min**.
 - Falhas WebKit nessa integração: preferência alwaysRun 0 após reabertura, esperada 1; RPC Enter no último boot Classic do cenário Alta Offline excedeu 360 s; RPC Enter no botão Configurações após o load Moderno sem HD excedeu 600 s. No último, munição 48/48 e load já haviam passado; o Node confirmou a operação pendente em `locator('#settings').press('Enter')`. Não atribuir os dois timeouts ao parser de saves, a uma tecla perdida ou ao GC sem prova.
@@ -31,7 +50,7 @@ Nesse ensaio o F3 do segundo boot foi enviado às 23:33:18.908, retirado da fila
 
 Na candidata B, o motor marca o retorno real de RenderView, consome essa marca após o swap e fixa o latch 33 somente após terminar um WebTick com esse quadro e `make_tic>2`. O callback nativo de tick completo exige esse latch e phase 0 (idle); após dois ticks qualificados, o host suspende dentro desse callback, antes de confirmar a preparação. O polling somente observa a pausa já feita, sem congelar um terceiro tick. Os testes exigem ticks e swaps reais positivos, latch 1 e fase 0 ao retomar. Não foram alterados os orçamentos de teste 120/600 s, as imagens, a resolução, o SDL hint ou as regras35Hz.
 
-A instrumentação é local ao runtime, somente leitura; logs detalhados exigem a flag explícita de teste `doomTraceModern` e ficam desligados no uso normal. Não há transmissão de diagnósticos. A integração preserva também a correção paralela 704c7ea/2c3c87f: busy_wait=0 mantém as esperas nativas cooperativas com o browser quando o relógio lógico está pausado, e um teste Mobile pausa explicitamente dentro do callback pré-swap e exige heartbeat, tics estáveis e retomada. Isso corrige uma possibilidade concreta de starvation; a falha CI não foi atribuída exclusivamente a ela. Candidata integrada aguarda compilação e testes.
+A instrumentação é local ao runtime, somente leitura; logs detalhados exigem a flag explícita de teste `doomTraceModern` e ficam desligados no uso normal. Não há transmissão de diagnósticos. A integração preserva também a correção paralela 704c7ea/2c3c87f: busy_wait=0 mantém as esperas nativas cooperativas com o browser quando o relógio lógico está pausado, e um teste Mobile pausa explicitamente dentro do callback pré-swap e exige heartbeat, tics estáveis e retomada. Isso corrige uma possibilidade concreta de starvation; a falha CI não foi atribuída exclusivamente a ela. Nesse estágio, a candidata integrada aguardava compilação e testes; o resultado final está registrado no início deste relatório.
 
 
 ### Bloqueio de interface por desbloqueio de áudio não solicitado
@@ -46,7 +65,16 @@ A correção remove somente o registro global de desbloqueio do backend, preserv
 
 **Red→green:** no build corrigido `1cf64351`, o mesmo teste passou em Chromium HOST (16,0 s) e WebKit Docker (30,2 s). Ambos comprovaram zero retomadas na interface/contexto suspenso; uma retomada necessária por Enter; zero chamadas adicionais durante WASD/setas/tiro com contexto running; PCM real e comandos. O arquivo `tests/browser/audio-policy.spec.ts` acrescenta dois casos ao gate, sem remover cobertura anterior. `tests/modern-audio.test.mjs` executa o corpo EM_JS real com contextos controlados e cobre coalescência, intenções opostas, conclusões fora de ordem, troca/fechamento de contexto, rejeições e throw síncrono: **32/32 testes Node** no total, dos quais dez dessa política. Esses testes unitários não certificam APIs ou áudio em hardware.
 
-A candidata também preserva a integração paralela `a092485`: ativação explícita de controles HTML por Enter, foco direto do launcher e verificações de foco/painel antes da seleção. A correção atual ainda depende da nova rodada integral. A demora de retomadas realmente necessárias no WPE permanece uma limitação observada, sem promessa de baixa latência física no iPad.
+A candidata também preserva a integração paralela `a092485`: ativação explícita de controles HTML por Enter, foco direto do launcher e verificações de foco/painel antes da seleção. Nesse estágio, a correção ainda dependia da nova rodada integral, posteriormente aprovada conforme o estado final acima. A demora de retomadas realmente necessárias no WPE permanece uma limitação observada, sem promessa de baixa latência física no iPad.
+
+
+### Reteste independente da correção de áudio
+
+No mesmo build `1cf64351aeed820c`, foram aprovados os 12 cenários direcionados: política de áudio Chromium (16,0 s)/WebKit (30,2 s); quatro Modernos Chromium (2,3 min)/WebKit (3,8 min); Mobile Modern com pausa forçada Chromium (27,4 s)/WebKit (45,8 s). Um worker e um processo gráfico por vez, Chromium no host e WebKit no container; nenhuma redução de conteúdo, imagem, resolução ou prazos.
+
+As 12 verificações de prontidão confirmaram phase 0, ticks 2, world swaps reais 2 e latch 1. Saves do cenário principal restauraram o valor capturado nos dois loads: Chromium 46/46 e WebKit 48/48. Passaram teclado, giro, PCM, backup, offline com servidor encerrado, falha de pacote, recuperação de contexto e associação do conteúdo ao hash exato. A regressão de áudio confirmou 0 retomadas na interface, 1 quando necessária por Enter e 0 adicionais durante comandos com o contexto running.
+
+Uma retomada realmente necessária do WebKit ainda levou 16,84 s em um dos casos. Portanto a correção resolve chamadas indevidas/redundantes e a coerência da política; não comprova eliminação da latência síncrona da API ou desempenho físico. Logs `/tmp/doom-audio-policy-after-fix-{chromium,webkit}.log`, `/tmp/doom-modern-audio-final-{chromium,webkit}.log` e `/tmp/doom-mobile-audio-final-{chromium,webkit}.log`; diretórios correspondentes em `build/`. Chrome no iPad/teclado Bluetooth/escuta humana seguem pendentes.
 
 ## Histórico — base 16f3 e integrações anteriores
 

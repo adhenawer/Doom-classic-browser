@@ -1,0 +1,40 @@
+{
+  "url": "https://adhenawer.github.io/Doom-classic-browser/",
+  "context": "Chromium normal disk profile reopened in three independent browser processes",
+  "startedAt": "2026-10-26T00:56:25.965Z",
+  "tests": [
+    "All 42 runtime resources prepared online without starting Modern",
+    "First Modern HD boot after closing browser and disabling all browser network",
+    "Native EDGE save survives another browser-process restart and loads offline",
+    "No page errors or app requests to external origins"
+  ],
+  "hardware": "Cloud Linux; not a physical iPad validation",
+  "artifact": "496f16345f9eab82",
+  "engineSHA256": "67415a9d2222c5895b8dba11132f2bf0a238bea72803d696d2a6be3785f9b10c",
+  "cachedEngineSHA256": "67415a9d2222c5895b8dba11132f2bf0a238bea72803d696d2a6be3785f9b10c",
+  "gpu": {
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "locked": false,
+    "vendor": "Google Inc. (Google)",
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "nativeView": [
+      3840,
+      2880
+    ],
+    "buffer": [
+      3840,
+      2880
+    ],
+    "hd": [
+      1115,
+      151,
+      4096
+    ]
+  },
+  "saveSHA256": "206c15a9082a0aa2f2b9f2286e19ef3abe2d52b4997f1b1eb29b7f07d327b055",
+  "savedAmmo": 48,
+  "completedAt": "2026-10-26T00:59:19.398Z",
+  "passed": true,
+  "errors": [],
+  "external": []
+}

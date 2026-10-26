@@ -1,0 +1,1181 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-26T00:59:30.199666+00:00",
+  "repository": "adhenawer/Doom-classic-browser",
+  "commit": "1c3ee9185d687e16bb55415ef03007ea7e657072",
+  "workflow": {
+    "runId": 40249846351,
+    "url": "https://github.com/adhenawer/Doom-classic-browser/actions/runs/40249846351",
+    "build": {
+      "jobId": 121339206213,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "deploy": {
+      "jobId": 121344359991,
+      "name": "deploy",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    "jobStatusSource": "GitHub workflow-run jobs API, independently read during this evidence extraction"
+  },
+  "sourceArtifact": {
+    "id": 12621281161,
+    "name": "browser-validation",
+    "url": "https://api.github.com/repos/adhenawer/Doom-classic-browser/actions/artifacts/12621281161",
+    "sizeInBytes": 4519146,
+    "githubReportedDigest": "sha256:c4fa2103bf0d04a45aded1cee4a97a1f09bc23ad778cee25167ac20415fd9955",
+    "digestSource": "GitHub workflow-run artifacts API metadata; archive bytes were not independently hashed in this extraction",
+    "createdAt": "2026-10-26T00:53:33Z",
+    "expiresAt": "2026-11-09T00:53:32Z",
+    "reportPathInArtifact": "build/browser-results.json",
+    "reportSha256": "b58a98b0cbb13ccfc91ba29c636d8f04139d06e92bcdb1af88892898813f9636"
+  },
+  "runner": {
+    "playwrightVersion": "1.56.1",
+    "workers": 1,
+    "actualWorkers": 1,
+    "projects": {
+      "chromium": 22,
+      "webkit": 22
+    }
+  },
+  "statsRaw": {
+    "startTime": "2026-10-26T00:38:14.126Z",
+    "duration": 917968.1270000001,
+    "expected": 44,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "independentChecks": {
+    "reportCommitMatchesSource": true,
+    "testCountMatchesStats": true,
+    "browserCountsMatch": true,
+    "zeroUnexpectedFlakySkipped": true,
+    "noTopLevelErrors": true,
+    "allTestsExpectedPassed": true,
+    "allAttemptsPassedWithoutRetries": true,
+    "allReadinessRecordsSatisfyInvariant": true,
+    "nativeSavedAmmoRestored": true,
+    "bothGPUAttachmentsAreNative1920x1440WebGL2": true
+  },
+  "testCount": 44,
+  "testDurationsMsByProject": {
+    "chromium": 243552,
+    "webkit": 670772
+  },
+  "tests": [
+    {
+      "file": "audio-policy.spec.ts",
+      "title": "native audio stays suspended in shell menus and active gameplay avoids redundant resume calls",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 180000,
+      "durationMs": 12099,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:38:15.370Z",
+          "durationMs": 12099,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "audio-policy.spec.ts",
+      "title": "native audio stays suspended in shell menus and active gameplay avoids redundant resume calls",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 180000,
+      "durationMs": 54561,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:42:20.316Z",
+          "durationMs": 54561,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "game.spec.ts",
+      "title": "keyboard shell, settings persistence, remapping, reserved modifier fallback",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 1544,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:38:27.507Z",
+          "durationMs": 1544,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "game.spec.ts",
+      "title": "real IWAD, rendered level, simultaneous input, ramp, shooting, menu, focus, save/load",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 6825,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:38:29.063Z",
+          "durationMs": 6825,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "game.spec.ts",
+      "title": "IWAD import persists metadata and blob; invalid file is rejected without replacement",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 3210,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:38:35.898Z",
+          "durationMs": 3210,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "game.spec.ts",
+      "title": "complete offline cache, re-open engine without network, persisted save",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 300000,
+      "durationMs": 9493,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:38:39.116Z",
+          "durationMs": 9493,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "game.spec.ts",
+      "title": "keyboard shell, settings persistence, remapping, reserved modifier fallback",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 1381,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:43:14.944Z",
+          "durationMs": 1381,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "game.spec.ts",
+      "title": "real IWAD, rendered level, simultaneous input, ramp, shooting, menu, focus, save/load",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 16857,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:43:16.336Z",
+          "durationMs": 16857,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "game.spec.ts",
+      "title": "IWAD import persists metadata and blob; invalid file is rejected without replacement",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 5164,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:43:33.203Z",
+          "durationMs": 5164,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "game.spec.ts",
+      "title": "complete offline cache, re-open engine without network, persisted save",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 300000,
+      "durationMs": 63118,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:43:38.378Z",
+          "durationMs": 63118,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "high-resolution.spec.ts",
+      "title": "real 640x400 renderer, keyboard, classic-save copy, isolated saves, v1/v2 backups and reversible restart",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 180000,
+      "durationMs": 14739,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:38:48.625Z",
+          "durationMs": 14739,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "high-resolution.spec.ts",
+      "title": "prepare only Classic, stop server, then select and play high resolution offline with persistent saves",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 360000,
+      "durationMs": 13660,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:39:03.371Z",
+          "durationMs": 13660,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "high-resolution.spec.ts",
+      "title": "real 640x400 renderer, keyboard, classic-save copy, isolated saves, v1/v2 backups and reversible restart",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 180000,
+      "durationMs": 35754,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:44:41.516Z",
+          "durationMs": 35754,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "high-resolution.spec.ts",
+      "title": "prepare only Classic, stop server, then select and play high resolution offline with persistent saves",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 360000,
+      "durationMs": 41938,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:45:17.280Z",
+          "durationMs": 41938,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "mobile.spec.ts",
+      "title": "desktop detection keeps keyboard interface",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 146,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:39:17.049Z",
+          "durationMs": 146,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "mobile.spec.ts",
+      "title": "desktop detection keeps keyboard interface",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 379,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:45:59.235Z",
+          "durationMs": 379,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "mobile.spec.ts",
+      "title": "automatic touch, landscape gate, menus, save name and hybrid input",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 9701,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:39:17.253Z",
+          "durationMs": 9701,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "mobile.spec.ts",
+      "title": "automatic touch, landscape gate, menus, save name and hybrid input",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 12142,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:45:59.685Z",
+          "durationMs": 12142,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "mobile.spec.ts",
+      "title": "Modern accepts touch actions, native save text and landscape suspension",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 180000,
+      "durationMs": 21614,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:39:26.967Z",
+          "durationMs": 21614,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "mobile.spec.ts",
+      "title": "Modern accepts touch actions, native save text and landscape suspension",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 180000,
+      "durationMs": 44724,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:46:11.848Z",
+          "durationMs": 44724,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 600000,
+      "durationMs": 57678,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:40:32.507Z",
+          "durationMs": 57678,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "Modern first boot after network removal persists saves and recovers safely from GPU context loss",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 600000,
+      "durationMs": 37441,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:41:30.200Z",
+          "durationMs": 37441,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "HD associates only with the exact authorized Freedoom revision and legacy preferences remain Classic",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 180000,
+      "durationMs": 11297,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:42:07.649Z",
+          "durationMs": 11297,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "failed HD download reports offline preparation failure and keeps keyboard settings usable",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 810,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:42:18.955Z",
+          "durationMs": 810,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 600000,
+      "durationMs": 143400,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:48:05.792Z",
+          "durationMs": 143400,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "Modern first boot after network removal persists saves and recovers safely from GPU context loss",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 600000,
+      "durationMs": 135102,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:50:29.207Z",
+          "durationMs": 135102,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "HD associates only with the exact authorized Freedoom revision and legacy preferences remain Classic",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 180000,
+      "durationMs": 46124,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:52:44.320Z",
+          "durationMs": 46124,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "failed HD download reports offline preparation failure and keeps keyboard settings usable",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 1609,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:53:30.456Z",
+          "durationMs": 1609,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modernization.spec.ts",
+      "title": "comfort input produces vanilla walk/run commands, releases keys and survives classic save/load",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 9123,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:39:48.597Z",
+          "durationMs": 9123,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modernization.spec.ts",
+      "title": "launcher fits desktop and narrow browser; presets preserve remapping and legacy settings migrate",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 722,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:39:57.730Z",
+          "durationMs": 722,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modernization.spec.ts",
+      "title": "audio suspends with the game; independent music mute is exact without muting gunshots",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 6908,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:39:58.460Z",
+          "durationMs": 6908,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modernization.spec.ts",
+      "title": "comfort input produces vanilla walk/run commands, releases keys and survives classic save/load",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 18624,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:46:56.590Z",
+          "durationMs": 18624,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modernization.spec.ts",
+      "title": "launcher fits desktop and narrow browser; presets preserve remapping and legacy settings migrate",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 1005,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:47:15.224Z",
+          "durationMs": 1005,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "modernization.spec.ts",
+      "title": "audio suspends with the game; independent music mute is exact without muting gunshots",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 15361,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:47:16.238Z",
+          "durationMs": 15361,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "original-map.spec.ts",
+      "title": "original map selection persists, allows combat/traversal, and activates its exit",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 15206,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:40:05.381Z",
+          "durationMs": 15206,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "original-map.spec.ts",
+      "title": "corrupted original map is rejected without changing content selection",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 530,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:40:20.595Z",
+          "durationMs": 530,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "original-map.spec.ts",
+      "title": "optional map discovery times out without preventing Freedoom play",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 4054,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:40:21.131Z",
+          "durationMs": 4054,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "original-map.spec.ts",
+      "title": "original map selection persists, allows combat/traversal, and activates its exit",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 16198,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:47:31.614Z",
+          "durationMs": 16198,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "original-map.spec.ts",
+      "title": "corrupted original map is rejected without changing content selection",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 929,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:47:47.821Z",
+          "durationMs": 929,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "original-map.spec.ts",
+      "title": "optional map discovery times out without preventing Freedoom play",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 4402,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:47:48.763Z",
+          "durationMs": 4402,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "presentation.spec.ts",
+      "title": "optional CRT presents real frames, preserves keyboard/focus and falls back on context loss",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 5902,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:40:25.196Z",
+          "durationMs": 5902,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "presentation.spec.ts",
+      "title": "optional CRT presents real frames, preserves keyboard/focus and falls back on context loss",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 90000,
+      "durationMs": 11024,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:47:53.235Z",
+          "durationMs": 11024,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "storage.spec.ts",
+      "title": "settings acknowledge only the latest committed write and survive reopening",
+      "project": "chromium",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 60000,
+      "durationMs": 850,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:40:31.110Z",
+          "durationMs": 850,
+          "errorCount": 0
+        }
+      ]
+    },
+    {
+      "file": "storage.spec.ts",
+      "title": "settings acknowledge only the latest committed write and survive reopening",
+      "project": "webkit",
+      "status": "expected",
+      "expectedStatus": "passed",
+      "timeoutMs": 60000,
+      "durationMs": 976,
+      "attempts": [
+        {
+          "status": "passed",
+          "retry": 0,
+          "startTime": "2026-10-26T00:48:04.274Z",
+          "durationMs": 976,
+          "errorCount": 0
+        }
+      ]
+    }
+  ],
+  "nativeReadiness": {
+    "stdoutMarker": "MODERN_READY_INVARIANT",
+    "count": 12,
+    "records": [
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "chromium",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "chromium",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "chromium",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern first boot after network removal persists saves and recovers safely from GPU context loss",
+        "project": "chromium",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern first boot after network removal persists saves and recovers safely from GPU context loss",
+        "project": "chromium",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "HD associates only with the exact authorized Freedoom revision and legacy preferences remain Classic",
+        "project": "chromium",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "webkit",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "webkit",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "webkit",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern first boot after network removal persists saves and recovers safely from GPU context loss",
+        "project": "webkit",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern first boot after network removal persists saves and recovers safely from GPU context loss",
+        "project": "webkit",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "HD associates only with the exact authorized Freedoom revision and legacy preferences remain Classic",
+        "project": "webkit",
+        "retry": 0,
+        "value": {
+          "phase": 0,
+          "ticks": 2,
+          "worldSwaps": 2,
+          "ready": 1
+        }
+      }
+    ]
+  },
+  "nativeSaveRestoration": {
+    "stdoutMarker": "MODERN_SAVE_RESTORED",
+    "records": [
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "chromium",
+        "retry": 0,
+        "value": {
+          "phase": "HD-reload",
+          "expected": 47,
+          "actual": 47
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "chromium",
+        "retry": 0,
+        "value": {
+          "phase": "HD-disabled",
+          "expected": 47,
+          "actual": 47
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "webkit",
+        "retry": 0,
+        "value": {
+          "phase": "HD-reload",
+          "expected": 48,
+          "actual": 48
+        }
+      },
+      {
+        "file": "modern-hd.spec.ts",
+        "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+        "project": "webkit",
+        "retry": 0,
+        "value": {
+          "phase": "HD-disabled",
+          "expected": 48,
+          "actual": 48
+        }
+      }
+    ]
+  },
+  "gpuAttachmentsDecoded": [
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+      "project": "chromium",
+      "name": "gpu-layout",
+      "value": {
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+        "width": 1920,
+        "height": 1440,
+        "locked": false,
+        "rect": {
+          "x": 43.328125,
+          "y": 0,
+          "width": 1093.328125,
+          "height": 820,
+          "top": 0,
+          "right": 1136.65625,
+          "bottom": 820,
+          "left": 43.328125
+        },
+        "viewport": [
+          0,
+          0,
+          1920,
+          1440
+        ],
+        "scissor": [
+          0,
+          0,
+          1920,
+          1440
+        ],
+        "css": {
+          "width": "1093.33px",
+          "height": "820px"
+        }
+      }
+    },
+    {
+      "file": "modern-hd.spec.ts",
+      "title": "Modern default renders real GPU geometry with HD, keyboard, audio, isolated native saves and backup v3",
+      "project": "webkit",
+      "name": "gpu-layout",
+      "value": {
+        "version": "WebGL 2.0",
+        "width": 1920,
+        "height": 1440,
+        "locked": false,
+        "rect": {
+          "x": 43.328125,
+          "y": 0,
+          "width": 1093.328125,
+          "height": 820,
+          "top": 0,
+          "right": 1136.65625,
+          "bottom": 820,
+          "left": 43.328125
+        },
+        "viewport": [
+          0,
+          0,
+          1920,
+          1440
+        ],
+        "scissor": [
+          0,
+          0,
+          1920,
+          1440
+        ],
+        "css": {
+          "width": "1093.328125px",
+          "height": "820px"
+        }
+      }
+    }
+  ],
+  "otherJSONAttachmentsDecoded": [
+    {
+      "file": "presentation.spec.ts",
+      "title": "optional CRT presents real frames, preserves keyboard/focus and falls back on context loss",
+      "project": "chromium",
+      "name": "presentation-diagnostics",
+      "value": {
+        "requested": "crt",
+        "active": "crt",
+        "frames": 32,
+        "renderMs": {
+          "mean": 1.9312500000087311,
+          "p95": 4.900000000023283
+        },
+        "message": ""
+      }
+    },
+    {
+      "file": "presentation.spec.ts",
+      "title": "optional CRT presents real frames, preserves keyboard/focus and falls back on context loss",
+      "project": "webkit",
+      "name": "presentation-diagnostics",
+      "value": {
+        "requested": "crt",
+        "active": "crt",
+        "frames": 27,
+        "renderMs": {
+          "mean": 37.62962962962965,
+          "p95": 52
+        },
+        "message": ""
+      }
+    }
+  ],
+  "limitations": [
+    "Automated Chromium and desktop WebKit coverage does not certify Chrome on an actual iPad, a physical Bluetooth keyboard, audible speaker output, battery consumption or device memory use.",
+    "Readiness observations certify the recorded native world-frame/tick handshake; they do not establish universal frame rate or latency.",
+    "This file summarizes CI evidence only. The separate production offline smoke test was still running when this extraction was requested.",
+    "PNG attachments and full browser stdout are retained in the source artifact, not embedded here."
+  ],
+  "archiveSHA256VerifiedLocally": "c4fa2103bf0d04a45aded1cee4a97a1f09bc23ad778cee25167ac20415fd9955"
+}

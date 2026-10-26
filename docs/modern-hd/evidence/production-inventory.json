@@ -1,0 +1,14 @@
+{
+  "version": "496f16345f9eab82",
+  "resourceCount": 42,
+  "runtimeBytes": 472850339,
+  "localHashMatches": 41,
+  "changedResourcesFetchedAndVerified": [
+    {
+      "path": "crispy-doom.wasm",
+      "bytes": 2466773,
+      "sha256": "7ed3c953f9fcd684181bc995cab66b7d50f7b3ec1ef99a57ee2787b730541cd5"
+    }
+  ],
+  "sourceExcluded": true
+}
