@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /// <reference types="vite/client" />
 import './style.css';
+import {LoadingScreen, readPart} from './loading';
 import modernHud from '../engine/modern-hud.lua?raw';
 import { InputState, engineKeys } from './input';
 import { TouchControls, detectTouch, type ControlMode } from './touch';
@@ -33,6 +34,8 @@ declare global { interface Window {
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const shell = el('shell'), game = el('game'), panel = el('panel'), home = el('home');
 const canvas = el<HTMLCanvasElement>('canvas'), status = el('status');
+const loading = new LoadingScreen(el('loadingScreen'));
+el('loadingBack').onclick = () => { loading.finish(); showShell(); };
 const baseSettings: Settings = { ...gameplayDefaults, ...sanitizePresentation(undefined), resolution: 'classic', modernSize: '1920', modernHD: true, modernHUD: 'overlay' };
 const presentation = new Presentation(canvas, game);
 window.doomPresentation = presentation;
@@ -65,7 +68,10 @@ function offlineFailed(name='') {
   el('offline').textContent=offlineFailure;
 }
 let initialized = false;
-const say = (message: string) => { status.textContent = message; };
+const say = (message: string) => {
+  status.textContent = message;
+  if (starting) { el('launchStatus').hidden = false; el('launchStatus').textContent = message; loading.stage(message); }
+};
 let controlMode: ControlMode = 'auto';
 let controlExperienceState = '', saveGeneration = 0;
 try { const saved = localStorage.getItem('doom-control-mode'); if (saved === 'mobile' || saved === 'desktop') controlMode = saved; } catch { /* Storage can be unavailable. */ }
@@ -457,7 +463,7 @@ async function loadScript(resolution: Resolution) {
 // Reuse a verified-version Cache Storage response. A first install may already
 // be downloading the large pack; wait for that transfer instead of requesting
 // a second copy concurrently and inflating network/renderer memory pressure.
-async function modernPartResponse(file: string, sha256: string): Promise<Response> {
+async function modernPartResponse(file: string, sha256: string): Promise<{response: Response; source: 'cache'|'network'}> {
   const url=new URL('./'+file,location.href).href;
   const cached=async()=>{
     if (!('caches' in window)) return undefined;
@@ -471,17 +477,17 @@ async function modernPartResponse(file: string, sha256: string): Promise<Respons
     } catch { /* A denied/unavailable cache must not prevent online play. */ }
     return undefined;
   };
-  let response=await cached(); if(response) return response;
+  let response=await cached(); if(response) return {response,source:'cache'};
   const worker=swRegistration?.installing;
   if(worker && worker.state !== 'redundant' && worker.state !== 'activated') {
-    say('Preparando conteúdo HD para uso offline…');
+    loading.indeterminate(); say('Baixando a preparação offline… O jogo aguarda esse download para não baixar duas vezes.');
     await new Promise<void>(resolve=>{
       const changed=()=>{if(['installed','activated','redundant'].includes(worker.state)){worker.removeEventListener('statechange',changed);resolve();}};
       worker.addEventListener('statechange',changed);changed();
     });
-    response=await cached(); if(response) return response;
+    response=await cached(); if(response) return {response,source:'cache'};
   }
-  return fetch(url,{cache:'no-store'});
+  return {response:await fetch(url,{cache:'no-store'}),source:'network'};
 }
 async function migrateClassicSaves(hash: string) {
   if (!engine || activeResolution !== 'high') return;
@@ -508,7 +514,10 @@ async function start(load = false) {
   // A failed runtime must be replaced in a fresh document, never mounted twice.
   if (engine) { restartResolution(); return; }
   let completedModernTicks = 0, preparedModernPause = false;
-  starting = true; el<HTMLButtonElement>('play').disabled = true; say('Carregando o motor real…');
+  const playButton = el<HTMLButtonElement>('play'), playLabel = playButton.innerHTML;
+  starting = true; playButton.disabled = true; playButton.textContent = 'Carregando…'; playButton.setAttribute('aria-busy','true');
+  loading.begin(); say('Carregando o motor real…');
+  el('launchStatus').scrollIntoView({block:'nearest'});
   try {
     const custom = wads.find(w => w.id === selected);
     if (selected !== 'freedoom' && !custom) throw new Error('IWAD selecionado não está armazenado.');
@@ -562,11 +571,12 @@ async function start(load = false) {
         for (const [index,part] of modernParts.entries()) {
           say(`Carregando conteúdo HD · ${index+1}/${modernParts.length}…`);
           if(part.offset !== offset || offset+part.bytes > pack.byteLength) throw new Error('Inventário HD inconsistente.');
-          const response=await modernPartResponse(part.file,part.sha256);
+          const {response,source}=await modernPartResponse(part.file,part.sha256);
           if(!response.ok) throw new Error('Parte do pacote HD ausente. Prepare o offline com conexão ou desative HD nas configurações.');
-          const block=await response.arrayBuffer();
-          if(block.byteLength !== part.bytes || await wadHash(block) !== part.sha256) throw new Error('Parte do pacote HD corrompida: tamanho/SHA-256 divergente. Prepare novamente com conexão.');
-          pack.set(new Uint8Array(block),part.offset); offset+=part.bytes;
+          say(`${source === 'cache' ? 'Lendo' : 'Recebendo'} texturas HD · ${index+1}/${modernParts.length}`);
+          const report = loading.part(source,offset,modernContent.bytes);
+          await readPart(response,pack.subarray(offset,offset+part.bytes),part.sha256,report,()=>loading.stage(`Conferindo integridade · ${index+1}/${modernParts.length}`));
+          offset+=part.bytes;
         }
         if(offset !== modernContent.bytes) throw new Error('Pacote HD incompleto.');
         // Each contiguous range is authenticated against its independently pinned
@@ -574,7 +584,7 @@ async function start(load = false) {
         // Avoid a second 399 MB digest/Response crossing WebKit process boundaries.
         engine.FS.writeFile('/modern-hd.epk',pack,{canOwn:true}); modernArgs.push('-file','/modern-hd.epk');
       }
-      say('Preparando a fase no renderer moderno…');
+      loading.indeterminate(); say('Texturas prontas. Preparando a fase e os gráficos…');
       displayGame(); engine.callMain(modernArgs);
     } else { displayGame(); engine.callMain(classicArgs); }
     await new Promise<void>((resolve, reject) => {
@@ -589,9 +599,9 @@ async function start(load = false) {
     });
     traceModern('ready-before-suspend');
     running = true; queuedLoad = load; applyConfig(true); suspend();
-    say('Motor pronto. Enter retoma a partida e tenta desbloquear o áudio.');
-  } catch (e) { shell.hidden = false; game.hidden = true; error(e); }
-  finally { starting = false; el<HTMLButtonElement>('play').disabled = false; }
+    loading.finish(); say('Motor pronto. Toque em Retomar ou pressione Enter.');
+  } catch (e) { shell.hidden = false; game.hidden = true; error(e); loading.fail(status.textContent ?? 'Falha ao carregar.'); }
+  finally { starting = false; playButton.disabled = false; playButton.innerHTML = playLabel; playButton.removeAttribute('aria-busy'); }
 }
 function tap(key: number, character = key) {
   engine?._web_key(key, 1, character); engine?._web_key(key, 0, character);

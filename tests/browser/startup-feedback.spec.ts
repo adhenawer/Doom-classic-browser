@@ -1,0 +1,46 @@
+import {test,expect} from '@playwright/test';
+import {readFile} from 'node:fs/promises';
+import ts from 'typescript';
+test.use({hasTouch:true,viewport:{width:390,height:844}});
+test('touch startup shows pending download and failure beside Play',async({page})=>{
+  let failDownload: (()=>void) | undefined;
+  await page.route('**/freedoom1.wad',async route=>{
+    await new Promise<void>(resolve=>{failDownload=resolve;});
+    await route.fulfill({status:503,body:'Unavailable'});
+  });
+  await page.goto('/');
+  await expect(page.locator('#play')).toBeEnabled();
+  await page.locator('#play').tap();
+  await expect(page.locator('#play')).toHaveText('Carregando…');
+  await expect(page.locator('#loadingScreen')).toBeVisible();
+  await expect(page.locator('[data-loading=stage]')).toBeInViewport();
+  await expect(page.locator('#launchStatus')).toContainText('Carregando');
+  await expect.poll(()=>!!failDownload).toBe(true);
+  failDownload!();
+  await expect(page.locator('#launchStatus')).toContainText('Erro: Freedoom indisponível.');
+  await expect(page.locator('[data-loading=stage]')).toContainText('Erro:');
+  await page.locator('#loadingBack').tap();
+  await expect(page.locator('#loadingScreen')).toBeHidden();
+  await expect(page.locator('#play')).toBeEnabled();
+  await expect(page.locator('#play')).toContainText('Jogar');
+});
+
+test('HD loading shows byte progress and fits iPhone portrait and landscape',async({page},info)=>{
+  const source=ts.transpileModule(await readFile('web/loading.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.ES2022,target:ts.ScriptTarget.ES2022}}).outputText;
+  await page.goto('/'); await expect(page.locator('#play')).toBeEnabled();
+  // Exercise the actual loading component with a controlled transfer sample;
+  // this visual fixture is not a measurement of the full HD package download.
+  await page.evaluate(async source=>{
+    const {LoadingScreen}=await import('data:text/javascript;base64,'+btoa(unescape(encodeURIComponent(source))));
+    const screen=new LoadingScreen(document.querySelector('#loadingScreen'));
+    screen.begin(); screen.stage('Recebendo texturas HD · 4/12');
+    screen.part('network',100000000,398681345)(20000000);
+  },source);
+  await expect(page.locator('[data-loading=amount]')).toContainText('30% · 120.0 / 398.7 MB');
+  for(const [name,width,height] of [['portrait',390,844],['landscape',844,390]] as const){
+    await page.setViewportSize({width,height});
+    await expect(page.locator('[data-loading=stage]')).toBeInViewport();
+    await expect(page.locator('[data-loading=hint]')).toBeInViewport();
+    await page.screenshot({path:info.outputPath(`loading-${name}.png`)});
+  }
+});

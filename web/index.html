@@ -79,6 +79,7 @@
     <nav id="home" aria-label="Menu principal">
       <p class="menu-caption"><span>ESCOLHA SEU CAMINHO</span><span aria-hidden="true">01 — 07</span></p>
       <button id="play" data-index="01" autofocus disabled>Jogar <kbd>Enter ↵</kbd></button>
+      <p id="launchStatus" role="status" aria-live="polite" hidden></p>
       <button id="content" data-index="02" disabled>Selecionar conteúdo</button>
       <button id="import" data-index="03" disabled>Importar WAD</button>
       <button id="settings" data-index="04" disabled>Configurações</button>
@@ -95,6 +96,18 @@
     </footer>
   </main>
   <section id="game" hidden aria-label="Jogo"><div id="rotatePrompt" hidden role="status"><div><span aria-hidden="true">↻</span><h2>Gire o aparelho</h2><p>Jogue na horizontal para acessar os controles.<br>A partida fica suspensa na vertical.</p><button id="rotateHome">Voltar à interface</button></div></div><canvas id="canvas" width="640" height="480" tabindex="0" aria-label="DOOM"></canvas><div id="resume" hidden><div class="resume-card"><p class="eyebrow">AGUARDANDO VOCÊ</p><h2>Partida suspensa</h2><p id="resumeInstruction">Pressione Enter para entrar e ativar o áudio.</p><button id="resumeButton">Enter para retomar <span aria-hidden="true">↵</span></button><dl class="resume-controls" hidden><div><dt>WASD</dt><dd>Mover</dd></div><div><dt>← →</dt><dd>Girar</dd></div><div><dt>J / E</dt><dd>Atirar / interagir</dd></div><div><dt>P / H</dt><dd>Menu / interface</dd></div></dl><p id="resumeGuide" class="resume-hint"></p></div></div></section>
+  <section id="loadingScreen" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="Carregando o jogo">
+    <div class="loading-card">
+      <p class="eyebrow">PREPARANDO SUA PARTIDA</p>
+      <h2 data-loading="stage" role="status" aria-live="polite">Preparando o jogo…</h2>
+      <progress data-loading="progress" max="100" aria-label="Conteúdo HD carregado"></progress>
+      <p data-loading="amount" class="loading-amount"></p>
+      <p data-loading="detail"></p>
+      <p data-loading="activity"></p>
+      <p data-loading="hint" class="loading-hint"></p>
+      <div data-loading="error" hidden><button id="loadingBack">Voltar à interface</button></div>
+    </div>
+  </section>
   <input id="wadFile" type="file" accept=".wad" hidden><input id="backupFile" type="file" accept=".json" hidden>
   <script type="module" src="./main.ts"></script>
 </body>
