@@ -118,6 +118,21 @@ self.addEventListener('activate', event => event.waitUntil((async () => {
   // Content-addressed assets and legacy installs are never deleted as an activation side effect.
   await self.clients.claim();
 })()));
+self.addEventListener('message', event => {
+  if (event.data?.type !== 'doom-runtime-claim' || event.source?.type !== 'window') return;
+  const clientURL = new URL(event.source.url);
+  if (clientURL.origin !== SCOPE.origin || !clientURL.pathname.startsWith(SCOPE.pathname)) return;
+  // An uncontrolled document may have loaded a newer bundle while this worker
+  // still has a waiting update. Claim only a document belonging to this shell.
+  const entry = typeof event.data.entry === 'string' ? routes.get(event.data.entry) : undefined;
+  if (!entry || !INDEX.resources.includes('./' + entry)) {
+    event.source.postMessage({type:'doom-runtime-version-mismatch'});
+    return;
+  }
+  // Only the already active worker can claim clients. This neither skips waiting
+  // nor activates an update; it repairs a document missed by activation-time claim.
+  event.waitUntil(self.clients.claim());
+});
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);

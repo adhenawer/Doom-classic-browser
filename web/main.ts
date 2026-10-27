@@ -462,22 +462,77 @@ async function loadScript(resolution: Resolution) {
     script.onload = () => resolve(); script.onerror = () => { script.remove(); reject(new Error('Loader WASM ausente. Verifique a preparação offline ou selecione Clássica.')); }; document.head.append(script);
   });
 }
-// Reuse a verified-version Cache Storage response. A first install may already
-// be downloading the large pack; wait for that transfer instead of requesting
-// a second copy concurrently and inflating network/renderer memory pressure.
+// Runtime and catalog requests must use the document's active worker. A
+// navigation can miss activate-time clients.claim(), even after ready resolves.
 async function ensureRuntimeController() {
   if (import.meta.env.DEV) return;
   if (!('serviceWorker' in navigator)) throw new Error('Service Worker necessário para preparar o jogo offline.');
-  // The first runtime request must be intercepted as well as subsequent visits.
-  await navigator.serviceWorker.register('./sw.js', { scope: './' });
-  if (navigator.serviceWorker.controller) return;
+  const serviceWorker = navigator.serviceWorker;
+  const registration = await serviceWorker.register('./sw.js', { scope: './' });
+  const scriptURL = new URL('./sw.js', location.href).href;
+  const controlled = () => serviceWorker.controller?.scriptURL === scriptURL;
+  if (controlled()) return;
   await new Promise<void>((resolve, reject) => {
-    const changed = () => { if (navigator.serviceWorker.controller) { cleanup(); resolve(); } };
-    const timer = setTimeout(() => { cleanup(); reject(new Error('A interface offline não ficou pronta. Confira a conexão e tente novamente.')); }, 60000);
-    const cleanup = () => { clearTimeout(timer); navigator.serviceWorker.removeEventListener('controllerchange', changed); };
-    navigator.serviceWorker.addEventListener('controllerchange', changed); changed();
+    let settled = false;
+    const observed = new Set<ServiceWorker>();
+    const cleanup = () => {
+      clearTimeout(timer); clearInterval(retry);
+      serviceWorker.removeEventListener('controllerchange', changed);
+      serviceWorker.removeEventListener('message', failed);
+      registration.removeEventListener('updatefound', observeInstall);
+      for (const worker of observed) worker.removeEventListener('statechange', stateChanged);
+    };
+    const finish = (error?: Error) => {
+      if (settled) return;
+      settled = true; cleanup(); error ? reject(error) : resolve();
+    };
+    const changed = () => { if (controlled()) finish(); };
+    const requestClaim = () => {
+      if (settled) return;
+      changed(); if (settled) return;
+      // Never message waiting/installing workers or activate an update early.
+      // The active worker serves both the catalog and all subsequent runtime requests.
+      const active = registration.active;
+      if (active?.state === 'activated') {
+        try { active.postMessage({ type: 'doom-runtime-claim', entry: import.meta.url }); }
+        catch { /* Activation can replace the worker between the state read and postMessage; retry the current active. */ }
+      }
+    };
+    const stateChanged = () => {
+      if (!registration.active && !registration.waiting && (!registration.installing || registration.installing.state === 'redundant'))
+        finish(new Error('A instalação da interface offline falhou. Confira a conexão e o espaço disponível e tente novamente.'));
+      else requestClaim();
+    };
+    const observeInstall = () => {
+      const worker = registration.installing;
+      if (worker && !observed.has(worker)) { observed.add(worker); worker.addEventListener('statechange', stateChanged); }
+      stateChanged();
+    };
+    const failed = (event: MessageEvent) => {
+      const source = event.source as ServiceWorker | null;
+      if (source?.scriptURL === scriptURL && event.data?.type === 'doom-runtime-version-mismatch')
+        finish(new Error('A página e a versão offline são diferentes. Feche as abas do jogo e reabra para concluir a atualização.'));
+      if (source?.scriptURL === scriptURL && event.data?.type === 'doom-offline-error' && !registration.active)
+        finish(new Error('A instalação da interface offline falhou. Confira a conexão e o espaço disponível e tente novamente.'));
+    };
+    const timer = setTimeout(() => {
+      console.warn('[offline-controller] timeout', {
+        active: registration.active?.state ?? 'none',
+        installing: registration.installing?.state ?? 'none',
+        waiting: registration.waiting?.state ?? 'none'
+      });
+      finish(new Error('Não foi possível preparar esta página. Confira a conexão, feche as abas do jogo e reabra para tentar novamente.'));
+    }, 60000);
+    const retry = setInterval(requestClaim, 1000);
+    serviceWorker.addEventListener('controllerchange', changed);
+    serviceWorker.addEventListener('message', failed);
+    registration.addEventListener('updatefound', observeInstall);
+    observeInstall();
+    // ready alone does not establish control of a document that navigated during activation.
+    void serviceWorker.ready.then(requestClaim, () => { /* State/error observers provide the failure diagnosis. */ });
   });
 }
+
 function mapProgress(progress: {completedBytes: number; totalBytes: number}) {
   loading.progress(progress.completedBytes, progress.totalBytes);
 }

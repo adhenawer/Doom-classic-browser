@@ -40,7 +40,7 @@ async function fixture(t) {
       self:{registration:{scope:'https://game.test/game/'},clients:{async claim(){claims++;},async matchAll(){return[];}},addEventListener(name,fn){listeners.set(name,fn);}}
     });
     runInContext(await readFile(join(dir,'dist/sw.js'),'utf8'),context);
-    return { index, async event(name) { let work; listeners.get(name)({waitUntil(p){work=p;}}); return work; }, request(path,mode='cors') {
+    return { index, async event(name) { let work; listeners.get(name)({waitUntil(p){work=p;}}); return work; }, async message(source, type, entry = 'https://game.test/game/assets.js') { let work; listeners.get('message')({source,data:{type,entry},waitUntil(p){work=p;}}); return work; }, request(path,mode='cors') {
       let response; listeners.get('fetch')({request:{url:new URL(path,'https://game.test/game/').href,method:'GET',mode},respondWith(p){response=p;}}); return response;
     } };
   }
@@ -102,4 +102,22 @@ test('runtime corruption is rejected before storage; corrupt cached object is re
   await legacy.put('https://game.test/game/chocolate-doom.wasm',new Response('fixture-chocolate-doom.wasm'));
   const response=await worker.request('chocolate-doom.wasm');
   assert.equal(await response.text(),'fixture-chocolate-doom.wasm'); assert.equal(f.counts.has('chocolate-doom.wasm'),false);
+});
+
+test('active worker can reclaim an in-scope window missed during navigation, without downloading content',async t=>{
+  const f=await fixture(t), worker=await f.build();await worker.event('install');await worker.event('activate');
+  const counts=new Map(f.counts);assert.equal(f.claims(),1);
+  await worker.message({type:'window',url:'https://foreign.test/game/'},'doom-runtime-claim');
+  await worker.message({type:'window',url:'https://game.test/other/'},'doom-runtime-claim');
+  await worker.message({type:'sharedworker',url:'https://game.test/game/'},'doom-runtime-claim');
+  await worker.message({type:'window',url:'https://game.test/game/'},'unrelated');
+  assert.equal(f.claims(),1);
+  await worker.message({type:'window',url:'https://game.test/game/index.html'},'doom-runtime-claim');
+  assert.equal(f.claims(),2);assert.deepEqual(f.counts,counts);
+});
+
+test('claim request from a newer shell is rejected without taking over the document',async t=>{
+  const f=await fixture(t), worker=await f.build(), messages=[];await worker.event('install');await worker.event('activate');
+  await worker.message({type:'window',url:'https://game.test/game/index.html',postMessage(data){messages.push(data);}},'doom-runtime-claim','https://game.test/game/assets/new-version.js');
+  assert.equal(f.claims(),1);assert.equal(messages[0].type,'doom-runtime-version-mismatch');
 });
