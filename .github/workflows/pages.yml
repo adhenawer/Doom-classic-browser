@@ -40,9 +40,9 @@ jobs:
           cc -std=c99 -Wall -Wextra -Werror -Ibuild/engine-high/src -Ibuild/wasm-high tests/event_queue_test.c build/engine-high/src/d_event.c -o /tmp/event-queue-high
           /tmp/event-queue-high High
       - run: npm test
+      - run: npm run build
       - name: Map packaging and lazy dependency tests
         run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'
-      - run: npm run build
       - name: Install browser runtimes
         run: |
           # The Azure Ubuntu mirror downloaded 119 MB at 172 kB/s in CI.
