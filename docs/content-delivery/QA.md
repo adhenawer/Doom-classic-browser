@@ -1,5 +1,7 @@
 # Revisão independente — conteúdo sob demanda
 
+> **Atualização de publicação (coordenador, 27/10/2026):** a versão completa foi validada e publicada pelo [pipeline 40439413592](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40439413592). Os limites de arquivos ausentes descritos na revisão local abaixo foram resolvidos no GitHub Actions, com os assets originais. Veja a validação final ao fim deste documento.
+
 - Data: 27/10/2026.
 - Entrega revisada: alterações locais de carregamento por mapa; sem publicação nesta revisão.
 - Revisor: agente `lazy_qa`, independente dos implementadores de plataforma, inventário e motor.
@@ -60,10 +62,28 @@ Evidências versionadas pelo coordenador: [comparação](evidence/hd-comparison.
 | Escape no seletor podia deixar inicialização pendente | Cancelamento reinicia o documento; teste WebKit passa |
 | Tests antigos esperavam monolitos/precache completo e não retomavam após load | Contratos atualizados para partes por mapa, perfis explicitamente preparados e retomada; cenários afetados passam |
 
-## Parecer
+## Parecer da revisão local inicial
 
 A evidência sustenta a entrega sob demanda para os caminhos exercitados: mapas Classic/Alta e Moderno, cache com retomada, saves, offline por mapa preparado e registro/decodificação HD com PNGs originais em E1M8. A qualidade de textura não foi reduzida.
 
 **Não há aprovação da release completa nem de toda a campanha HD/4K**: faltam os dois materiais bloqueados e a execução do build/suíte completos com eles. Não foram medidos desempenho sustentado, RAM/GPU total, latência de rede real ou qualidade audível em dispositivo. O funcionamento em iPad físico permanece pendente.
 
 Antes de publicar, executar o pipeline completo com todos os arquivos originais, incluindo os testes HD de E1M1, saves/backups Moderno e revisão das cenas 4K. As fontes e licenças continuam parte da distribuição. Nenhum deploy foi realizado por este QA.
+
+## Validação final e publicação — 27/10/2026
+
+Registro do coordenador, posterior à revisão local acima:
+
+- Commit publicado: [2a3caeff5e35c504e0b5fc711c9a5c2096e75509](https://github.com/adhenawer/Doom-classic-browser/commit/2a3caeff5e35c504e0b5fc711c9a5c2096e75509).
+- [Pipeline completo e deploy](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40439413592): sucesso. Compilação dos três motores; **63 testes Node, 17 Python, três verificações C e 66 testes de navegador aprovados**, sem testes de navegador dispensados.
+- Pacote real: dois IWADs e 1.115 PNGs HD originais, incluindo os dois materiais 4K. Catálogo SHA-256 `d969e861a6c18dd4557389739710383acbf142fb1caa6c181d1be03a8d73f6b0`; versão offline `4233d20b7868e523`. Nenhuma fixture local foi publicada.
+- [Jogo publicado](https://adhenawer.github.io/Doom-classic-browser/), com deploy confirmado pelo GitHub Pages às 03:05 UTC. A rede do ambiente local bloqueou a abertura direta dessa URL; a confirmação de publicação vem do job de deploy.
+- Artefato de validação de navegador: ID `12707465332`, SHA-256 `6c09b04274b352f73dd919250a6d649dfa1ef25b11dcb99acb1818fafcb78513`. A retenção configurada no Actions é de 14 dias.
+
+A integração corrigiu a ordem dos testes que dependem da geração de Aurora e a retomada explícita após load antes de verificar áudio. As falhas simuladas de download passaram a ser injetadas no servidor HTTP, com contadores que comprovam a injeção, preservando o Service Worker real; a interceptação de página não aplicava essas falhas no WebKit.
+
+Um timeout de controle offline observado no CI motivou a regressão determinística de navegação durante a instalação: worker ativo, mas documento sem controlador. O QA independente demonstrou falha antes da correção e sucesso depois em Chromium/WebKit, incluindo repetições do teste de áudio. A recuperação solicita controle ao worker ativo compatível, não promove atualizações em espera, mantém catálogo/runtime bloqueados até confirmar controle e informa falhas de instalação. O protocolo também rejeita recuperação com bundle de outra revisão.
+
+Os testes completos incluem HD/4K, saves/backups, perda de contexto GPU, reabertura offline, trocas de mapa sem antecipação e recuperação de downloads. A revisão independente das capturas HD nas rodadas de integração não encontrou novo defeito visual concreto; não se afirma comparação por pixel entre poses diferentes. Os limites de dispositivo físico e o comportamento herdado de `BROVINE` permanecem os registrados acima.
+
+Rollback: publicar novamente a revisão anterior completa `5b6c8db789d1e52f5fd6106e742c92b45d2c357a`, preservando bancos, namespaces e saves.
