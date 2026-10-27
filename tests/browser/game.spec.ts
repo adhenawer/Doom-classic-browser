@@ -88,9 +88,12 @@ test('real IWAD, rendered level, simultaneous input, ramp, shooting, menu, focus
   await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(1);
   await page.keyboard.press('Enter');
   await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(0);
+  await expect(page.locator('#resume')).toBeVisible();
+  await page.locator('#resumeButton').press('Enter');
+  await expect.poll(()=>state(page,1)).toBe(0);
   await page.screenshot({path:info.outputPath('real-level.png')});
   expect(errors).toEqual([]);
-  expect(await page.evaluate(()=>(window as any).doom._web_audio())).toBe(1);
+  await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_audio())).toBe(1);
   await page.evaluate(() => {
     const node = (window as any).doom.SDL2.audio.scriptProcessorNode;
     const original = node.onaudioprocess;
