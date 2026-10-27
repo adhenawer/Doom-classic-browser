@@ -9,7 +9,7 @@ O motor executa mapas reais e preserva as mecânicas clássicas. A distribuiçã
 ## Jogar no navegador
 
 1. Abra a URL HTTPS com conexão. O browser seleciona automaticamente teclado no desktop ou controles touch no mobile. No mobile, jogue na horizontal; girar para a vertical suspende a partida.
-2. Aguarde a preparação offline terminar (inclui o pacote HD de aproximadamente 380 MiB, além dos motores, conteúdo-base e mapa Estação Aurora).
+2. Ao iniciar, aguarde os recursos do mapa escolhido. A entrega sob demanda preserva a qualidade integral e não baixa antecipadamente a próxima fase. Recursos compartilhados ficam em cache; a disponibilidade offline é por mapa preparado.
 3. Selecione **Jogar** por toque ou Enter. Quando aparecer a partida suspensa, toque em **Retomar partida** ou pressione Enter para retomar e tentar liberar o áudio.
 4. Para o conteúdo original, use **Importar WAD** e o seletor de arquivos do browser. A seleção inicial pode usar a interface nativa do sistema; a partida e os menus funcionam pelo teclado.
 
@@ -59,7 +59,7 @@ Veja [arquitetura e validação da entrega](docs/modern-hd/RELEASE.md), [proced�
 
 Em **Configurações → Resolução do motor**, escolha **Alta · 640×400 · Crispy Doom** e salve. Se já há uma partida, use **Aplicar nova resolução → Aplicar resolução e reiniciar**; salve o progresso no menu do DOOM antes, pois reiniciar não cria um save. Depois entre em Jogar/Carregar jogo. Preferências antigas continuam em Clássica (320×200).
 
-Alta rasteriza **quatro vezes mais pixels**, mantendo o aspecto de exibição 4:3. Isso melhora o detalhe geométrico sem criar texturas novas; não é zoom/CSS, Full HD ou filtro. O menu permite voltar a Clássica. Cada motor tem saves próprios: a primeira entrada em Alta copia os slots clássicos para o perfil novo, sem sobrescrever os originais. Backups novos incluem ambos; backups antigos continuam aceitos. O cache prepara os dois motores para a troca offline.
+Alta rasteriza **quatro vezes mais pixels**, mantendo o aspecto de exibição 4:3. Isso melhora o detalhe geométrico sem criar texturas novas; não é zoom/CSS, Full HD ou filtro. O menu permite voltar a Clássica. Cada motor tem saves próprios: a primeira entrada em Alta copia os slots clássicos para o perfil novo, sem sobrescrever os originais. Backups novos incluem ambos; backups antigos continuam aceitos. Cada perfil precisa ser preparado ao menos uma vez para permitir a troca offline.
 
 Crispy permanece com auto-aim vertical, 35 tics/s e extensões de pulo/mira livre desativadas. Sua simulação não é declarada idêntica à do Chocolate; Clássica mantém a base anterior. O custo da alta resolução precisa ser avaliado em cada dispositivo. Veja [arquitetura, medições e validação](docs/HIRES.md) e [revisão independente](docs/HIRES-QA.md).
 
@@ -91,10 +91,12 @@ O browser precisa oferecer WebAssembly, Canvas/WebGL, Web Audio, IndexedDB e Ser
 
 Resultados de um motor desktop não certificam automaticamente todos os browsers que o utilizam. Veja [checklist geral de browsers](docs/BROWSER-CHECKLIST.md) e [perfil complementar do Chrome no iPad](docs/IPAD-CHECKLIST.md).
 
+Veja [a arquitetura de entrega por mapa, cache e retomada](docs/CONTENT-DELIVERY.md).
+
 ## Offline e instalação
 
 1. Abra com conexão, fora do modo privado.
-2. Aguarde **Preparado para offline neste contexto** e importe seu conteúdo, se desejar.
+2. Inicie o mapa desejado e aguarde a indicação de que ele está disponível offline. Importe seu conteúdo, se desejar. Uma fase ainda não preparada exigirá conexão quando for solicitada.
 3. Jogue e salve. A confirmação de persistência aparece na interface (H).
 4. Feche a página, desligue a conexão e reabra a mesma URL no mesmo browser/perfil.
 5. Se o browser oferecer instalação como PWA, use a opção de instalar ou adicionar à tela inicial. Prepare e valide também esse contexto; não presuma armazenamento compartilhado entre diferentes browsers, perfis e aplicativos instalados.
@@ -159,9 +161,9 @@ O servidor fica restrito a localhost por padrão. O endpoint local não existe e
 
 ## Mapa original — Estação Aurora
 
-Em **Selecionar conteúdo**, **Freedoom Phase 1** e **Estação Aurora · mapa original** são opções fixas. Não é preciso importar um arquivo manualmente: ao selecionar Aurora pela primeira vez, o browser verifica e armazena o IWAD composto localmente. É uma primeira fase própria, com três salas, duas passagens, seis inimigos, shotgun, recursos e alcova secreta; após a saída, E1M2 e os outros mapas continuam sendo Freedoom. O layout não reproduz uma fase comercial. O motor Classic preserva as regras clássicas; sprites, sons e texturas são os recursos livres do Freedoom, não os originais comerciais.
+Em **Selecionar conteúdo**, **Freedoom Phase 1** e **Estação Aurora · mapa original** são opções fixas. Não é preciso importar um arquivo manualmente: ao iniciar Aurora, o browser verifica os recursos compartilhados e os intervalos do mapa solicitado, mantendo a identidade do IWAD composto para os saves. É uma primeira fase própria, com três salas, duas passagens, seis inimigos, shotgun, recursos e alcova secreta; após a saída, E1M2 e os outros mapas continuam sendo Freedoom. O layout não reproduz uma fase comercial. O motor Classic preserva as regras clássicas; sprites, sons e texturas são os recursos livres do Freedoom, não os originais comerciais.
 
-`npm run build` gera o mapa a partir de `maps/aurora/layout.json`, usando somente a base Freedoom pinada. O gerador e a geometria novos usam MIT; os assets preservam BSD e créditos. O PWAD `aurora-map.wad` contém apenas o mapa próprio; `aurora.wad` é o IWAD importável com os recursos livres. Ambos e seus créditos entram no cache offline.
+`npm run build` gera o mapa a partir de `maps/aurora/layout.json`, usando somente a base Freedoom pinada. O gerador e a geometria novos usam MIT; os assets preservam BSD e créditos. O PWAD `aurora-map.wad` contém apenas o mapa próprio; `aurora.wad` é o IWAD importável com os recursos livres. Na entrega web, os intervalos necessários ao mapa e os créditos entram no cache sob demanda, reaproveitando os recursos compartilhados do Freedoom. O pacote independente continua contendo os WADs integrais.
 
 Documentação detalhada: [análise estrutural do WAD](docs/maps/WAD-ANALYSIS.md), [inventário completo de metadados](docs/maps/wad-inventory.json), [brief passado ao criador](docs/maps/ORIGINAL-MAP-BRIEF.md), [design e procedência de Aurora](docs/maps/AURORA.md) e [revisão independente](docs/maps/QA.md) e [validação funcional](docs/maps/VALIDATION.md). A análise comercial não é um mapa reconstruível nem fornece assets ao gerador.
 

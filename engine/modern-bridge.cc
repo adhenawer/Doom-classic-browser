@@ -5,6 +5,7 @@
 #include <emscripten.h>
 #include <cmath>
 #include "dm_state.h"
+#include "g_game.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "i_sound.h"
@@ -122,6 +123,8 @@ EMSCRIPTEN_KEEPALIVE void web_suspend(int value) {
  web_suspended=!!value; web_clock_pause(web_suspended);
  if (web_suspended) web_audio_request(0);
 }
+#include "map-delivery.h"
+void web_prepare_map(const char *map) { web_prepare_map_named(map); }
 EMSCRIPTEN_KEEPALIVE int web_menu() { return menu_active; }
 EMSCRIPTEN_KEEPALIVE int web_audio() { return web_audio_request(1); }
 EMSCRIPTEN_KEEPALIVE void web_comfort(int value) { web_always_run=!!value; in_running=web_always_run; }
@@ -188,6 +191,9 @@ EMSCRIPTEN_KEEPALIVE double web_state(int selector) {
  case 31:return web_diag_preview_phase;
  case 32:return web_diag_swaps;
  case 33:return web_diag_first_world_tick;
+ case 34:
+  if (!current_map || current_map->name_.size() != 4 || current_map->name_[0] != 'E' || current_map->name_[2] != 'M') return -1;
+  return (current_map->name_[1] - '0') * 100 + (current_map->name_[3] - '0');
  default:return -1;
  }
 }

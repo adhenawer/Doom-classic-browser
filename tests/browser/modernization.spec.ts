@@ -49,6 +49,7 @@ test('comfort input produces vanilla walk/run commands, releases keys and surviv
   await page.keyboard.press('Enter');
   await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(0);
   await expect.poll(()=>state(page,14)).toBe(0);
+  await expect(page.locator('#resume')).toBeVisible();await page.locator('#resumeButton').press('Enter');
   await page.keyboard.down('KeyW'); await expect.poll(()=>state(page,6)).toBe(25); await page.keyboard.up('KeyW');
   await page.keyboard.down('KeyJ'); await page.keyboard.down('KeyW');
   await page.keyboard.press('KeyP'); await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(1);

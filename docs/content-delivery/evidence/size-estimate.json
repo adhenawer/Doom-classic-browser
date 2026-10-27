@@ -1,0 +1,83 @@
+{
+  "method": "Original PNG lengths/SHA validated from pinned source PK3; two 4K sizes only from pin, files unavailable. Raw image bytes only, excludes transport/compression/manifest/motor; not measured network transfer. Map closure exact pinned EDGE DDF plus native SW1/SW2.",
+  "sourcePK3SHA256": "8a0d4c1abe86a1582200289db38c8562a9eaa58e5725d7a182984931c5cc6ae9",
+  "assetCount": 1115,
+  "allPNGBytes": 398185744,
+  "packBytes": 398681345,
+  "bootstrapBytes": 18238008,
+  "maps": [
+    {
+      "map": "E1M1",
+      "hdImages": 161,
+      "hdImageBytes": 156622659,
+      "hdImageMiB": 149.367,
+      "mapGeometryBytes": 141905,
+      "4K": [
+        "BASE2",
+        "FLAT1"
+      ],
+      "savingAgainstWholePackPct": 60.71,
+      "uniquePNGHashes": 159,
+      "uniquePNGBytes": 155994818,
+      "uniquePNGMiB": 148.768
+    },
+    {
+      "map": "E1M2",
+      "hdImages": 201,
+      "hdImageBytes": 77535125,
+      "hdImageMiB": 73.943,
+      "mapGeometryBytes": 261230,
+      "4K": [
+        "FLAT1"
+      ],
+      "savingAgainstWholePackPct": 80.55,
+      "additionalAfterE1M1Bytes": 29068432,
+      "additionalAfterE1M1Images": 139,
+      "additionalAfterE1M1MiB": 27.722,
+      "sharedWithE1M1Images": 62,
+      "uniquePNGHashes": 200,
+      "uniquePNGBytes": 77213169,
+      "uniquePNGMiB": 73.636
+    },
+    {
+      "map": "E1M8",
+      "hdImages": 90,
+      "hdImageBytes": 18254982,
+      "hdImageMiB": 17.409,
+      "mapGeometryBytes": 114409,
+      "4K": [],
+      "savingAgainstWholePackPct": 95.42
+    },
+    {
+      "map": "E2M8",
+      "hdImages": 61,
+      "hdImageBytes": 49828760,
+      "hdImageMiB": 47.52,
+      "mapGeometryBytes": 37847,
+      "4K": [
+        "FLAT1"
+      ],
+      "savingAgainstWholePackPct": 87.5
+    },
+    {
+      "map": "E3M8",
+      "hdImages": 43,
+      "hdImageBytes": 12561852,
+      "hdImageMiB": 11.98,
+      "mapGeometryBytes": 45541,
+      "4K": [],
+      "savingAgainstWholePackPct": 96.85
+    },
+    {
+      "map": "E4M8",
+      "hdImages": 140,
+      "hdImageBytes": 65233680,
+      "hdImageMiB": 62.212,
+      "mapGeometryBytes": 236294,
+      "4K": [
+        "FLAT1"
+      ],
+      "savingAgainstWholePackPct": 83.64
+    }
+  ]
+}

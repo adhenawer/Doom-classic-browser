@@ -1,3 +1,4 @@
+import {pathToFileURL} from 'node:url';
 import {test, expect, type Page} from './normal-browser';
 import {selectClassic} from './legacy-profile';
 import {readFile} from 'node:fs/promises';
@@ -13,8 +14,8 @@ const data=(p:Page,path:string)=>p.evaluate(async path=>{
 },path);
 async function boot(p:Page,load=false) {
   await p.locator(load?'#load':'#play').press('Enter');
+  if(load) await p.getByRole('button',{name:'Carregar slot 1',exact:true}).press('Enter');
   await expect(p.locator('#resume')).toBeVisible({timeout:60000});await p.keyboard.press('Enter');
-  if(load) {await expect.poll(()=>p.evaluate(()=>(window as any).doom._web_menu())).toBe(1);await p.keyboard.press('Enter');}
   await expect.poll(()=>p.evaluate(()=>(window as any).doom._web_menu())).toBe(0);
 }
 async function save(p:Page,label:string) {
@@ -89,21 +90,22 @@ test('real 640x400 renderer, keyboard, classic-save copy, isolated saves, v1/v2 
   expect(await state(page,11)).toBe(legacyAmmo);
   expect(await data(page,classic)).toEqual(original);expect(await data(page,high)).toEqual(highData);expect(errors).toEqual([]);
 });
-test('prepare only Classic, stop server, then select and play high resolution offline with persistent saves',async({page,context,browserName})=>{
-  test.setTimeout(360000); // Full HD preparation plus Classic/High boots, all resources retained.
-  const root=new URL('../../dist/',import.meta.url),mount='/high-resolution-offline/';
+test('explicitly prepare Classic and High, then reopen both offline with persistent saves',async({page,context,browserName})=>{
+  test.setTimeout(360000); // Prepare only the selected profile and E1M1 before removing the server.
+  const root=process.env.QA_DIST ? pathToFileURL(process.env.QA_DIST.replace(/\/$/,'')+'/') : new URL('../../dist/',import.meta.url),mount='/high-resolution-offline/';
   const server=createServer(async(req,res)=>{try{
     const path=new URL(req.url!,'http://localhost').pathname;if(!path.startsWith(mount)){res.writeHead(404).end();return;}
     const file=new URL(path.slice(mount.length)||'index.html',root);if(!file.href.startsWith(root.href)){res.writeHead(403).end();return;}
     const mime=path.endsWith('.wasm')?'application/wasm':path.endsWith('.js')?'text/javascript':path.endsWith('.css')?'text/css':path.endsWith('.json')?'application/json':path.endsWith('.webmanifest')?'application/manifest+json':path.endsWith('.svg')?'image/svg+xml':'text/html';
-    res.writeHead(200,{'Content-Type':mime,'Cache-Control':'no-store'});res.end(await readFile(file));
+    const body=await readFile(file);res.writeHead(200,{'Content-Type':mime,'Cache-Control':'no-store'});res.end(body);
   }catch{res.writeHead(404).end();}});
   server.listen(0,'127.0.0.1');await once(server,'listening');const url=`http://127.0.0.1:${(server.address() as any).port}${mount}`;
   try{
     await page.goto(url);await selectClassic(page);await expect(page.locator('#play')).toBeEnabled();await boot(page);await save(page,'OFFCLASSIC');
-    await expect(page.locator('#offline')).toContainText('Preparado para offline',{timeout:180000});
-    server.close();server.closeAllConnections();await once(server,'close');if(browserName==='chromium')await context.setOffline(true);
     await page.keyboard.press('KeyH');await select(page,'high');await restart(page);await boot(page,true);
+    await expect(page.locator('#offline')).toContainText('E1M1 disponível offline',{timeout:180000});
+    server.close();server.closeAllConnections();await once(server,'close');if(browserName==='chromium')await context.setOffline(true);
+    await page.reload();await expect(page.locator('#play')).toBeEnabled();await boot(page,true);
     expect([await state(page,17),await state(page,18)]).toEqual([640,400]);
     await page.keyboard.down('KeyW');await expect.poll(()=>state(page,6)).toBe(25);await page.keyboard.up('KeyW');await save(page,'OFFHIGH');
     const saved=await data(page,high);await page.reload();await expect(page.locator('#play')).toBeEnabled();await boot(page,true);

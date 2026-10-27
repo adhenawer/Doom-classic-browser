@@ -67,6 +67,13 @@ EMSCRIPTEN_KEEPALIVE void web_suspend(int value) {
     web_clock_pause(web_suspended);
     if (web_suspended) web_audio_request(0);
 }
+#include "map-delivery.h"
+void web_prepare_map(int episode, int map) {
+    char name[16];
+    if (gamemode == commercial) snprintf(name, sizeof(name), "MAP%02d", map);
+    else snprintf(name, sizeof(name), "E%dM%d", episode, map);
+    web_prepare_map_named(name);
+}
 EMSCRIPTEN_KEEPALIVE int web_menu(void) { return menuactive; }
 EMSCRIPTEN_KEEPALIVE int web_text(void) { return saveStringEnter; }
 EMSCRIPTEN_KEEPALIVE int web_audio(void) { return web_audio_request(1); }
@@ -130,6 +137,7 @@ EMSCRIPTEN_KEEPALIVE double web_state(int selector) {
 #endif
         case 20: return viewwidth;
         case 21: return viewheight;
+        case 34: return gameepisode * 100 + gamemap;
         case 22:
 #ifdef WEB_HIRES_ENGINE
             return crispy->freelook | crispy->freeaim | crispy->jump | crispy->overunder;

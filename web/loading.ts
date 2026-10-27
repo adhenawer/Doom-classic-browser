@@ -42,7 +42,7 @@ export class LoadingScreen {
     this.root.hidden = false; this.element('progress').hidden = false;
     document.getElementById('shell')!.inert = true; document.getElementById('game')!.inert = true; this.root.focus({preventScroll:true});
     this.element('error').hidden = true;
-    this.element('hint').textContent = 'A primeira preparação HD usa cerca de 399 MB. Mantenha esta página aberta. O conteúdo fica disponível offline após a preparação completa.';
+    this.element('hint').textContent = 'Somente os recursos necessários ao mapa solicitado serão preparados, com qualidade integral. A próxima fase não será baixada antecipadamente.';
     this.stage('Preparando o jogo…');
     clearInterval(this.timer); this.timer = setInterval(()=>this.render(),1000); this.render();
   }
@@ -57,6 +57,9 @@ export class LoadingScreen {
       previous = received; this.bytes = completed + received; this.lastUpdate = performance.now(); if (this.lastUpdate-this.rendered > 100) this.render();
     };
   }
+  progress(completed: number, total: number) {
+    this.bytes = completed; this.total = total; this.source = ''; this.lastUpdate = performance.now(); this.render();
+  }
   indeterminate() { this.total = 0; this.source = ''; this.render(); }
   finish() {
     clearInterval(this.timer); this.root.hidden = true; document.getElementById('shell')!.inert = false;
@@ -68,7 +71,7 @@ export class LoadingScreen {
     this.element('error').hidden = false; this.root.querySelector<HTMLButtonElement>('button')!.focus();
     this.element('activity').textContent = 'O carregamento foi interrompido.';
     this.element('progress').hidden = true; this.element('amount').textContent = 'Preparação não concluída';
-    this.element('hint').textContent = 'Não foi possível concluir. Volte à interface para conferir a conexão ou ajustar as configurações.';
+    this.element('hint').textContent = 'Não foi possível concluir. Confira a conexão e tente novamente. As partes verificadas já recebidas foram preservadas.';
   }
   private render() {
     const now = performance.now(); this.rendered = now;

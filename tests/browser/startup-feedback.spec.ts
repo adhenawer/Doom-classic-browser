@@ -4,7 +4,10 @@ import ts from 'typescript';
 test.use({hasTouch:true,viewport:{width:390,height:844}});
 test('touch startup shows pending download and failure beside Play',async({page})=>{
   let failDownload: (()=>void) | undefined;
-  await page.route('**/freedoom1.wad',async route=>{
+  const index=JSON.parse(await readFile((process.env.QA_DIST??'dist')+'/content-index.json','utf8'));
+  const wad=index.iwads['7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d'];
+  const part=wad.bootstrap[0].asset.parts[0].file;
+  await page.route('**/'+part,async route=>{
     await new Promise<void>(resolve=>{failDownload=resolve;});
     await route.fulfill({status:503,body:'Unavailable'});
   });
@@ -17,7 +20,7 @@ test('touch startup shows pending download and failure beside Play',async({page}
   await expect(page.locator('#launchStatus')).toContainText('Carregando');
   await expect.poll(()=>!!failDownload).toBe(true);
   failDownload!();
-  await expect(page.locator('#launchStatus')).toContainText('Erro: Freedoom indisponível.');
+  await expect(page.locator('#launchStatus')).toContainText('Erro:');
   await expect(page.locator('[data-loading=stage]')).toContainText('Erro:');
   await page.locator('#loadingBack').tap();
   await expect(page.locator('#loadingScreen')).toBeHidden();

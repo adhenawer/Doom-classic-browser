@@ -1,5 +1,6 @@
 import { test, expect } from './normal-browser';
 import { selectClassic } from './legacy-profile';
+import {readFile} from 'node:fs/promises';
 
 test('original map selection persists, allows combat/traversal, and activates its exit', async ({ page }) => {
   await page.goto('/');
@@ -14,7 +15,7 @@ test('original map selection persists, allows combat/traversal, and activates it
   await expect(page.getByRole('button', { name: '✓ Estação Aurora · mapa original', exact: true })).toHaveCount(1);
   await page.getByRole('button', { name: 'Freedoom Phase 1 · conteúdo livre', exact: true }).click();
   await expect(page.locator('#selectedContent')).toHaveText('Freedoom Phase 1');
-  // Aurora remains a built-in choice and reuses its verified stored data.
+  // Aurora remains a built-in choice; no monolithic IWAD is needed.
   await page.route('**/aurora.wad', route => route.abort());
   await page.getByRole('button', { name: 'Estação Aurora · mapa original', exact: true }).click();
   await expect(page.locator('#selectedContent')).toHaveText('Estação Aurora');
@@ -41,16 +42,21 @@ test('original map selection persists, allows combat/traversal, and activates it
   await expect.poll(() => page.evaluate(() => (window as any).doom._web_state(1))).toBe(1);
 });
 
-test('corrupted original map is rejected without changing content selection', async ({ page }) => {
-  await page.route('**/aurora.wad', route => route.fulfill({ body: Buffer.from('corrupt'), contentType: 'application/octet-stream' }));
-  await page.goto('/');
-  await expect(page.locator('#play')).toBeEnabled();
+test('corrupted requested original-map geometry blocks entry without silently selecting other content', async ({ page }) => {
+  const index=JSON.parse(await readFile((process.env.QA_DIST??'dist')+'/content-index.json','utf8'));
+  const metadata=JSON.parse(await readFile((process.env.QA_DIST??'dist')+'/aurora.json','utf8'));
+  const part=index.iwads[metadata.sha256].maps.E1M1.ranges[0].asset.parts[0].file;
+  await page.route('**/'+part, route => route.fulfill({ body: Buffer.from('corrupt'), contentType: 'application/octet-stream' }));
+  await page.goto('/');await selectClassic(page);
   await page.locator('#content').click();
   await page.getByRole('button', { name: 'Estação Aurora · mapa original', exact: true }).click();
-  await expect(page.locator('#status')).toContainText('Mapa original corrompido');
-  await expect(page.locator('#selectedContent')).toHaveText('Freedoom Phase 1');
-  await page.reload();
-  await expect(page.locator('#selectedContent')).toHaveText('Freedoom Phase 1');
+  await expect(page.locator('#selectedContent')).toHaveText('Estação Aurora');
+  await page.getByRole('button',{name:'Voltar',exact:true}).click();await page.locator('#play').click();
+  await expect(page.locator('#loadingBack')).toBeVisible({timeout:60000});
+  await expect(page.locator('#loadingBack')).toHaveText('Tentar novamente');
+  await expect(page.locator('#status')).toContainText('Erro:');
+  await expect(page.locator('#offline')).not.toContainText('E1M1 disponível offline');
+  await expect(page.locator('#selectedContent')).toHaveText('Estação Aurora');
 });
 
 test('optional map discovery times out without preventing Freedoom play', async ({ page }) => {

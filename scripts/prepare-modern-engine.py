@@ -73,11 +73,15 @@ replace('libraries/miniaudio/miniaudio.h',
 # would race the same mount and report success before the full save exists.
 p=target/'source_files/epi/epi_filesystem.cc';s=p.read_text();a=s.index('#ifdef EDGE_WEB\nvoid SyncFilesystem(bool populate)');b=s.index('#else\nvoid SyncFilesystem(bool populate)',a)
 s=s[:a]+'#ifdef EDGE_WEB\nvoid SyncFilesystem(bool populate) { EPI_UNUSED(populate); }\n'+s[b:];p.write_text(s)
+# Sparse map ranges are populated while this IWAD remains open in the engine.
+# Read directly from MEMFS after each barrier, never stale stdio read-ahead.
+replace('source_files/epi/epi_filesystem.cc', '    return new ANSIFile(fp);',
+ '    if (name == "/game.wad") setvbuf(fp, nullptr, _IONBF, 0);\n    return new ANSIFile(fp);')
 # Existing turn controller runs in the authoritative 35Hz command builder.
 p=target/'source_files/edge/e_input.cc';s=p.read_text().replace('#include "e_input.h"','#include "e_input.h"\nstatic void web_apply(EventTicCommand*);')
 s=s.replace('    cmd->chat_character = 0;', '    web_apply(cmd);\n    cmd->chat_character = 0;')
 s+='\n#include "modern-bridge.cc"\n';p.write_text(s)
-for name in ['modern-bridge.cc','turn.h','turn.c']:shutil.copyfile(root/'engine'/name,target/'source_files/edge'/name)
+for name in ['modern-bridge.cc','turn.h','turn.c','map-delivery.h']:shutil.copyfile(root/'engine'/name,target/'source_files/edge'/name)
 # Expose read-only native save-name entry state and complete-save notification.
 p=target/'source_files/edge/m_menu.cc';s=p.read_text();s+='\n#include <emscripten.h>\nextern "C" EMSCRIPTEN_KEEPALIVE int web_text() {return entering_save_string;}\n'
 s=s.replace('        if (current_menu->previous_menu)\n        {', '        if (!current_menu->previous_menu) { MenuClear(); return true; }\n        if (current_menu->previous_menu)\n        {')
@@ -86,6 +90,61 @@ s=s.replace('static constexpr uint8_t kTotalSavePages = 100;','static constexpr 
 p.write_text(s)
 replace('source_files/edge/g_game.cc','        SaveCopySlot("current", dir_name);','        SaveCopySlot("current", dir_name);\n        EM_ASM({ Module["onSaveWritten"]?.(); });')
 replace('source_files/edge/g_game.cc','#include "g_game.h"','#include "g_game.h"\n#include <emscripten.h>')
+# Every actual map entry waits before its old world/players are discarded.
+# The save path bypasses DoLoadLevel, so prepare from its verified GLOB before
+# InitNew or LoadLevel_Bits. No next-map lookahead is added to intermission.
+replace('source_files/edge/g_game.cc', '#include <emscripten.h>',
+ '#include <emscripten.h>\nextern "C" void web_prepare_map(const char *map);')
+replace('source_files/edge/g_game.cc', 'void DoLoadLevel(void)\n{\n    HUDStart();',
+ 'void DoLoadLevel(void)\n{\n    if (current_map) web_prepare_map(current_map->name_.c_str());\n    HUDStart();')
+replace('source_files/edge/g_game.cc', 'static void InitNew(NewGameParameters &params)\n{',
+ 'static void InitNew(NewGameParameters &params)\n{\n    if (params.map_) web_prepare_map(params.map_->name_.c_str());')
+replace('source_files/edge/g_game.cc', '    // --- pull info from global structure ---',
+ '    web_prepare_map(globs->level);\n\n    // --- pull info from global structure ---')
+# Native AJBSP normally generates nodes for every IWAD map at startup. A sparse
+# IWAD must instead generate exactly the selected map after its data barrier.
+# Keep the same AJBSP algorithm/settings and immutable source directory indices.
+replace('source_files/ajbsp/bsp.h', 'int LevelsInWad();',
+ 'int LevelsInWad();\nint FindLevel(const char *name);')
+replace('source_files/ajbsp/bsp_level.cc', 'int LevelsInWad()\n{',
+ 'int FindLevel(const char *name) { return cur_wad ? cur_wad->LevelFind(name) : -1; }\n\nint LevelsInWad()\n{')
+replace('source_files/edge/w_wad.cc', 'std::string BuildXGLNodesForWAD(DataFile *df)\n{',
+ '''#include <emscripten.h>
+EM_JS(int, web_map_streaming, (), { return typeof Module['prepareMap'] === 'function'; });
+static std::string BuildXGLNodesForSelectedMap(DataFile *df, const char *map)
+{''')
+replace('source_files/edge/w_wad.cc', '    cache_name += ".xwa";',
+ '    if (map) { cache_name += "-"; cache_name += map; }\n    cache_name += ".xwa";')
+replace('source_files/edge/w_wad.cc', '        for (int i = 0; i < ajbsp::LevelsInWad(); i++)\n            ajbsp::BuildLevel(i);',
+ '''        if (map)
+        {
+            int level = ajbsp::FindLevel(map);
+            if (level < 0) FatalError("AJBSP: Requested map missing: %s\\n", map);
+            ajbsp::BuildLevel(level);
+        }
+        else
+            for (int i = 0; i < ajbsp::LevelsInWad(); i++)
+                ajbsp::BuildLevel(i);''')
+p=target/'source_files/edge/w_wad.cc';s=p.read_text();s+='''
+std::string BuildXGLNodesForWAD(DataFile *df)
+{
+    if (web_map_streaming() && df->name_ == "/game.wad") return "";
+    return BuildXGLNodesForSelectedMap(df, nullptr);
+}
+void WebPrepareXGLNodes(const char *map)
+{
+    if (!web_map_streaming() || CheckXGLLumpNumberForName(map) >= 0) return;
+    DataFile *source = nullptr;
+    for (DataFile *df : data_files)
+        if (df->name_ == "/game.wad") { source = df; break; }
+    if (!source) FatalError("Browser map IWAD missing\\n");
+    std::string nodes = BuildXGLNodesForSelectedMap(source, map);
+    if (nodes.empty()) FatalError("Browser map nodes missing: %s\\n", map);
+    ProcessFile(new DataFile(nodes, kFileKindXWAD));
+}
+''';p.write_text(s)
+replace('source_files/edge/p_setup.cc', 'void LevelSetup(void)\n{',
+ 'extern void WebPrepareXGLNodes(const char *map);\nvoid LevelSetup(void)\n{\n    WebPrepareXGLNodes(current_map->lump_.c_str());')
 # SDL's Emscripten swap yields via emscripten_sleep(0). Capture/present
 # after Sokol end-pass/commit but before that yield clears non-preserved GL buffers.
 replace('source_files/edge/i_video.cc','    SwapBuffers();','    EM_ASM({ Module["onFrame"]?.(); });\n    SwapBuffers();')
@@ -99,6 +158,64 @@ replace('source_files/edge/r_image.cc', '        return (1 << 22);', '        re
 replace('source_files/edge/r_image.cc', '#include "r_image.h"', '#include "r_image.h"\nint web_hd_registered=0, web_hd_uploaded=0, web_hd_maxwidth=0;')
 replace('source_files/edge/r_image.cc', '    rim->source_graphic_.packfile_name = (char *)calloc(pn_len + 1, 1);', '    rim->source_graphic_.packfile_name = (char *)calloc(pn_len + 1, 1);\n    if (type == kImageSourceTXHI && replaces) web_hd_registered++;')
 replace('source_files/edge/r_image.cc', '    GLuint tex_id =\n        UploadTexture(tmp_img,', '    if (rim->source_type_ == kImageSourceTXHI && rim->source_graphic_.packfile_name) {\n        web_hd_uploaded++;\n        if (tmp_img->width_ > web_hd_maxwidth) web_hd_maxwidth=tmp_img->width_;\n    }\n    GLuint tex_id =\n        UploadTexture(tmp_img,')
+# Enumerate the complete replacement catalogue without opening missing PNGs.
+# Only metadata is lazy: the native decode/upload receives the original image
+# bytes after the requested-map barrier. Width/height/channel count match the
+# pinned PNG metadata, preserving logical scale and opacity classification.
+p=target/'source_files/edge/r_image.cc';s=p.read_text()
+s=s.replace('#include "r_image.h"', '''#include "r_image.h"
+#include <emscripten.h>
+EM_JS(int, web_lazy_image_info, (const char *path, int *info), {
+ const asset = Module['lazyImages']?.[UTF8ToString(path)];
+ if (!asset) return 0;
+ if (![asset.width, asset.height, asset.channels].every(Number.isInteger) ||
+     asset.width < 1 || asset.width > 32768 || asset.height < 1 || asset.height > 32768 ||
+     asset.channels < 1 || asset.channels > 4) return -1;
+ HEAP32[info >> 2] = asset.width;
+ HEAP32[(info >> 2) + 1] = asset.height;
+ HEAP32[(info >> 2) + 2] = asset.channels;
+ return 1;
+});''')
+start=s.index('    epi::File *f = OpenFileFromPack(packfile_name);', s.index('static Image *AddPackImageSmartInternal('))
+end=s.index('    // create new image',start)
+scan=s[start:end]
+declarations='''    int width = 0, height = 0, bpp = 0;
+    int offset_x = 0, offset_y = 0;
+
+    bool is_patch = false;
+    bool solid    = false;
+'''
+if scan.count(declarations)!=1: raise RuntimeError('Lazy image registration declarations changed')
+scan=scan.replace(declarations,'')
+s=s[:start]+declarations+'''    int metadata[3];
+    int lazy = web_lazy_image_info(packfile_name, metadata);
+    if (lazy < 0) FatalError("Invalid browser image metadata: %s\\n", packfile_name);
+    if (lazy > 0)
+    {
+        width = metadata[0]; height = metadata[1]; bpp = metadata[2];
+        solid = (bpp == 3);
+    }
+    else
+    {
+'''+scan+'''    }
+
+'''+s[end:]
+p.write_text(s)
+# A missing dependency is an explicit preparation defect, never an invitation
+# to decode an empty placeholder or silently use a lower-resolution image.
+replace('source_files/edge/w_epk.cc', '#include "w_files.h"', '''#include "w_files.h"
+#include <emscripten.h>
+EM_JS(int, web_lazy_image_ready, (const char *path), {
+ const name = UTF8ToString(path), asset = Module['lazyImages']?.[name];
+ if (!asset) return 1;
+ try { return FS.stat('/lazy-hd/' + name).size === asset.bytes ? 1 : 0; }
+ catch (_) { return 0; }
+});''')
+replace('source_files/edge/w_epk.cc', 'epi::File *OpenPackFile(PackFile *pack, const std::string &name)\n{',
+ '''epi::File *OpenPackFile(PackFile *pack, const std::string &name)
+{
+    if (!web_lazy_image_ready(name.c_str()))
+        FatalError("Map dependency was not prepared: %s\\n", name.c_str());''')
 # Read-only lifecycle diagnostics. Keep the SDL swap/yield and startup policy
 # with cooperative waits so a trace can distinguish rendering, Asyncify and native input.
 replace('source_files/edge/i_web.cc', 'void WebTick(void)\n{',
@@ -106,7 +223,15 @@ replace('source_files/edge/i_web.cc', 'void WebTick(void)\n{',
 replace('source_files/edge/i_web.cc', '    if (web_suspended) return;',
  '    if (web_suspended) { web_diag_set_phase(0); return; }')
 replace('source_files/edge/i_web.cc', '    if (app_state & kApplicationActive)\n        EdgeTicker();',
- '    if (app_state & kApplicationActive) {\n        EdgeTicker();\n        web_diag_tick_finished();\n        EM_ASM({ Module["onTickComplete"]?.(); });\n    } else web_diag_set_phase(0);')
+ '''    if (app_state & kApplicationActive) {
+        EdgeTicker();
+        web_diag_tick_finished();
+        EM_ASM({
+            const name = Module['mapReadyName'];
+            if (name) { delete Module['mapReadyName']; Module['onMapReady']?.(name); }
+            Module["onTickComplete"]?.();
+        });
+    } else web_diag_set_phase(0);''')
 replace('source_files/edge/e_main.cc', 'void EdgeTicker(void)\n{\n    DoBigGameStuff();',
  'extern void web_diag_set_phase(int);\nvoid EdgeTicker(void)\n{\n    web_diag_set_phase(2);\n    DoBigGameStuff();')
 replace('source_files/edge/e_main.cc', '    // Update display, next frame, with current state.\n    EdgeDisplay();',

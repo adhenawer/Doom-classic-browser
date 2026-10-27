@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /// <reference types="vite/client" />
 import './style.css';
-import {LoadingScreen, readPart} from './loading';
+import {LoadingScreen} from './loading';
+import {MapContent, loadContentIndex, type ContentFS} from './map-content';
 import modernHud from '../engine/modern-hud.lua?raw';
 import { InputState, engineKeys } from './input';
 import { TouchControls, detectTouch, type ControlMode } from './touch';
@@ -9,17 +10,17 @@ import { baseSettings as gameplayDefaults, sanitizeSettings as sanitizeGameplay,
 import { Presentation, sanitizePresentation, type PresentationSettings } from './presentation';
 import { validateWad, wadHash, MAX_WAD } from './wad';
 import { read, write, remove } from './storage';
-import { engineProfiles, backupProfiles, modernBackupProfiles, modernContent, modernParts, modernSizes, sanitizeModernSize, highConfig, sanitizeResolution, saveDirectory, validateSavePath, validateBackupProfiles, type Resolution, type ModernSize } from './engine-profile';
+import { engineProfiles, backupProfiles, modernBackupProfiles, modernContent, modernSizes, sanitizeModernSize, highConfig, sanitizeResolution, saveDirectory, validateSavePath, validateBackupProfiles, type Resolution, type ModernSize } from './engine-profile';
 
 type Wad = { id: string; name: string; bytes: number };
 type Settings = GameplaySettings & PresentationSettings & { resolution: Resolution; modernSize: ModernSize; modernHD: boolean; modernHUD: 'overlay'|'classic' };
-type FS = {
+type FS = ContentFS & {
   mkdirTree(p: string): void; mount(type: unknown, options: object, p: string): void;
   filesystems: { IDBFS: unknown }; syncfs(populate: boolean, cb: (e?: Error) => void): void;
   writeFile(p: string, data: Uint8Array | string, options?: {canOwn?: boolean}): void; readFile(p: string): Uint8Array;
   readdir(p: string): string[]; stat(p: string): { mode: number }; isDir(mode: number): boolean; unlink(p: string): void;
 };
-type Engine = { FS: FS; callMain(args: string[]): void; _web_key(k: number, d: number, c: number): void;
+type Engine = { retryMapPreparation?: () => void; FS: FS; callMain(args: string[]): void; _web_key(k: number, d: number, c: number): void;
   _web_rotate(l: number, r: number): void; _web_reset(): void; _web_suspend(v: number): void;
   _web_comfort(v: number): void; _web_mix(sfx: number, music: number): void;
   _web_menu(): number; _web_text(): number; _web_audio(): number; _web_state(n: number): number;
@@ -35,7 +36,10 @@ const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElem
 const shell = el('shell'), game = el('game'), panel = el('panel'), home = el('home');
 const canvas = el<HTMLCanvasElement>('canvas'), status = el('status');
 const loading = new LoadingScreen(el('loadingScreen'));
-el('loadingBack').onclick = () => { loading.finish(); showShell(); };
+el('loadingBack').onclick = () => {
+  if (mapPreparing) { loading.begin(); engine?.retryMapPreparation?.(); return; }
+  loading.finish(); showShell();
+};
 const baseSettings: Settings = { ...gameplayDefaults, ...sanitizePresentation(undefined), resolution: 'classic', modernSize: '1920', modernHD: true, modernHUD: 'overlay' };
 const presentation = new Presentation(canvas, game);
 window.doomPresentation = presentation;
@@ -53,6 +57,8 @@ let originalMap: { name: string; sha256: string; bytes: number } | undefined;
 let localDoomAvailable = false;
 const localDoomHash = '6fdf361847b46228cfebd9f3af09cd844282ac75f3edbb61ca4cb27103ce2e7f';
 let queuedLoad = false, graphicsLost = false;
+let mapPreparing = false, preparedMap = '', selectingSlot = false;
+let mapContent: MapContent | undefined;
 let activeResolution: Resolution | undefined;
 let activeModernSize: ModernSize | undefined, activeModernHD: boolean | undefined, activeModernHUD: Settings['modernHUD'] | undefined;
 const profileName = (r: Resolution) => r === 'modern' ? 'Moderno HD · EDGE-Classic' : r === 'high' ? 'Alta · Crispy Doom' : 'Clássica · Chocolate Doom';
@@ -70,7 +76,7 @@ function offlineFailed(name='') {
 let initialized = false;
 const say = (message: string) => {
   status.textContent = message;
-  if (starting) { el('launchStatus').hidden = false; el('launchStatus').textContent = message; loading.stage(message); }
+  if (starting || mapPreparing) { el('launchStatus').hidden = false; el('launchStatus').textContent = message; loading.stage(message); }
 };
 let controlMode: ControlMode = 'auto';
 let controlExperienceState = '', saveGeneration = 0;
@@ -78,15 +84,15 @@ try { const saved = localStorage.getItem('doom-control-mode'); if (saved === 'mo
 const coarsePointer = matchMedia('(pointer: coarse)');
 const mobileControls = () => controlMode === 'mobile' || (controlMode === 'auto' && detectTouch(coarsePointer.matches, navigator.maxTouchPoints, 'ontouchstart' in window));
 const touch = new TouchControls(game, (source, actions) => {
-  if (!running || suspended || game.hidden || engine?._web_menu()) return;
+  if (mapPreparing || !running || suspended || game.hidden || engine?._web_menu()) return;
   input.setActions(source, actions); updateInput();
 }, key => {
-  if (!running || suspended || game.hidden) return;
+  if (mapPreparing || !running || suspended || game.hidden) return;
   engine?._web_audio();
   if (key === 'shell') showShell();
   else { reset(); tap(key); }
 }, name => {
-  if (!engine?._web_text() || suspended) return;
+  if (mapPreparing || !engine?._web_text() || suspended) return;
   reset(); const generation = saveGeneration;
   const keys: [number, number][] = Array.from({length:24}, () => [127, 127]);
   for (const character of name) keys.push([character.toLowerCase().charCodeAt(0), character.charCodeAt(0)]);
@@ -105,6 +111,7 @@ const touch = new TouchControls(game, (source, actions) => {
   send().catch(error);
 }, reconcileMenuState);
 function updateControlExperience() {
+  if (mapPreparing) return;
   const mobile = mobileControls();
   const state = `${mobile}/${game.hidden}/${running}/${suspended}/${matchMedia('(orientation: portrait)').matches}/${engine?._web_menu()}/${engine?._web_text()}`;
   if (state === controlExperienceState) return;
@@ -156,6 +163,7 @@ async function saveSettings() {
   if (generation === settingsSaveGeneration) say('Configurações armazenadas neste navegador.');
 }
 function reset() {
+  if (mapPreparing) { input.clear(); sent.clear(); return; }
   saveGeneration++; touch.clear();
   // Preserve complete down/up pairs if a DOM event was queued before a menu
   // transition but has not reached the next engine tic yet.
@@ -163,17 +171,17 @@ function reset() {
   input.clear(); sent.clear(); engine?._web_reset();
 }
 function traceModern(event: string) {
-  if (!window.doomTraceModern || activeResolution !== 'modern') return;
+  if (mapPreparing || !window.doomTraceModern || activeResolution !== 'modern') return;
   console.info('[modern-host]', event, JSON.stringify({at:performance.now(),suspended,starting,queuedLoad,gameHidden:game.hidden,state:engine?[0,1,26,27,28,29,30,31,32,33].map(n=>engine!._web_state(n)):null}));
 }
 function suspend(focusResume = true) {
-  if (!engine || !running) return;
+  if (mapPreparing || !engine || !running) return;
   reset(); engine._web_suspend(1); suspended = true; presentation.setActive(false);
   el('resume').hidden = false; updateControlExperience(); traceModern('suspended');
   if (focusResume && !document.hidden && !game.hidden) { traceModern('suspend-before-focus'); el('resumeButton').focus(); traceModern('suspend-after-focus'); }
 }
 function resume() {
-  if (!engine || !running || (mobileControls() && matchMedia('(orientation: portrait)').matches)) return;
+  if (mapPreparing || !engine || !running || (mobileControls() && matchMedia('(orientation: portrait)').matches)) return;
   if (mobileControls()) {
     const orientation = screen.orientation as ScreenOrientation & { lock?: (orientation: string) => Promise<void> };
     orientation?.lock?.('landscape').catch(() => { /* Browser may require installed PWA/fullscreen. */ });
@@ -221,13 +229,7 @@ async function content() {
   button(`${selected === 'freedoom' ? '✓ ' : ''}Freedoom Phase 1 · conteúdo livre`, () => select('freedoom', 'Freedoom Phase 1'));
   if (originalMap) {
     button(`${selected === originalMap.sha256 ? '✓ ' : ''}${originalMap.name} · mapa original`, async () => {
-      const expected = originalMap!;
-      if (wads.some(w => w.id === expected.sha256)) { await select(expected.sha256, expected.name); return; }
-      const response = await fetch('./aurora.wad', { cache: 'no-store' });
-      if (!response.ok) throw new Error('Mapa original indisponível. Prepare o conteúdo novamente.');
-      const data = await response.arrayBuffer();
-      if (data.byteLength !== expected.bytes || await wadHash(data) !== expected.sha256) throw new Error('Mapa original corrompido: SHA-256 ou tamanho divergente.');
-      await importWad(new File([data], `${expected.name}.wad`));
+      await select(originalMap!.sha256, originalMap!.name);
     });
   }
   if (localDoomAvailable && !wads.some(w => w.id === localDoomHash)) {
@@ -463,31 +465,40 @@ async function loadScript(resolution: Resolution) {
 // Reuse a verified-version Cache Storage response. A first install may already
 // be downloading the large pack; wait for that transfer instead of requesting
 // a second copy concurrently and inflating network/renderer memory pressure.
-async function modernPartResponse(file: string, sha256: string): Promise<{response: Response; source: 'cache'|'network'}> {
-  const url=new URL('./'+file,location.href).href;
-  const cached=async()=>{
-    if (!('caches' in window)) return undefined;
-    try {
-      const prefix='doom-'+encodeURIComponent(new URL('./',location.href).pathname)+'-';
-      for (const name of (await caches.keys()).filter(name=>name.startsWith(prefix))) {
-        const cache=await caches.open(name), index=await cache.match(new URL('./offline-index.json',location.href).href);
-        if (!index || (await index.json()).hashes?.[file] !== sha256) continue;
-        const response=await cache.match(url); if(response) return response;
-      }
-    } catch { /* A denied/unavailable cache must not prevent online play. */ }
-    return undefined;
-  };
-  let response=await cached(); if(response) return {response,source:'cache'};
-  const worker=swRegistration?.installing;
-  if(worker && worker.state !== 'redundant' && worker.state !== 'activated') {
-    loading.indeterminate(); say('Baixando a preparação offline… O jogo aguarda esse download para não baixar duas vezes.');
-    await new Promise<void>(resolve=>{
-      const changed=()=>{if(['installed','activated','redundant'].includes(worker.state)){worker.removeEventListener('statechange',changed);resolve();}};
-      worker.addEventListener('statechange',changed);changed();
-    });
-    response=await cached(); if(response) return {response,source:'cache'};
+async function ensureRuntimeController() {
+  if (import.meta.env.DEV) return;
+  if (!('serviceWorker' in navigator)) throw new Error('Service Worker necessário para preparar o jogo offline.');
+  // The first runtime request must be intercepted as well as subsequent visits.
+  await navigator.serviceWorker.register('./sw.js', { scope: './' });
+  if (navigator.serviceWorker.controller) return;
+  await new Promise<void>((resolve, reject) => {
+    const changed = () => { if (navigator.serviceWorker.controller) { cleanup(); resolve(); } };
+    const timer = setTimeout(() => { cleanup(); reject(new Error('A interface offline não ficou pronta. Confira a conexão e tente novamente.')); }, 60000);
+    const cleanup = () => { clearTimeout(timer); navigator.serviceWorker.removeEventListener('controllerchange', changed); };
+    navigator.serviceWorker.addEventListener('controllerchange', changed); changed();
+  });
+}
+function mapProgress(progress: {completedBytes: number; totalBytes: number}) {
+  loading.progress(progress.completedBytes, progress.totalBytes);
+}
+async function prepareRequestedMap(name: string) {
+  if (!mapContent) return;
+  mapPreparing = true;
+  input.clear(); sent.clear(); touch.clear(); presentation.setActive(false);
+  el('loadingBack').textContent = 'Tentar novamente';
+  loading.begin(); say(`Preparando ${name} · qualidade integral…`);
+  await mapContent.prepareMap(name, mapProgress);
+  loading.indeterminate(); say(`${name} preparado. Abrindo a fase…`);
+  // Keep inputs blocked until the native frame has finished, not just download.
+}
+function mapReady(name: string) {
+  if (!mapPreparing) return;
+  mapPreparing = false; preparedMap = name;
+  el('loadingBack').textContent = 'Voltar à interface';
+  el('offline').textContent = `${name} disponível offline neste contexto · outros mapas serão preparados ao entrar.`;
+  if (running) {
+    suspend(); loading.finish(); say(`${name} pronto. Retome a partida para ativar o áudio.`);
   }
-  return {response:await fetch(url,{cache:'no-store'}),source:'network'};
 }
 async function migrateClassicSaves(hash: string) {
   if (!engine || activeResolution !== 'high') return;
@@ -504,6 +515,26 @@ async function migrateClassicSaves(hash: string) {
   }
   fs.writeFile(marker, engineProfiles.high.id); await sync();
 }
+async function chooseSavedSlot(): Promise<number | undefined> {
+  // Select before callMain: -loadgame lets the native save header choose the
+  // requested map without booting/downloading E1M1 just to open the load menu.
+  const fs = engine!.FS, modern = activeResolution === 'modern';
+  const slots: number[] = [];
+  for (let slot = 0; slot < (modern ? 8 : 6); slot++) {
+    const path = modern ? `${activeSavePath}/savegame/slot${String(slot).padStart(3, '0')}/head.esg` : `${activeSavePath}/doomsav${slot}.dsg`;
+    try { if (fs.readFile(path).byteLength) slots.push(slot); } catch { /* Empty slot. */ }
+  }
+  loading.finish(); shell.hidden = false; game.hidden = true;
+  selectingSlot = true; showPanel('Carregar partida');
+  paragraph(slots.length ? 'Escolha um save deste conteúdo e perfil. Somente o mapa salvo será preparado.' : 'Nenhum save encontrado neste conteúdo e perfil.');
+  return new Promise(resolve => {
+    const select = (slot?: number) => { selectingSlot = false; showHome(); loading.begin(); resolve(slot); };
+    for (const slot of slots) button(`Carregar slot ${slot + 1}`, () => select(slot));
+    button('Iniciar nova partida', () => select());
+    button('Voltar à interface', () => location.reload());
+    panel.querySelector<HTMLButtonElement>('button')?.focus();
+  });
+}
 async function start(load = false) {
   if (!initialized) { say('Aguarde a leitura do armazenamento local.'); return; }
   if (running) {
@@ -519,18 +550,34 @@ async function start(load = false) {
   loading.begin(); say('Carregando o motor real…');
   el('launchStatus').scrollIntoView({block:'nearest'});
   try {
+    await ensureRuntimeController();
+    const catalog = await loadContentIndex();
+    const builtinHash = selected === 'freedoom' ? modernContent.iwad : selected;
+    const builtin = catalog.iwads[builtinHash];
     const custom = wads.find(w => w.id === selected);
-    if (selected !== 'freedoom' && !custom) throw new Error('IWAD selecionado não está armazenado.');
-    let data = custom ? await read<ArrayBuffer>('wad:' + custom.id) : undefined;
-    if (custom && !data) throw new Error('Arquivo IWAD ausente. Importe-o novamente pelo seletor de arquivos.');
-    if (!data) { const response = await fetch('./freedoom1.wad', { cache: 'no-store' }); if (!response.ok) throw new Error('Freedoom indisponível.'); data = await response.arrayBuffer(); }
-    validateWad(data); const hash = await wadHash(data);
-    if (hash !== (custom?.id ?? '7323bcc168c5a45ff10749b339960e98314740a734c30d4b9f3337001f9e703d')) throw new Error('IWAD corrompido: SHA-256 divergente. Importe novamente.');
+    let data: ArrayBuffer | undefined, hash: string;
+    if (builtin) {
+      hash = builtinHash;
+      mapContent = new MapContent(catalog, hash, settings.resolution === 'modern' && settings.modernHD && hash === modernContent.iwad);
+    } else {
+      if (!custom) throw new Error('IWAD selecionado não está armazenado.');
+      data = await read<ArrayBuffer>('wad:' + custom.id);
+      if (!data) throw new Error('Arquivo IWAD ausente. Importe-o novamente pelo seletor de arquivos.');
+      validateWad(data); hash = await wadHash(data);
+      if (hash !== custom.id) throw new Error('IWAD corrompido: SHA-256 divergente. Importe novamente.');
+      mapContent = undefined;
+    }
     activeResolution = settings.resolution; game.dataset.renderer=activeResolution; activeModernSize=settings.modernSize; activeModernHD=settings.modernHD; activeModernHUD=settings.modernHUD;
     await loadScript(activeResolution);
     let tracedFrames=0;
     engine = await window[engineProfiles[activeResolution].factory]!({ canvas, noInitialRun: true,
       traceModern:!!window.doomTraceModern,
+      prepareMap: mapContent ? prepareRequestedMap : undefined,
+      lazyImages: mapContent?.lazyImages,
+      onMapReady: mapReady,
+      onMapPreparationError: (reason: unknown, name: string) => {
+        error(reason); loading.fail(`Não foi possível preparar ${name}. As partes concluídas estão preservadas. Confira a conexão e tente novamente.`);
+      },
       onFrame: () => { presentation.frame(); if (++tracedFrames<=8) traceModern('frame-before-swap'); },
       onTickComplete: () => {
         if (activeResolution !== 'modern' || running || preparedModernPause || !engine) return;
@@ -552,11 +599,13 @@ async function start(load = false) {
     await sync(true);
     activeSavePath = saveDirectory(activeResolution, hash); engine.FS.mkdirTree(activeSavePath);
     await migrateClassicSaves(hash);
-    engine.FS.writeFile('/game.wad', new Uint8Array(data), {canOwn:true});
+    const loadSlot = load ? await chooseSavedSlot() : undefined;
+    if (mapContent) await mapContent.initialize(engine.FS, mapProgress);
+    else engine.FS.writeFile('/game.wad', new Uint8Array(data!), {canOwn:true});
     engine.FS.writeFile('/default.cfg', `mouse_sensitivity 0\nsfx_volume ${settings.sfxVolume}\nmusic_volume ${settings.musicVolume}\nshow_messages 1\nscreenblocks 10\ndetaillevel 0\n`);
     engine.FS.writeFile('/chocolate.cfg', 'fullscreen 0\nwindow_width 640\nwindow_height 480\naspect_ratio_correct 1\ninteger_scaling 0\nforce_software_renderer 0\nsnd_musicdevice 3\nsnd_sfxdevice 3\nsnd_samplerate 22050\nuse_mouse 0\ngrabmouse 0\nshow_endoom 0\nvanilla_savegame_limit 0\n' + (activeResolution === 'high' ? highConfig : ''));
     const displayGame = () => { shell.hidden=true; game.hidden=false; presentation.apply(settings); presentation.setActive(true); canvas.focus(); };
-    const classicArgs = ['-iwad', '/game.wad', '-config', '/default.cfg', '-extraconfig', '/chocolate.cfg', '-savedir', activeSavePath + '/', '-nomouse', '-nojoystick', '-noautoload', '-warp', '1', '1', '-skill', '3'];
+    const classicArgs = ['-iwad', '/game.wad', '-config', '/default.cfg', '-extraconfig', '/chocolate.cfg', '-savedir', activeSavePath + '/', '-nomouse', '-nojoystick', '-noautoload', ...(loadSlot === undefined ? ['-warp', '1', '1'] : ['-loadgame', String(loadSlot)]), '-skill', '3'];
     if (activeResolution === 'modern') {
       const hudPath='/edge_defs/scripts/lua/edge_hud.lua';
       const upstreamHud=new TextDecoder().decode(engine.FS.readFile(hudPath));
@@ -564,41 +613,24 @@ async function start(load = false) {
       // runtime's support node with the corresponding, locally bundled script.
       engine.FS.unlink(hudPath); engine.FS.writeFile(hudPath,upstreamHud+'\n'+modernHud);
       engine.FS.writeFile('/edge.cfg', `#VERSION 6\nsmoothing 1\ndetail_level 2\nmipmapping 2\nhq2x_scaling 2\nscreen_hud ${settings.modernHUD === 'overlay' ? 2 : 0}\n`);
-      const modernArgs=['-game','/','-config','/edge.cfg','-home',activeSavePath,'-iwad','/game.wad','-width',modernSizes[settings.modernSize][0].toString(),'-height',modernSizes[settings.modernSize][1].toString(),'-windowed','-warp','1','-skill','3'];
-      if (settings.modernHD && hash === modernContent.iwad) {
-        say('Carregando texturas HD e materiais 4K…');
-        const pack=new Uint8Array(modernContent.bytes); let offset=0;
-        for (const [index,part] of modernParts.entries()) {
-          say(`Carregando conteúdo HD · ${index+1}/${modernParts.length}…`);
-          if(part.offset !== offset || offset+part.bytes > pack.byteLength) throw new Error('Inventário HD inconsistente.');
-          const {response,source}=await modernPartResponse(part.file,part.sha256);
-          if(!response.ok) throw new Error('Parte do pacote HD ausente. Prepare o offline com conexão ou desative HD nas configurações.');
-          say(`${source === 'cache' ? 'Lendo' : 'Recebendo'} texturas HD · ${index+1}/${modernParts.length}`);
-          const report = loading.part(source,offset,modernContent.bytes);
-          await readPart(response,pack.subarray(offset,offset+part.bytes),part.sha256,report,()=>loading.stage(`Conferindo integridade · ${index+1}/${modernParts.length}`));
-          offset+=part.bytes;
-        }
-        if(offset !== modernContent.bytes) throw new Error('Pacote HD incompleto.');
-        // Each contiguous range is authenticated against its independently pinned
-        // SHA-256. The build also verifies that concatenation has the full EPK hash.
-        // Avoid a second 399 MB digest/Response crossing WebKit process boundaries.
-        engine.FS.writeFile('/modern-hd.epk',pack,{canOwn:true}); modernArgs.push('-file','/modern-hd.epk');
-      }
-      loading.indeterminate(); say('Texturas prontas. Preparando a fase e os gráficos…');
+      const modernArgs=['-game','/','-config','/edge.cfg','-home',activeSavePath,'-iwad','/game.wad','-width',modernSizes[settings.modernSize][0].toString(),'-height',modernSizes[settings.modernSize][1].toString(),'-windowed',...(loadSlot === undefined ? ['-warp','1'] : ['-loadgame', String(loadSlot)]),'-skill','3'];
+      if (mapContent?.hd) modernArgs.push('-file', '/lazy-hd');
+      loading.indeterminate(); say('Preparando o motor para carregar a fase solicitada…');
       displayGame(); engine.callMain(modernArgs);
     } else { displayGame(); engine.callMain(classicArgs); }
     await new Promise<void>((resolve, reject) => {
       const timeout=activeResolution === 'modern' ? 90000 : 45000;
-      const until = performance.now() + timeout;
+      let until = performance.now() + timeout;
       const timer = setInterval(() => {
+        if (mapPreparing) { until = performance.now() + timeout; return; }
         const levelReady = engine!._web_state(0) > 2 && engine!._web_state(1) === 0;
         const frameReady = activeResolution !== 'modern' || (preparedModernPause && engine!._web_state(33) === 1 && engine!._web_state(26) === 0);
         if (levelReady && frameReady) { clearInterval(timer); resolve(); }
-        else if (performance.now() > until) { clearInterval(timer); reject(new Error('Motor não chegou à fase no tempo de preparação. Reabra o aplicativo e tente uma resolução menor.')); }
+        else if (performance.now() > until) { clearInterval(timer); reject(new Error('O motor não concluiu a abertura da fase. Reabra o aplicativo para tentar novamente; os arquivos já preparados foram preservados.')); }
       }, 50);
     });
     traceModern('ready-before-suspend');
-    running = true; queuedLoad = load; applyConfig(true); suspend();
+    running = true; queuedLoad = false; applyConfig(true); suspend();
     loading.finish(); say('Motor pronto. Toque em Retomar ou pressione Enter.');
   } catch (e) { shell.hidden = false; game.hidden = true; error(e); loading.fail(status.textContent ?? 'Falha ao carregar.'); }
   finally { starting = false; playButton.disabled = false; playButton.innerHTML = playLabel; playButton.removeAttribute('aria-busy'); }
@@ -618,6 +650,15 @@ function updateInput() {
 const menuCodes: Record<string, number> = { ArrowUp: 173, ArrowDown: 175, ArrowLeft: 172, ArrowRight: 174, Enter: 13, NumpadEnter: 13, Escape: 27, Backspace: 127 };
 window.addEventListener('keydown', event => {
   const code = event.code;
+  if (selectingSlot && ['Escape', 'Backspace', 'KeyV'].includes(code)) {
+    event.preventDefault(); event.stopImmediatePropagation(); location.reload(); return;
+  }
+  if (mapPreparing) {
+    event.stopImmediatePropagation();
+    if (event.cancelable) event.preventDefault();
+    if (code === 'Enter' && !event.repeat && !el('loadingBack').parentElement!.hidden) el('loadingBack').click();
+    return;
+  }
   // Observe a native menu transition before accepting fresh physical input.
   // A later rAF reset must not erase a key pressed just after the menu closed.
   reconcileMenuState();
@@ -683,6 +724,7 @@ window.addEventListener('keydown', event => {
   } else if (!panel.hidden && ['Escape', 'Backspace', 'KeyV'].includes(code)) { event.preventDefault(); showHome(); }
 }, true);
 window.addEventListener('keyup', event => {
+  if (mapPreparing) { event.stopImmediatePropagation(); input.release(event.code); return; }
   reconcileMenuState();
   input.release(event.code);
   if (engine) event.stopImmediatePropagation();
@@ -698,6 +740,7 @@ window.addEventListener('blur', () => suspend());
 window.addEventListener('pagehide', () => { suspend(false); sync().catch(error); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) suspend(); });
 function reconcileMenuState() {
+  if (mapPreparing) return;
   if (engine && running) {
     const now = !!engine._web_menu();
     if (now !== previousMenu) { previousMenu = now; reset(); }
@@ -730,7 +773,7 @@ async function checkOffline() {
     const response = await fetch('./offline-index.json');
     if (!response.ok) throw new Error('Build offline indisponível');
     const { version, resources } = await response.json();
-    const name=`doom-${encodeURIComponent(new URL('./', location.href).pathname)}-${version}`;
+    const name=`doom-shell-v1-${encodeURIComponent(new URL('./', location.href).pathname)}-${version}`;
     // The installing worker owns creation and population. A readiness query must
     // not create an empty same-name cache concurrently in another process.
     if (!navigator.serviceWorker.controller || !(await caches.keys()).includes(name)) {
@@ -742,7 +785,7 @@ async function checkOffline() {
     // in WebKit even when the caller only tests the Response's presence.
     const stored=new Set((await cache.keys()).map(request=>request.url));
     const all=(resources as string[]).every(path=>stored.has(new URL(path,location.href).href));
-    el('offline').textContent = all && navigator.serviceWorker.controller ? 'Preparado para offline neste contexto · confirme reabrindo sem rede.' + (offlineFailure ? ' A atualização falhou; a versão atual está preservada.' : '') : offlineFailure || 'Preparação offline incompleta. Mantenha esta página aberta com conexão.';
+    el('offline').textContent = all && navigator.serviceWorker.controller ? (preparedMap ? `${preparedMap} disponível offline neste contexto.` : 'Interface disponível offline. Cada mapa será preparado ao entrar.') + (offlineFailure ? ' A atualização falhou; a versão atual está preservada.' : '') : offlineFailure || 'Preparação offline incompleta. Mantenha esta página aberta com conexão.';
   } catch { el('offline').textContent = 'Preparação offline não confirmada. Reabra com conexão para preparar.'; }
 }
 async function init() {
@@ -751,7 +794,8 @@ async function init() {
     if (!stored) settings.resolution='modern';
     input = new InputState(settings.bindings);
     wads = await read<Wad[]>('wads') ?? []; selected = await read<string>('selected') ?? 'freedoom';
-    if (selected !== 'freedoom' && !wads.some(w => w.id === selected)) { selected = 'freedoom'; say('IWAD anterior ausente; Freedoom selecionado.'); }
+    if (selected !== 'freedoom' && !wads.some(w => w.id === selected)) await ensureRuntimeController();
+    if (selected !== 'freedoom' && !wads.some(w => w.id === selected) && !(await loadContentIndex()).iwads[selected]) { selected = 'freedoom'; say('IWAD anterior ausente; Freedoom selecionado.'); }
     else say('Pronto. Enter em Jogar inicia Freedoom ou o IWAD selecionado.');
     const mapDiscovery = new AbortController();
     const mapDiscoveryTimer = setTimeout(() => mapDiscovery.abort(), 3000);

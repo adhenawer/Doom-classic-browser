@@ -1,0 +1,55 @@
+{
+  "dimensions": [
+    1094,
+    820
+  ],
+  "sameDimensions": true,
+  "changedPixels": 21031,
+  "totalPixels": 897080,
+  "bbox": [
+    465,
+    611,
+    647,
+    820
+  ],
+  "lazyMagentaPixels": 391190,
+  "controlMagentaPixels": 390905,
+  "lazyState": [
+    18,
+    161480704,
+    23592960,
+    3221225550,
+    1280,
+    960,
+    1115,
+    83,
+    1024,
+    108
+  ],
+  "controlState": [
+    19,
+    161480704,
+    23592960,
+    3221225550,
+    1280,
+    960,
+    90,
+    83,
+    1024,
+    108
+  ],
+  "selectors": [
+    0,
+    2,
+    3,
+    4,
+    17,
+    18,
+    23,
+    24,
+    25,
+    34
+  ],
+  "lazyScreenshotSHA256": "c1add83a3af5c0e3a6400d441856edb8293b39165b36f99a33c0c1b7523e1be8",
+  "controlScreenshotSHA256": "9299e2f9f925308679daba20c45d1ed45d2cb740dcb47b583dcf2b8cbd1593c0"
+}

@@ -1,3 +1,4 @@
+import {pathToFileURL} from 'node:url';
 import { test, expect } from './normal-browser';
 import {selectClassic} from './legacy-profile';
 import type { Page } from './normal-browser';
@@ -131,11 +132,11 @@ test('IWAD import persists metadata and blob; invalid file is rejected without r
   await expect(page.locator('#resume')).toBeVisible({timeout:60000});await page.keyboard.press('Enter');
   await expect.poll(()=>state(page,1)).toBe(0);
 });
-test('complete offline cache, re-open engine without network, persisted save', async ({page,context,browserName}) => {
-  test.setTimeout(300000); // The full cache now includes the roughly 399 MB Modern HD package.
+test('prepared Classic map reopens without network and retains persisted save', async ({page,context,browserName}) => {
+  test.setTimeout(300000); // Only Classic and its requested map are prepared.
   // Shut the actual HTTP server down: no network fallback can satisfy a cache miss.
   // Playwright's WebKit offline emulation itself produced an internal navigation error.
-  const root = new URL('../../dist/', import.meta.url);
+  const root = process.env.QA_DIST ? pathToFileURL(process.env.QA_DIST.replace(/\/$/,'')+'/') : new URL('../../dist/', import.meta.url);
   const mount = '/doom-browser-check/';
   const server = createServer(async (req, res) => {
     try {
@@ -144,7 +145,7 @@ test('complete offline cache, re-open engine without network, persisted save', a
       const url = new URL(path.slice(mount.length) || 'index.html', root);
       if (!url.href.startsWith(root.href)) { res.writeHead(403).end(); return; }
       const mime = path.endsWith('.wasm') ? 'application/wasm' : path.endsWith('.js') ? 'text/javascript' : path.endsWith('.css') ? 'text/css' : path.endsWith('.json') ? 'application/json' : path.endsWith('.webmanifest') ? 'application/manifest+json' : path.endsWith('.svg') ? 'image/svg+xml' : 'text/html';
-      res.writeHead(200, {'Content-Type':mime, 'Cache-Control':'no-store'});res.end(await readFile(url));
+      const body=await readFile(url);res.writeHead(200, {'Content-Type':mime, 'Cache-Control':'no-store'});res.end(body);
     } catch { res.writeHead(404).end(); }
   });
   server.listen(0,'127.0.0.1');await once(server,'listening');
@@ -160,7 +161,7 @@ test('complete offline cache, re-open engine without network, persisted save', a
   await expect(page.locator('#status')).toHaveText('Configurações armazenadas neste navegador.');
   await page.keyboard.press('KeyV');
   await boot(page, origin);
-  await expect(page.locator('#offline')).toContainText('Preparado para offline',{timeout:180000});
+  await expect(page.locator('#offline')).toContainText('E1M1 disponível offline',{timeout:180000});
   await page.keyboard.press('KeyK');
   await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(1);
   await page.keyboard.press('Enter');
@@ -172,9 +173,8 @@ test('complete offline cache, re-open engine without network, persisted save', a
   await page.reload();
   await expect(page.locator('#play')).toBeEnabled();
   await page.locator('#load').press('Enter');
+  await page.getByRole('button',{name:'Carregar slot 1',exact:true}).press('Enter');
   await expect(page.locator('#resume')).toBeVisible({timeout:60000});
-  await page.keyboard.press('Enter');
-  await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(1);
   await page.keyboard.press('Enter');
   await expect.poll(()=>page.evaluate(()=>(window as any).doom._web_menu())).toBe(0);
   await expect.poll(()=>state(page,1)).toBe(0);

@@ -18,6 +18,12 @@ def replace(path, old, new):
 # but accommodate browser/menu bursts without losing the final key releases.
 replace('src/d_event.c', '#define MAXEVENTS 64\n', '#define MAXEVENTS 1024\n')
 replace('src/doom/g_game.c', '#include "doomdef.h"', '#include "doomdef.h"\n#include "turn.h"\n#include <emscripten.h>\n#include "d_ticcmd.h"\nextern int web_suspended;\nstatic void web_apply(ticcmd_t *cmd);')
+replace('src/doom/g_game.c', 'void G_DoLoadLevel (void) \n{ \n    int             i;',
+    'extern void web_prepare_map(int episode, int map);\nvoid G_DoLoadLevel (void) \n{ \n    int             i;\n    web_prepare_map(gameepisode, gamemap);')
+# The host fills sparse map ranges after the file is already open. Do not keep
+# stdio read-ahead copies of their previous zero-filled contents.
+replace('src/w_file_stdc.c', '    // Create a new stdc_wad_file_t to hold the file handle.',
+    '    setvbuf(fstream, NULL, _IONBF, 0);\n\n    // Create a new stdc_wad_file_t to hold the file handle.')
 p = target / 'src/doom/g_game.c'
 p.write_text(p.read_text() + '\n#include "bridge.c"\nstatic void web_apply(ticcmd_t *cmd) {\n'
     ' if (menuactive || web_suspended || paused) { web_turn_reset(&web_turn); return; }\n'
@@ -31,14 +37,19 @@ replace('src/doom/g_game.c', '    M_rename(temp_savegame_file, savegame_file);',
 replace('src/doom/m_menu.c',
     '    else if (key == key_menu_back)\n    {\n        // Go back to previous menu',
     '    else if (key == key_menu_back)\n    {\n        if (!currentMenu->prevMenu) { M_ClearMenus(); return true; }\n        // Go back to previous menu')
-for name in ['bridge.c', 'turn.h', 'turn.c']:
+for name in ['bridge.c', 'turn.h', 'turn.c', 'map-delivery.h']:
     shutil.copy(root / 'engine' / name, target / 'src/doom' / name)
 with (target / 'src/doom/CMakeLists.txt').open('a') as f:
     f.write('\ntarget_sources(doom PRIVATE turn.c)\n')
 replace('src/doom/d_main.c', 'void D_RunFrame()\n{',
     'extern int web_suspended;\nvoid D_RunFrame()\n{\n    if (web_suspended) return;')
 replace('src/doom/d_main.c', '        D_RunFrame();',
-    '        D_RunFrame();\n        emscripten_sleep(1);')
+    '''        D_RunFrame();
+        EM_ASM({
+            const name = Module['mapReadyName'];
+            if (name) { delete Module['mapReadyName']; Module['onMapReady']?.(name); }
+        });
+        emscripten_sleep(1);''')
 replace('src/doom/d_main.c', '#include "doomdef.h"', '#include "doomdef.h"\n#include <emscripten.h>')
 replace('src/i_timer.c', '#include "SDL.h"', '''#include "SDL.h"
 #include <emscripten.h>
