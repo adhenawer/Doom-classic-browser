@@ -19,7 +19,7 @@ Quando disponível, Audio Session recebe a categoria playback dentro do gesto. A
 - TypeScript e verificações de diferenças: aprovados.
 - Áudio: 17 testes unitários aprovados, incluindo promessa pendente, estados suspended/interrupted, retomadas tardias, pausa concorrente, sessão opcional recusada e limpeza do sinal de gesto após erro.
 - Rotação nativa e filas de eventos Classic/High: três verificações aprovadas.
-- Suíte Node local: 69 de 70 aprovados; o único erro é ausência do arquivo original modern-hd.000.bin no executor. O gate remoto deve verificar o pacote completo antes de publicar.
+- Suíte Node local: 69 de 70 aprovados; o único erro é ausência do arquivo original modern-hd.000.bin no executor. A execução remota final, registrada abaixo, verificou o pacote completo e passou os 70 testes.
 
 ### QA independente de navegadores
 
@@ -41,9 +41,15 @@ A execução [40494129828](https://github.com/adhenawer/Doom-classic-browser/act
 
 A única falha foi a exigência de zero pageerrors no teste geral Classic/WebKit: três mensagens de access-control em consultas a offline-index.json. A captura mostrava a cena e o menu nativo; o fluxo já havia salvo e carregado a partida. O mesmo cenário passou três vezes localmente sem alteração. O teste fazia um goto redundante imediatamente depois de beforeEach já abrir e configurar o launcher; cancelamento de consultas do documento anterior é uma hipótese, não uma causa confirmada pela evidência do CI.
 
-O helper de teste passou a navegar somente quando recebe uma URL explícita, reaproveitando o launcher preparado no cenário de entrada. A exigência de zero erros e todas as verificações de jogo foram mantidas. Os testes específicos de navegação, reload durante instalação e reabertura offline continuam ativos. Esse ajuste não altera o produto nem filtra mensagens de erro; uma nova execução integral é necessária antes da publicação.
+O helper de teste passou a navegar somente quando recebe uma URL explícita, reaproveitando o launcher preparado no cenário de entrada. A exigência de zero erros e todas as verificações de jogo foram mantidas. Os testes específicos de navegação, reload durante instalação e reabertura offline continuam ativos. Esse ajuste não altera o produto nem filtra mensagens de erro; o gate foi repetido integralmente antes da publicação.
 
 Após o ajuste, a revisão independente aprovou o cenário de entrada três vezes no WebKit (41,0 s), uma no Chromium (7,4 s) e a reabertura Classic offline no WebKit com URL explícita e servidor desligado (9,9 s).
+
+### Publicação confirmada
+
+A execução final [40497409092](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40497409092), revisão `32d72f7085f14057595342090b8ef1184addee98`, concluiu com sucesso: **70 testes Node, 17 Python, três verificações C e 74 testes de navegador em Chromium/WebKit (21,8 min)**. Não houve skips ou retries na suíte final. Os três motores e os assets HD originais foram compilados/verificados pelo pipeline. A versão offline é `27619dd3e6fc7b2b`, com 21 recursos de interface e sete recursos de runtime sob demanda.
+
+O job de deploy confirmou sucesso em **27/10/2026 às 12:06 UTC**, em [DOOM Classic Browser](https://adhenawer.github.io/Doom-classic-browser/). A confirmação vem do GitHub Pages; não foi realizada uma consulta HTTP direta à URL pública neste executor. Esta atualização de documentação não altera o código publicado.
 
 ## Limites e reversão
 
