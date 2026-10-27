@@ -70,11 +70,9 @@ test.describe('mobile audio and fire placement',()=>{
   });
 
   test('fire stays on the left with a separate touch target above the movement stick',async({page},info)=>{
+    await configure(page,'classic');await page.locator('#resumeButton').tap();
     for(const [width,height] of [[844,390],[667,375],[568,320],[1024,768]]) {
       await page.setViewportSize({width,height});
-      // Start at each size: resizing an existing SDL canvas can invalidate its
-      // capture independently of the touch layout under test.
-      await configure(page,'classic');await page.locator('#resumeButton').tap();
       const tic=await state(page,0);await expect.poll(()=>state(page,0)).toBeGreaterThan(tic+3);
       const fire=await page.locator('[data-hold="fire"]').boundingBox(),move=await page.locator('.move-stick').boundingBox();
       expect(fire).not.toBeNull();expect(move).not.toBeNull();
@@ -84,7 +82,7 @@ test.describe('mobile audio and fire placement',()=>{
       expect(fire!.width).toBeGreaterThanOrEqual(44);expect(fire!.height).toBeGreaterThanOrEqual(44);
       const target=await page.evaluate(({x,y})=>!!document.elementFromPoint(x,y)?.closest('[data-hold="fire"]'),{x:fire!.x+fire!.width/2,y:fire!.y+fire!.height/2});
       expect(target).toBe(true);
-      await page.screenshot({path:info.outputPath(`fire-left-${width}x${height}.png`)});
+      if(width===844)await page.screenshot({path:info.outputPath(`fire-left-${width}x${height}.png`)});
     }
   });
 });
