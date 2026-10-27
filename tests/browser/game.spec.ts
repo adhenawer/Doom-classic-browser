@@ -7,8 +7,10 @@ import { readFile } from 'node:fs/promises';
 import { once } from 'node:events';
 import { basename } from 'node:path';
 const state = (page: Page, n: number) => page.evaluate(n => (window as any).doom._web_state(n), n);
-async function boot(page: Page, url = '/') {
-  await page.goto(url);
+async function boot(page: Page, url?: string) {
+  // The input scenario uses the launcher prepared by beforeEach. Reloading it
+  // here would abort readiness fetches just as page-error collection starts.
+  if (url) await page.goto(url);
   await expect(page.locator('#play')).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('#resume')).toBeVisible({ timeout: 60000 });

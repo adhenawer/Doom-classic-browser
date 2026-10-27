@@ -35,6 +35,16 @@ Capturas após redimensionar uma partida Classic já aberta apresentaram fundo p
 
 Os testes locais usam os motores reais e os bytes originais dos mapas, em um pacote de teste explicitamente sem HD. Nenhum pacote reduzido é destinado à publicação. O pipeline de main recompila e verifica todos os assets originais.
 
+### Gate completo de publicação
+
+A execução [40494129828](https://github.com/adhenawer/Doom-classic-browser/actions/runs/40494129828), revisão `926a90a79ca09f216bd2544166f3eb48c9854ebf`, compilou os três motores com o pacote HD integral. Passaram 70 testes Node, 17 Python e as três verificações C. No navegador, passaram **73 de 74**, incluindo todos os cenários mobile dos dois browsers; o deploy ficou bloqueado.
+
+A única falha foi a exigência de zero pageerrors no teste geral Classic/WebKit: três mensagens de access-control em consultas a offline-index.json. A captura mostrava a cena e o menu nativo; o fluxo já havia salvo e carregado a partida. O mesmo cenário passou três vezes localmente sem alteração. O teste fazia um goto redundante imediatamente depois de beforeEach já abrir e configurar o launcher; cancelamento de consultas do documento anterior é uma hipótese, não uma causa confirmada pela evidência do CI.
+
+O helper de teste passou a navegar somente quando recebe uma URL explícita, reaproveitando o launcher preparado no cenário de entrada. A exigência de zero erros e todas as verificações de jogo foram mantidas. Os testes específicos de navegação, reload durante instalação e reabertura offline continuam ativos. Esse ajuste não altera o produto nem filtra mensagens de erro; uma nova execução integral é necessária antes da publicação.
+
+Após o ajuste, a revisão independente aprovou o cenário de entrada três vezes no WebKit (41,0 s), uma no Chromium (7,4 s) e a reabertura Classic offline no WebKit com URL explícita e servidor desligado (9,9 s).
+
 ## Limites e reversão
 
 Contexto running e PCM não nulo comprovam reprodução técnica no navegador; não comprovam som audível, volume do sistema, rota Bluetooth ou qualidade no alto-falante. Chromium/WebKit em Linux com toque emulado não certificam um iPhone/iPad físico. Não houve redução de resolução, textura, áudio ou conteúdo.
