@@ -94,7 +94,10 @@ EM_JS(int, web_audio_request, (int running), {
    } catch (_) { finished(); }
  };
  const wanted = Module['webAudioWanted'];
- if (!(pending && pending.wanted === wanted) &&
+ // A resume made without activation can remain pending indefinitely. A later
+ // real gesture must get its own synchronous resume, even with the same intent.
+ const activatedRetry = wanted && context.state !== 'running' && Module['webAudioGesture'] === true;
+ if ((!(pending && pending.wanted === wanted) || activatedRetry) &&
      !(!pending && context.state === (wanted ? 'running' : 'suspended'))) transition(wanted);
  return context.state === 'running' ? 1 : 0;
 });

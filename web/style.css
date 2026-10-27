@@ -132,7 +132,7 @@ canvas { display: block; width: min(100vw, 133.333dvh); height: min(75vw, 100dvh
 .touch-stick span { position: absolute; top: 12px; color: #fff5df; font: 10px var(--mono); text-shadow: 0 1px 3px #000; }
 .touch-stick i { display: block; width: 36%; height: 36%; border: 1px solid #f5ddb9bb; border-radius: 50%; background: #e5ba7055; pointer-events: none; }
 .touch-actions { position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: calc(max(34px, env(safe-area-inset-bottom)) + clamp(100px, 20vmin, 160px) + 12px); display: grid; grid-template-columns: repeat(4, minmax(48px, 70px)); gap: 8px; }
-#touchControls .touch-fire { background: #78401cc9; border-color: #ffd18c; }
+#touchControls .touch-fire { position: absolute; left: max(20px, env(safe-area-inset-left)); bottom: calc(max(34px, env(safe-area-inset-bottom)) + clamp(100px, 20vmin, 160px) + 12px); width: clamp(100px, 20vmin, 160px); min-height: 56px; background: #78401cc9; border-color: #ffd18c; }
 .touch-menu { position: absolute; bottom: max(18px, env(safe-area-inset-bottom)); left: max(16px, env(safe-area-inset-left)); right: max(16px, env(safe-area-inset-right)); display: flex; justify-content: space-between; gap: 12px; }
 .touch-menu > div { display: flex; flex-wrap: wrap; gap: 8px; align-content: end; }
 .touch-name { pointer-events: auto; position: absolute; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); margin: auto; max-width: 420px; padding: 12px; background: #111b19f5; border: 1px solid var(--accent); border-radius: 8px; }
@@ -146,6 +146,7 @@ canvas { display: block; width: min(100vw, 133.333dvh); height: min(75vw, 100dvh
 @media (max-height: 400px) and (orientation: landscape) {
   .touch-stick { bottom: max(12px, env(safe-area-inset-bottom)); width: 100px; height: 100px; }
   .touch-actions { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 112px); right: max(20px, env(safe-area-inset-right)); grid-template-columns: repeat(2, 64px); gap: 4px; }
+  #touchControls .touch-fire { bottom: calc(max(12px, env(safe-area-inset-bottom)) + 112px); width: 100px; }
   #touchControls button { min-height: 44px; padding: 6px; }
 }
 

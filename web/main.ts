@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 /// <reference types="vite/client" />
 import './style.css';
+import {requestGameAudio} from './audio';
 import {LoadingScreen} from './loading';
 import {MapContent, loadContentIndex, type ContentFS} from './map-content';
 import modernHud from '../engine/modern-hud.lua?raw';
@@ -88,7 +89,7 @@ const touch = new TouchControls(game, (source, actions) => {
   input.setActions(source, actions); updateInput();
 }, key => {
   if (mapPreparing || !running || suspended || game.hidden) return;
-  engine?._web_audio();
+  if (engine) requestGameAudio(engine);
   if (key === 'shell') showShell();
   else { reset(); tap(key); }
 }, name => {
@@ -109,7 +110,9 @@ const touch = new TouchControls(game, (source, actions) => {
     canvas.focus();
   };
   send().catch(error);
-}, reconcileMenuState);
+}, reconcileMenuState, () => {
+  if (!mapPreparing && running && !suspended && !game.hidden && !document.hidden && engine) requestGameAudio(engine);
+});
 function updateControlExperience() {
   if (mapPreparing) return;
   const mobile = mobileControls();
@@ -121,7 +124,7 @@ function updateControlExperience() {
   el('deviceExperience').textContent = mobile ? 'Touch + teclado · paisagem' : 'Teclado · sem controles na tela';
   el('resumeInstruction').textContent = mobile ? 'Toque em Retomar para entrar e ativar o áudio.' : 'Pressione Enter para entrar e ativar o áudio.';
   el('resumeButton').textContent = mobile ? 'Retomar partida' : 'Enter para retomar ↵';
-  el('resumeGuide').textContent = mobile ? 'Jogue na horizontal. Esquerda: mover. Direita: mantenha deslocado para girar. Use os botões para atirar e interagir. Teclado também funciona.' : 'WASD mover · ← → girar · J atirar · E interagir · P menu · H interface. Seus remapeamentos continuam ativos.';
+  el('resumeGuide').textContent = mobile ? 'Jogue na horizontal. Esquerda: mover e atirar. Direita: mantenha deslocado para girar e use os demais botões para interagir. Teclado também funciona.' : 'WASD mover · ← → girar · J atirar · E interagir · P menu · H interface. Seus remapeamentos continuam ativos.';
   touch.update(mobile && running && !suspended && !game.hidden, !!engine?._web_menu(), !!engine?._web_text());
 }
 coarsePointer.addEventListener('change', () => { reset(); updateControlExperience(); });
@@ -188,7 +191,7 @@ function resume() {
   }
   if (graphicsLost) { game.hidden=true; shell.hidden=false; restartResolution(); return; }
   traceModern('resume-before');
-  reset(); applyConfig(); engine._web_audio(); engine._web_suspend(0);
+  reset(); applyConfig(); requestGameAudio(engine); engine._web_suspend(0);
   suspended = false; el('resume').hidden = true;
   shell.hidden = true; game.hidden = false; presentation.setActive(true); canvas.focus(); updateControlExperience();
   if (queuedLoad) { queuedLoad = false; console.info('[doom-host] queued load resumed', activeResolution, engine._web_state(0)); traceModern('load-key-before'); tap(189); traceModern('load-key-posted'); }
@@ -736,7 +739,7 @@ window.addEventListener('keydown', event => {
     if (event.cancelable) event.preventDefault(); event.stopImmediatePropagation();
     if (input.action(code) === 'shell' && !engine!._web_menu()) { showShell(); return; }
     if (suspended) { if (code === 'Enter' && !event.repeat) resume(); return; }
-    engine!._web_audio();
+    requestGameAudio(engine!);
     if (engine!._web_menu()) {
       if (event.repeat) return;
       const action = engine!._web_text() ? undefined : input.action(code);

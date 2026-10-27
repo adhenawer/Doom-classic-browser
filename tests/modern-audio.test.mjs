@@ -10,6 +10,12 @@ const bodies = [...source.matchAll(/EM_JS\(int, web_audio_request, \(int running
 assert.equal(bodies.length, 1, 'exactly one native audio controller must be tested');
 const request = new Function('Module', 'running', bodies[0][1]);
 const flush = async () => { for (let i = 0; i < 4; i++) await Promise.resolve(); };
+function gesture(module, wanted = 1) {
+  const previous = module.webAudioGesture;
+  module.webAudioGesture = true;
+  try { return request(module, wanted); }
+  finally { module.webAudioGesture = previous; }
+}
 
 function context(state = 'suspended') {
   const audio = { state, calls: [], resume() { return operation('running'); }, suspend() { return operation('suspended'); } };
@@ -127,6 +133,50 @@ test('Modern audio: an older opposite completion reconciles after the latest tic
   assert.equal(audio.calls.length, 3, 'late resume must request a correcting suspend');
   assert.equal(audio.calls[2].target, 'suspended');
   audio.calls[2].resolve(); await flush();
+  assert.equal(audio.state, 'suspended');
+  assert.equal(module.webAudioPendingOp, undefined);
+});
+
+test('Modern audio: an activated gesture retries an unresolved resume synchronously', async t => {
+  for (const state of ['suspended', 'interrupted']) {
+    await t.test(state, async () => {
+      const audio = context(state), module = { modernAudioContext: audio };
+      request(module, 1);
+      const blocked = module.webAudioPendingOp;
+      request(module, 1);
+      assert.equal(audio.calls.length, 1, 'unactivated repeat must remain deduplicated');
+      gesture(module);
+      assert.equal(audio.calls.length, 2, 'resume must run inside the gesture without awaiting the blocked call');
+      assert.notEqual(module.webAudioPendingOp, blocked);
+      assert.equal(module.webAudioGesture, undefined);
+      request(module, 1);
+      assert.equal(audio.calls.length, 2, 'a gesture must not authorize later unactivated retries');
+      audio.calls[1].resolve(); await flush();
+      assert.equal(audio.state, 'running');
+      assert.equal(module.webAudioPendingOp, undefined);
+      gesture(module);
+      assert.equal(audio.calls.length, 2, 'already-running gesture must not restart audio');
+      audio.calls[0].resolve(); await flush();
+      assert.equal(audio.calls.length, 2, 'late same-intent completion must not create another transition');
+    });
+  }
+});
+
+test('Modern audio: suspend wins over both pending resumes after an activated retry', async () => {
+  const audio = context(), module = { modernAudioContext: audio };
+  request(module, 1);
+  gesture(module);
+  gesture(module, 0);
+  const suspension = module.webAudioPendingOp;
+  assert.deepEqual(audio.calls.map(call => call.target), ['running', 'running', 'suspended']);
+  audio.calls[0].resolve(); await flush();
+  assert.equal(module.webAudioPendingOp, suspension, 'old blocked resume must not clear the newer suspend');
+  audio.calls[2].resolve(); await flush();
+  assert.equal(audio.state, 'suspended');
+  audio.calls[1].resolve(); await flush();
+  assert.equal(module.webAudioWanted, false);
+  assert.equal(audio.calls[3].target, 'suspended', 'late activated resume must reconcile back to paused');
+  audio.calls[3].resolve(); await flush();
   assert.equal(audio.state, 'suspended');
   assert.equal(module.webAudioPendingOp, undefined);
 });

@@ -8,19 +8,24 @@ export class TouchControls {
   private pointers = new Map<number, { node: HTMLElement; source: string; x: number; y: number }>();
   private state = '';
   constructor(host: HTMLElement, private actions: (source: string, actions: string[]) => void,
-    private command: (key: number | 'shell') => void, private saveName: (name: string) => void, private beforeInput: () => void = () => {}) {
+    private command: (key: number | 'shell') => void, private saveName: (name: string) => void, private beforeInput: () => void = () => {}, private audioGesture: () => void = () => {}) {
     this.root.id = 'touchControls'; this.root.hidden = true;
     this.root.innerHTML = `
       <div class="touch-toolbar"><button data-command="shell">Interface</button><button data-command="27">Menu</button></div>
       <div class="touch-play">
         <div class="touch-stick move-stick" data-stick="move" role="group" aria-label="Mover e deslocar lateralmente"><span>MOVER</span><i></i></div>
         <div class="touch-stick look-stick" data-stick="look" role="group" aria-label="Girar horizontalmente"><span>GIRAR ↔</span><i></i></div>
-        <div class="touch-actions"><button data-hold="fire" class="touch-fire">ATIRAR</button><button data-hold="use">Usar</button><button data-hold="run">Correr</button><button data-hold="previous">Arma −</button><button data-hold="next">Arma +</button><button data-hold="map">Mapa</button><button data-key="188">Salvar</button><button data-key="189">Carregar</button></div>
+        <button data-hold="fire" class="touch-fire">ATIRAR</button>
+        <div class="touch-actions"><button data-hold="use">Usar</button><button data-hold="run">Correr</button><button data-hold="previous">Arma −</button><button data-hold="next">Arma +</button><button data-hold="map">Mapa</button><button data-key="188">Salvar</button><button data-key="189">Carregar</button></div>
       </div>
       <div class="touch-menu" hidden><div class="touch-directions"><button data-command="173">↑</button><button data-command="172">←</button><button data-command="175">↓</button><button data-command="174">→</button></div><div><button data-command="13">Confirmar</button><button data-command="127">Voltar</button><button data-command="121">Sim</button><button data-command="110">Não</button></div></div>
       <form class="touch-name" hidden><label>Nome do save<input aria-label="Nome do save" maxlength="20" autocomplete="off" autocapitalize="characters"></label><button type="submit">Salvar nome</button><button type="button" data-command="27">Cancelar</button></form>
       <p class="touch-orientation">Para mais espaço, gire o aparelho para paisagem.</p>`;
     host.append(this.root);
+    // Touch activation belongs to the end of the gesture, not pointerdown or
+    // pointermove. Use touchend for Safari even when pointer capture is active.
+    this.root.addEventListener('touchend', e => { if (e.isTrusted) this.audioGesture(); }, {passive: true});
+    this.root.addEventListener('pointerup', e => { if (e.isTrusted && e.pointerType !== 'touch') this.audioGesture(); });
     this.root.addEventListener('contextmenu', e => e.preventDefault());
     this.root.addEventListener('pointerdown', e => {
       this.beforeInput();

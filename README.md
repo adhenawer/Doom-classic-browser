@@ -37,7 +37,9 @@ Configurações permitem velocidade inicial, aceleração, velocidade máxima, s
 
 ## Controles mobile
 
-O joystick esquerdo move e desloca lateralmente; desloque e mantenha o controle direito para girar. Botões permitem segurar tiro, usar e correr junto com movimento e giro, trocar arma, abrir mapa, salvar e carregar. O giro usa a resposta de teclado configurada, com zona morta; os controles são digitais, sem prometer giro proporcional ao arrasto. Auto-aim vertical continua ativo; não há recarga manual ou pulo.
+O joystick esquerdo move e desloca lateralmente; o botão **Atirar** fica acima dele, à esquerda. Desloque e mantenha o controle direito para girar. Botões permitem segurar tiro, usar e correr junto com movimento e giro, trocar arma, abrir mapa, salvar e carregar. O giro usa a resposta de teclado configurada, com zona morta; os controles são digitais, sem prometer giro proporcional ao arrasto. Auto-aim vertical continua ativo; não há recarga manual ou pulo.
+
+Retomar ativa o áudio dentro do toque. Se o navegador interromper o som durante a partida, terminar um toque nos controles tenta reativá-lo. Navegadores com Audio Session usam a categoria de reprodução; nos demais, continua valendo a política de áudio nativa. Veja a [validação da correção mobile](docs/MOBILE-AUDIO-QA.md).
 
 Menus do DOOM têm setas, confirmar, voltar e Sim/Não na tela. Para saves, digite o nome no campo touch (até 20 caracteres ASCII) e toque em **Salvar nome**. O jogo suspende ao perder foco ou girar para vertical. O bloqueio de orientação é tentado quando permitido pelo browser; o aviso de rotação cobre os demais casos. Controles novos integram o cache offline existente.
 
