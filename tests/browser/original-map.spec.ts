@@ -1,6 +1,7 @@
 import { test, expect } from './normal-browser';
 import { selectClassic } from './legacy-profile';
 import {readFile} from 'node:fs/promises';
+import {contentServer} from './content-server';
 
 test('original map selection persists, allows combat/traversal, and activates its exit', async ({ page }) => {
   await page.goto('/');
@@ -46,17 +47,24 @@ test('corrupted requested original-map geometry blocks entry without silently se
   const index=JSON.parse(await readFile((process.env.QA_DIST??'dist')+'/content-index.json','utf8'));
   const metadata=JSON.parse(await readFile((process.env.QA_DIST??'dist')+'/aurora.json','utf8'));
   const part=index.iwads[metadata.sha256].maps.E1M1.ranges[0].asset.parts[0].file;
-  await page.route('**/'+part, route => route.fulfill({ body: Buffer.from('corrupt'), contentType: 'application/octet-stream' }));
-  await page.goto('/');await selectClassic(page);
+  let corruptedRequests=0;
+  const server=await contentServer('/corrupt-original-map/',(path,_request,response)=>{
+    if(path!==part.replace(/^\.\//,''))return false;
+    corruptedRequests++;response.writeHead(200,{'Content-Type':'application/octet-stream'}).end('corrupt');return true;
+  });
+  try {
+  await page.goto(server.url);await selectClassic(page);
   await page.locator('#content').click();
   await page.getByRole('button', { name: 'Estação Aurora · mapa original', exact: true }).click();
   await expect(page.locator('#selectedContent')).toHaveText('Estação Aurora');
   await page.getByRole('button',{name:'Voltar',exact:true}).click();await page.locator('#play').click();
   await expect(page.locator('#loadingBack')).toBeVisible({timeout:60000});
+  expect(corruptedRequests).toBeGreaterThan(0);
   await expect(page.locator('#loadingBack')).toHaveText('Tentar novamente');
   await expect(page.locator('#status')).toContainText('Erro:');
   await expect(page.locator('#offline')).not.toContainText('E1M1 disponível offline');
   await expect(page.locator('#selectedContent')).toHaveText('Estação Aurora');
+  } finally {await server.close();}
 });
 
 test('optional map discovery times out without preventing Freedoom play', async ({ page }) => {
